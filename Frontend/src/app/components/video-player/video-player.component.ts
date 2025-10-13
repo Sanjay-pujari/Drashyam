@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { VideoService, Video } from '../../services/video.service';
-import { CommentService } from '../../services/comment.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription, interval } from 'rxjs';
 
@@ -34,8 +33,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   constructor(
     private videoService: VideoService,
-    private commentService: CommentService,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit() {

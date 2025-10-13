@@ -1,0 +1,38 @@
+.sidebar {
+  width: 250px;
+  background-color: #f5f5f5;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding-top: 80px; // Account for header height
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar-nav {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      a {
+        display: block;
+        padding: 15px 20px;
+        text-decoration: none;
+        color: #333;
+        border-bottom: 1px solid #e0e0e0;
+        transition: background-color 0.3s;
+        
+        &:hover {
+          background-color: #e0e0e0;
+        }
+        
+        &.active {
+          background-color: #1976d2;
+          color: white;
+        }
+      }
+    }
+  }
+}

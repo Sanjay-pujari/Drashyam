@@ -83,11 +83,11 @@
         <p>{{ video.description }}</p>
       </div>
       <div class="video-tags" *ngIf="video.tags">
-        <mat-chip-list>
-          <mat-chip *ngFor="let tag of video.tags.split(',')" [value]="tag.trim()">
+        <mat-chip-set>
+          <mat-chip *ngFor="let tag of video.tags.split(',')">
             {{ tag.trim() }}
           </mat-chip>
-        </mat-chip-list>
+        </mat-chip-set>
       </div>
     </div>
   </div>
