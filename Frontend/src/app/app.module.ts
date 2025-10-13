@@ -23,13 +23,18 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { VideoPlayerComponent } from './components/video-player/video-player.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { HomeComponent } from './components/home/home.component';
+
+// Store
+import { AppStoreModule } from './store/app.module';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     VideoPlayerComponent,
-    SidebarComponent
+    SidebarComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -50,7 +55,10 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
     MatChipsModule,
     
     // Third-party modules
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    
+    // Store
+    AppStoreModule
   ],
   providers: [],
   bootstrap: [AppComponent]

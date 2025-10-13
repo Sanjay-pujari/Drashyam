@@ -1,13 +1,14 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.drashyam.com/api',
-  signalRUrl: 'https://api.drashyam.com',
-  stripePublishableKey: 'pk_live_...', // Replace with your live Stripe publishable key
-  googleClientId: '...', // Replace with your Google OAuth client ID
-  facebookAppId: '...', // Replace with your Facebook App ID
-  enableAnalytics: true,
-  enablePWA: true,
-  maxFileSize: 2 * 1024 * 1024 * 1024, // 2GB
-  allowedVideoFormats: ['mp4', 'webm', 'ogg', 'mov', 'avi'],
-  allowedImageFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+  apiUrl: 'https://api.drashyam.com',
+  signalRUrl: 'https://api.drashyam.com/hubs',
+  stripePublishableKey: 'pk_live_your_stripe_publishable_key_here',
+  googleClientId: 'your_google_client_id_here',
+  facebookAppId: 'your_facebook_app_id_here',
+  azureStorageAccount: 'your_azure_storage_account_here',
+  azureStorageKey: 'your_azure_storage_key_here',
+  azureStorageContainer: 'videos',
+  maxVideoSize: 2 * 1024 * 1024 * 1024, // 2GB
+  supportedVideoFormats: ['mp4', 'webm', 'ogg', 'avi', 'mov'],
+  supportedImageFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
 };

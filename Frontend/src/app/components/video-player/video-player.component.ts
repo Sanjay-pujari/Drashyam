@@ -1,7 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
-import { VideoService, Video } from '../../services/video.service';
-import { AuthService } from '../../services/auth.service';
-import { Subscription, interval } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { Observable, Subscription, interval } from 'rxjs';
+import { Video } from '../../models/video.model';
+import { AppState } from '../../store/app.state';
+import { selectCurrentUser } from '../../store/user/user.selectors';
+import { recordVideoView, likeVideo } from '../../store/video/video.actions';
+import { User } from '../../models/user.model';
 
 declare var videojs: any;
 
@@ -31,10 +35,13 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private watchTimer?: Subscription;
   private viewRecorded = false;
 
+  currentUser$: Observable<User | null>;
+
   constructor(
-    private videoService: VideoService,
-    public authService: AuthService
-  ) {}
+    private store: Store<AppState>
+  ) {
+    this.currentUser$ = this.store.select(selectCurrentUser);
+  }
 
   ngOnInit() {
     if (this.video) {
@@ -133,19 +140,18 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private recordView() {
-    if (!this.video || !this.authService.isAuthenticated() || this.viewRecorded) {
+    if (!this.video || this.viewRecorded) {
       return;
     }
 
     const watchDuration = (Date.now() - this.watchStartTime) / 1000;
     if (watchDuration > 10) { // Only record if watched for more than 10 seconds
-      this.videoService.recordView(this.video.id, watchDuration).subscribe({
-        next: () => {
-          this.viewRecorded = true;
-          this.video!.viewCount++;
-        },
-        error: (error) => console.error('Error recording view:', error)
-      });
+      this.store.dispatch(recordVideoView({ 
+        videoId: this.video.id, 
+        watchDuration 
+      }));
+      this.viewRecorded = true;
+      this.video.viewCount++;
     }
   }
 
@@ -204,27 +210,23 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   likeVideo() {
-    if (!this.video || !this.authService.isAuthenticated()) return;
+    if (!this.video) return;
 
-    const type = this.video.isLiked ? 'dislike' : 'like';
-    this.videoService.likeVideo(this.video.id, type).subscribe({
-      next: (updatedVideo) => {
-        this.video = updatedVideo;
-      },
-      error: (error) => console.error('Error liking video:', error)
-    });
+    const likeType = this.video.isLiked ? 'dislike' : 'like';
+    this.store.dispatch(likeVideo({ 
+      videoId: this.video.id, 
+      likeType: likeType as 'like' | 'dislike' 
+    }));
   }
 
   dislikeVideo() {
-    if (!this.video || !this.authService.isAuthenticated()) return;
+    if (!this.video) return;
 
-    const type = this.video.isDisliked ? 'like' : 'dislike';
-    this.videoService.likeVideo(this.video.id, type).subscribe({
-      next: (updatedVideo) => {
-        this.video = updatedVideo;
-      },
-      error: (error) => console.error('Error disliking video:', error)
-    });
+    const likeType = this.video.isDisliked ? 'like' : 'dislike';
+    this.store.dispatch(likeVideo({ 
+      videoId: this.video.id, 
+      likeType: likeType as 'like' | 'dislike' 
+    }));
   }
 
   shareVideo() {

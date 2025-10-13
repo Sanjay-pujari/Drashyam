@@ -1,0 +1,160 @@
+<div class="home-container">
+  <!-- Header with Search and Navigation -->
+  <div class="home-header">
+    <div class="search-container">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Search videos, channels, and more..."
+          class="search-input">
+        <button class="search-btn">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Navigation -->
+  <div class="category-nav">
+    <div class="category-scroll">
+      <button 
+        *ngFor="let category of categories"
+        class="category-btn"
+        [class.active]="selectedCategory === category"
+        (click)="onCategoryChange(category)">
+        {{ category }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Trending Section -->
+    <section class="trending-section" *ngIf="trendingVideos.length > 0">
+      <h2 class="section-title">
+        <mat-icon>trending_up</mat-icon>
+        Trending Now
+      </h2>
+      <div class="video-grid trending-grid">
+        <div 
+          *ngFor="let video of trendingVideos; trackBy: trackByVideoId"
+          class="video-card trending-card"
+          (click)="onVideoClick(video)">
+          <div class="video-thumbnail">
+            <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" 
+                 [alt]="video.title">
+            <div class="video-duration">{{ formatDuration(video.duration) }}</div>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-channel" (click)="onChannelClick(video.channelId!)">
+              {{ video.channel?.name || video.user?.firstName + ' ' + video.user?.lastName }}
+            </p>
+            <div class="video-stats">
+              <span>{{ video.viewCount | number }} views</span>
+              <span>{{ video.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended Section -->
+    <section class="recommended-section" *ngIf="recommendedVideos.length > 0">
+      <h2 class="section-title">
+        <mat-icon>recommend</mat-icon>
+        Recommended for you
+      </h2>
+      <div class="video-grid recommended-grid">
+        <div 
+          *ngFor="let video of recommendedVideos; trackBy: trackByVideoId"
+          class="video-card recommended-card"
+          (click)="onVideoClick(video)">
+          <div class="video-thumbnail">
+            <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" 
+                 [alt]="video.title">
+            <div class="video-duration">{{ formatDuration(video.duration) }}</div>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-channel" (click)="onChannelClick(video.channelId!)">
+              {{ video.channel?.name || video.user?.firstName + ' ' + video.user?.lastName }}
+            </p>
+            <div class="video-stats">
+              <span>{{ video.viewCount | number }} views</span>
+              <span>{{ video.createdAt | date:'MMM d' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Video Grid -->
+    <section class="videos-section">
+      <h2 class="section-title" *ngIf="selectedCategory !== 'All'">
+        {{ selectedCategory }} Videos
+      </h2>
+      <h2 class="section-title" *ngIf="selectedCategory === 'All'">
+        Latest Videos
+      </h2>
+      
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="loading$ | async">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading videos...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-container" *ngIf="error$ | async as error">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h3>Error loading videos</h3>
+        <p>{{ error }}</p>
+        <button class="retry-btn" (click)="loadInitialVideos()">
+          Try Again
+        </button>
+      </div>
+
+      <!-- Video Grid -->
+      <div class="video-grid main-grid" *ngIf="!(loading$ | async) && !(error$ | async)">
+        <div 
+          *ngFor="let video of videos$ | async; trackBy: trackByVideoId"
+          class="video-card main-card"
+          (click)="onVideoClick(video)">
+          <div class="video-thumbnail">
+            <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" 
+                 [alt]="video.title">
+            <div class="video-duration">{{ formatDuration(video.duration) }}</div>
+            <div class="video-overlay">
+              <button class="play-btn">
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="video-info">
+            <div class="channel-avatar">
+              <img [src]="video.channel?.profilePictureUrl || video.user?.profilePictureUrl || '/assets/default-avatar.png'" 
+                   [alt]="video.channel?.name || video.user?.firstName">
+            </div>
+            <div class="video-details">
+              <h3 class="video-title">{{ video.title }}</h3>
+              <p class="video-channel" (click)="onChannelClick(video.channelId!)">
+                {{ video.channel?.name || video.user?.firstName + ' ' + video.user?.lastName }}
+              </p>
+              <div class="video-stats">
+                <span>{{ video.viewCount | number }} views</span>
+                <span>{{ video.createdAt | date:'MMM d' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More Button -->
+      <div class="load-more-container" *ngIf="!(loading$ | async) && !(error$ | async)">
+        <button class="load-more-btn" (click)="loadMoreVideos()">
+          Load More Videos
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

@@ -21,6 +21,10 @@
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
     "@microsoft/signalr": "^8.0.0",
+    "@ngrx/store": "^18.0.0",
+    "@ngrx/effects": "^18.0.0",
+    "@ngrx/store-devtools": "^18.0.0",
+    "@ngrx/entity": "^18.0.0",
     "jwt-decode": "^4.0.0",
     "ngx-spinner": "^18.0.0",
     "ngx-toastr": "^18.0.0",
@@ -30,8 +34,8 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.0.0",
-    "@angular/cli": "^18.0.0",
+    "@angular-devkit/build-angular": "^18.2.21",
+    "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.0.0",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.7.0",

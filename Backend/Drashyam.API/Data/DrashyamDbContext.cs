@@ -21,6 +21,11 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ChannelSubscription> ChannelSubscriptions { get; set; }
     public DbSet<LiveStream> LiveStreams { get; set; }
     public DbSet<Analytics> Analytics { get; set; }
+    public DbSet<Playlist> Playlists { get; set; }
+    public DbSet<PlaylistVideo> PlaylistVideos { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<AdCampaign> AdCampaigns { get; set; }
+    public DbSet<AdImpression> AdImpressions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -115,6 +120,48 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.VideoId);
             entity.HasIndex(e => e.ChannelId);
             entity.HasIndex(e => e.Date);
+        });
+
+        // Configure Playlist entity
+        builder.Entity<Playlist>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChannelId);
+        });
+
+        // Configure PlaylistVideo entity
+        builder.Entity<PlaylistVideo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.PlaylistId);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => new { e.PlaylistId, e.VideoId }).IsUnique();
+        });
+
+        // Configure Notification entity
+        builder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // Configure AdCampaign entity
+        builder.Entity<AdCampaign>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.AdvertiserId);
+            entity.HasIndex(e => e.Status);
+        });
+
+        // Configure AdImpression entity
+        builder.Entity<AdImpression>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.AdCampaignId);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => e.UserId);
         });
 
         // Seed data
