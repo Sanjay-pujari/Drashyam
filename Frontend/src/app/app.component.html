@@ -1,0 +1,24 @@
+<div class="app-container">
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Sidebar -->
+    <app-sidebar *ngIf="isAuthenticated"></app-sidebar>
+
+    <!-- Router Outlet -->
+    <div class="content-area" [class.with-sidebar]="isAuthenticated">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  <!-- Global Spinner -->
+  <ngx-spinner
+    bdColor="rgba(0,0,0,0.8)"
+    size="large"
+    color="#fff"
+    type="ball-scale-multiple">
+    <p style="color: white">Loading...</p>
+  </ngx-spinner>
+</div>

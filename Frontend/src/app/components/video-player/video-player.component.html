@@ -1,0 +1,106 @@
+<div class="video-player-container" *ngIf="video">
+  <!-- Video Player -->
+  <div class="video-wrapper">
+    <video
+      #videoElement
+      class="video-js vjs-default-skin"
+      controls
+      preload="auto"
+      data-setup="{}">
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+      </p>
+    </video>
+  </div>
+
+  <!-- Video Info -->
+  <div class="video-info">
+    <div class="video-title">
+      <h1>{{ video.title }}</h1>
+    </div>
+
+    <div class="video-meta">
+      <div class="video-stats">
+        <span class="view-count">{{ video.viewCount | number }} views</span>
+        <span class="upload-date">{{ video.createdAt | date:'medium' }}</span>
+      </div>
+
+      <div class="video-actions">
+        <button 
+          class="action-btn like-btn"
+          [class.active]="video.isLiked"
+          (click)="likeVideo()"
+          [disabled]="!authService.isAuthenticated()">
+          <mat-icon>thumb_up</mat-icon>
+          <span>{{ video.likeCount | number }}</span>
+        </button>
+
+        <button 
+          class="action-btn dislike-btn"
+          [class.active]="video.isDisliked"
+          (click)="dislikeVideo()"
+          [disabled]="!authService.isAuthenticated()">
+          <mat-icon>thumb_down</mat-icon>
+          <span>{{ video.dislikeCount | number }}</span>
+        </button>
+
+        <button class="action-btn share-btn" (click)="shareVideo()">
+          <mat-icon>share</mat-icon>
+          <span>Share</span>
+        </button>
+
+        <button class="action-btn save-btn">
+          <mat-icon>playlist_add</mat-icon>
+          <span>Save</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Channel Info -->
+    <div class="channel-info" *ngIf="video.channelName">
+      <div class="channel-avatar">
+        <img [src]="video.userProfilePicture || '/assets/default-avatar.png'" alt="Channel Avatar">
+      </div>
+      <div class="channel-details">
+        <h3>{{ video.channelName }}</h3>
+        <p>{{ video.userName }}</p>
+        <span class="subscriber-count">{{ video.viewCount | number }} subscribers</span>
+      </div>
+      <div class="channel-actions">
+        <button 
+          class="subscribe-btn"
+          [class.subscribed]="video.isSubscribed"
+          [disabled]="!authService.isAuthenticated()">
+          {{ video.isSubscribed ? 'Subscribed' : 'Subscribe' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Video Description -->
+    <div class="video-description" *ngIf="video.description">
+      <div class="description-content">
+        <p>{{ video.description }}</p>
+      </div>
+      <div class="video-tags" *ngIf="video.tags">
+        <mat-chip-list>
+          <mat-chip *ngFor="let tag of video.tags.split(',')" [value]="tag.trim()">
+            {{ tag.trim() }}
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+</div>
+
+<!-- No Video Message -->
+<div class="no-video" *ngIf="!video">
+  <mat-icon>video_library</mat-icon>
+  <h2>No video selected</h2>
+  <p>Please select a video to play</p>
+</div>

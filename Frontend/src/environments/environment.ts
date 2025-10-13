@@ -1,0 +1,13 @@
+export const environment = {
+  production: false,
+  apiUrl: 'https://localhost:7001/api',
+  signalRUrl: 'https://localhost:7001',
+  stripePublishableKey: 'pk_test_...', // Replace with your Stripe publishable key
+  googleClientId: '...', // Replace with your Google OAuth client ID
+  facebookAppId: '...', // Replace with your Facebook App ID
+  enableAnalytics: true,
+  enablePWA: true,
+  maxFileSize: 2 * 1024 * 1024 * 1024, // 2GB
+  allowedVideoFormats: ['mp4', 'webm', 'ogg', 'mov', 'avi'],
+  allowedImageFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+};
