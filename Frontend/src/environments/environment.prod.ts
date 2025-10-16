@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.drashyam.com',
-  signalRUrl: 'https://api.drashyam.com/hubs',
+  apiUrl: 'https://localhost:56379',
+  signalRUrl: 'https://localhost:56379/hubs',
   stripePublishableKey: 'pk_live_your_stripe_publishable_key_here',
   googleClientId: 'your_google_client_id_here',
   facebookAppId: 'your_facebook_app_id_here',
