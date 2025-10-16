@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 	templateUrl: './subscriptions.component.html',
 	styleUrls: ['./subscriptions.component.scss']
 })
-export class SubscriptionsComponent implements OnInit, OnDestroy {
+export class SubscriptionsComponent implements OnInit, OnDestroy, AfterViewInit {
 	loading = true;
 	loadingMore = false;
 	error: string | null = null;
@@ -23,11 +23,17 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
 	pageSize = 20;
 	hasNextPage = false;
 	private sub?: Subscription;
+	@ViewChild('loadMoreTrigger', { static: false }) loadMoreTrigger?: ElementRef;
+	private observer?: IntersectionObserver;
 
 	constructor(private videoService: VideoService) {}
 
 	ngOnInit(): void {
 		this.loadPage(1);
+	}
+
+	ngAfterViewInit(): void {
+		this.setupIntersectionObserver();
 	}
 
 	loadPage(nextPage: number) {
@@ -55,6 +61,17 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy(): void {
 		this.sub?.unsubscribe();
+		this.observer?.disconnect();
+	}
+
+	private setupIntersectionObserver(): void {
+		if (!this.loadMoreTrigger) return;
+		this.observer = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting && this.hasNextPage && !this.loadingMore) {
+				this.loadMore();
+			}
+		}, { threshold: 0.1 });
+		this.observer.observe(this.loadMoreTrigger.nativeElement);
 	}
 }
 

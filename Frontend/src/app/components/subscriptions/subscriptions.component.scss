@@ -3,5 +3,7 @@
 .video-card { cursor: pointer; }
 .loading { display: flex; justify-content: center; padding: 24px; }
 .error { color: #c00; }
+.load-more { display: flex; justify-content: center; padding: 24px; }
+.load-more-trigger { display: flex; align-items: center; gap: 8px; }
 
 
