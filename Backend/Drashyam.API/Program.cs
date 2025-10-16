@@ -132,4 +132,13 @@ app.MapControllers();
 app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
 
+// Seed
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<DrashyamDbContext>();
+    var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await SeedData.Initialize(ctx, userMgr, roleMgr);
+}
+
 app.Run();
