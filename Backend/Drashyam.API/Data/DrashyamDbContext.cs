@@ -188,7 +188,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
                 HasMonetization = false,
                 HasLiveStreaming = false,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc)
             },
             new SubscriptionPlan
             {
@@ -205,7 +205,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
                 HasMonetization = false,
                 HasLiveStreaming = true,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc)
             },
             new SubscriptionPlan
             {
@@ -222,7 +222,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
                 HasMonetization = true,
                 HasLiveStreaming = true,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
