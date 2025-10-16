@@ -12,24 +12,23 @@ using FluentValidation;
 using Drashyam.API.Validators;
 using Drashyam.API.Mapping;
 using Drashyam.API.Middleware;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
-    .WriteTo.File("logs/drashyam-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
-
 builder.Host.UseSerilog();
 
-// Add services to the container
+// Controllers & Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database
+// DbContext (PostgreSQL)
 builder.Services.AddDbContext<DrashyamDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -46,10 +45,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<DrashyamDbContext>()
 .AddDefaultTokenProviders();
 
-// JWT Authentication
+// JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"];
-
+var secretKey = jwtSettings["SecretKey"] ?? "change-this-dev-secret";
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,8 +61,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = jwtSettings["Issuer"] ?? "Drashyam.API",
+        ValidAudience = jwtSettings["Audience"] ?? "Drashyam.Client",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
@@ -72,12 +70,14 @@ builder.Services.AddAuthentication(options =>
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularApp", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.WithOrigins(
+                builder.Configuration.GetValue<string>("FrontendUrl") ?? "http://localhost:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -90,7 +90,13 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<UserRegistrationValidator>();
 
-// Application Services
+// File upload limits
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024; // 2GB
+});
+
+// Application services (current in-repo implementations)
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
@@ -98,25 +104,13 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILiveStreamService, LiveStreamService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IPaymentService, StripePaymentService>();
-
-// Redis
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-});
-
-// File Upload Configuration
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024; // 2GB
-});
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -124,27 +118,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAngularApp");
+app.UseCors("AllowFrontend");
 
-// Custom middleware
+// Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Endpoints
 app.MapControllers();
 app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
-
-// Seed database
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<DrashyamDbContext>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    
-    await SeedData.Initialize(context, userManager, roleManager);
-}
 
 app.Run();

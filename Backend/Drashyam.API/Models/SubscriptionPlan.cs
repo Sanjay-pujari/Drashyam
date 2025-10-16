@@ -16,7 +16,7 @@ public class SubscriptionPlan
     [Required]
     public decimal Price { get; set; }
 
-    public BillingCycle BillingCycle { get; set; } = BillingCycle.Monthly;
+    public Drashyam.API.DTOs.BillingCycle BillingCycle { get; set; } = Drashyam.API.DTOs.BillingCycle.Monthly;
 
     public int MaxChannels { get; set; } = 1;
 
@@ -42,8 +42,3 @@ public class SubscriptionPlan
     public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
 }
 
-public enum BillingCycle
-{
-    Monthly,
-    Yearly
-}

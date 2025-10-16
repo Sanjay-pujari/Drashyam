@@ -13,7 +13,7 @@ public interface IVideoService
     Task<PagedResult<VideoDto>> GetChannelVideosAsync(int channelId, VideoFilterDto filter);
     Task<VideoDto> UpdateVideoAsync(int id, VideoUpdateDto updateDto, string userId);
     Task DeleteVideoAsync(int id, string userId);
-    Task<VideoDto> LikeVideoAsync(int videoId, string userId, LikeType type);
+    Task<VideoDto> LikeVideoAsync(int videoId, string userId, Drashyam.API.DTOs.LikeType type);
     Task<VideoDto> UnlikeVideoAsync(int videoId, string userId);
     Task RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration);
     Task<string> GenerateShareLinkAsync(int videoId, string userId);

@@ -77,12 +77,12 @@ public class VideoService : IVideoService
                 ThumbnailUrl = thumbnailUrl,
                 UserId = userId,
                 ChannelId = uploadDto.ChannelId,
-                Visibility = uploadDto.Visibility,
+                Visibility = (Models.VideoVisibility)uploadDto.Visibility,
                 Tags = uploadDto.Tags,
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
                 FileSize = uploadDto.VideoFile.Length,
-                Status = VideoStatus.Processing
+                Status = Models.VideoStatus.Processing
             };
 
             _context.Videos.Add(video);
@@ -142,7 +142,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoStatus.Ready && v.Visibility == VideoVisibility.Public);
+            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
 
         // Apply filters
         if (!string.IsNullOrEmpty(filter.Search))
@@ -159,7 +159,7 @@ public class VideoService : IVideoService
 
         if (filter.Type.HasValue)
         {
-            query = query.Where(v => v.Type == filter.Type);
+            query = query.Where(v => v.Type == (Models.VideoType) filter.Type);
         }
 
         // Apply sorting
@@ -191,7 +191,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.UserId == userId && v.Status != VideoStatus.Deleted);
+            .Where(v => v.UserId == userId && v.Status != Models.VideoStatus.Deleted);
 
         // Apply filters and sorting similar to GetVideosAsync
         var totalCount = await query.CountAsync();
@@ -214,7 +214,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.ChannelId == channelId && v.Status == VideoStatus.Ready);
+            .Where(v => v.ChannelId == channelId && v.Status == Models.VideoStatus.Ready);
 
         var totalCount = await query.CountAsync();
         var videos = await query
@@ -247,7 +247,7 @@ public class VideoService : IVideoService
             video.Description = updateDto.Description;
 
         if (updateDto.Visibility.HasValue)
-            video.Visibility = updateDto.Visibility.Value;
+            video.Visibility = (Models.VideoVisibility)updateDto.Visibility.Value;
 
         if (updateDto.Tags != null)
             video.Tags = updateDto.Tags;
@@ -274,13 +274,13 @@ public class VideoService : IVideoService
         if (video == null)
             throw new ArgumentException("Video not found or access denied");
 
-        video.Status = VideoStatus.Deleted;
+        video.Status = (Models.VideoStatus)DTOs.VideoStatus.Deleted;
         await _context.SaveChangesAsync();
 
         // TODO: Delete files from storage
     }
 
-    public async Task<VideoDto> LikeVideoAsync(int videoId, string userId, LikeType type)
+    public async Task<VideoDto> LikeVideoAsync(int videoId, string userId, Drashyam.API.DTOs.LikeType type)
     {
         var video = await _context.Videos.FindAsync(videoId);
         if (video == null)
@@ -292,11 +292,11 @@ public class VideoService : IVideoService
 
         if (existingLike != null)
         {
-            if (existingLike.Type == type)
+            if (existingLike.Type != (Models.LikeType) type)
             {
                 // Remove like/dislike
                 _context.VideoLikes.Remove(existingLike);
-                if (type == LikeType.Like)
+                if (type == DTOs.LikeType.Like)
                     video.LikeCount--;
                 else
                     video.DislikeCount--;
@@ -304,7 +304,7 @@ public class VideoService : IVideoService
             else
             {
                 // Change like/dislike
-                if (existingLike.Type == LikeType.Like)
+                if (existingLike.Type == Models.LikeType.Like)
                 {
                     video.LikeCount--;
                     video.DislikeCount++;
@@ -314,7 +314,7 @@ public class VideoService : IVideoService
                     video.DislikeCount--;
                     video.LikeCount++;
                 }
-                existingLike.Type = type;
+                existingLike.Type = (Models.LikeType)type;
             }
         }
         else
@@ -324,10 +324,10 @@ public class VideoService : IVideoService
             {
                 UserId = userId,
                 VideoId = videoId,
-                Type = type
+                Type = (Models.LikeType)type
             });
 
-            if (type == LikeType.Like)
+            if (type == DTOs.LikeType.Like)
                 video.LikeCount++;
             else
                 video.DislikeCount++;
@@ -347,7 +347,7 @@ public class VideoService : IVideoService
             var video = await _context.Videos.FindAsync(videoId);
             if (video != null)
             {
-                if (existingLike.Type == LikeType.Like)
+                if (existingLike.Type == Models.LikeType.Like)
                     video.LikeCount--;
                 else
                     video.DislikeCount--;
@@ -406,7 +406,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoStatus.Ready && v.Visibility == VideoVisibility.Public)
+            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
             .OrderByDescending(v => v.ViewCount)
             .ThenByDescending(v => v.LikeCount);
 
@@ -429,7 +429,7 @@ public class VideoService : IVideoService
     {
         // Simple recommendation based on user's liked videos and subscribed channels
         var userLikes = await _context.VideoLikes
-            .Where(l => l.UserId == userId && l.Type == LikeType.Like)
+            .Where(l => l.UserId == userId && l.Type == Models.LikeType.Like)
             .Select(l => l.VideoId)
             .ToListAsync();
 
@@ -441,7 +441,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoStatus.Ready && v.Visibility == VideoVisibility.Public)
+            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
             .Where(v => userSubscriptions.Contains(v.ChannelId ?? 0) || 
                        v.Category != null && _context.Videos
                            .Where(v2 => userLikes.Contains(v2.Id))
