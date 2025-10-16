@@ -2,3 +2,22 @@
   flex: 1 1 auto;
 }
 
+.user-info {
+  padding: 16px;
+  min-width: 200px;
+}
+
+.user-welcome {
+  .welcome-text {
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    color: #333;
+  }
+  
+  .user-email {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
