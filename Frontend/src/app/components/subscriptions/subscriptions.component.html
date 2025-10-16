@@ -18,6 +18,11 @@
 				</div>
 			}
 		</div>
+		<div class="load-more" *ngIf="hasNextPage">
+			<button mat-raised-button color="primary" (click)="loadMore()" [disabled]="loadingMore">
+				{{ loadingMore ? 'Loading...' : 'Load more' }}
+			</button>
+		</div>
 	}
 </div>
 

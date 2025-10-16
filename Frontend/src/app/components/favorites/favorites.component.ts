@@ -16,23 +16,41 @@ import { Subscription } from 'rxjs';
 })
 export class FavoritesComponent implements OnInit, OnDestroy {
 	loading = true;
+	loadingMore = false;
 	error: string | null = null;
 	videos: Video[] = [];
+	page = 1;
+	pageSize = 20;
+	hasNextPage = false;
 	private sub?: Subscription;
 
 	constructor(private videoService: VideoService) {}
 
 	ngOnInit(): void {
-		this.sub = this.videoService.getFavoriteVideos({ page: 1, pageSize: 20 }).subscribe({
+		this.loadPage(1);
+	}
+
+	loadPage(nextPage: number) {
+		if (nextPage === 1) this.loading = true; else this.loadingMore = true;
+		this.sub = this.videoService.getFavoriteVideos({ page: nextPage, pageSize: this.pageSize }).subscribe({
 			next: (res: PagedResult<Video>) => {
-				this.videos = res.items;
+				this.page = res.page;
+				this.hasNextPage = res.hasNextPage;
+				this.videos = nextPage === 1 ? res.items : [...this.videos, ...res.items];
 				this.loading = false;
+				this.loadingMore = false;
 			},
-			error: (err) => {
+			error: () => {
 				this.error = 'Failed to load favorites';
 				this.loading = false;
+				this.loadingMore = false;
 			}
 		});
+	}
+
+	loadMore() {
+		if (!this.hasNextPage || this.loadingMore) return;
+		this.loadPage(this.page + 1);
 	}
 
 	ngOnDestroy(): void {
