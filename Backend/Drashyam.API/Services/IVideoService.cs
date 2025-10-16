@@ -20,4 +20,6 @@ public interface IVideoService
     Task<PagedResult<VideoDto>> SearchVideosAsync(string query, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetTrendingVideosAsync(VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetRecommendedVideosAsync(string userId, VideoFilterDto filter);
+    Task<PagedResult<VideoDto>> GetUserFavoriteVideosAsync(string userId, VideoFilterDto filter);
+    Task<PagedResult<VideoDto>> GetSubscribedChannelsVideosAsync(string userId, VideoFilterDto filter);
 }

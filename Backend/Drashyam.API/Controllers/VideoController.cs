@@ -145,6 +145,43 @@ public class VideoController : ControllerBase
         var results = await _videoService.GetRecommendedVideosAsync(userId, filter);
         return Ok(results);
     }
+
+    [HttpGet("favorites")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<VideoDto>>> Favorites([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var filter = new VideoFilterDto { Page = page, PageSize = pageSize };
+        var results = await _videoService.GetUserFavoriteVideosAsync(userId, filter);
+        return Ok(results);
+    }
+
+    [HttpGet("subscribed-feed")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<VideoDto>>> SubscribedFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var filter = new VideoFilterDto { Page = page, PageSize = pageSize };
+        var results = await _videoService.GetSubscribedChannelsVideosAsync(userId, filter);
+        return Ok(results);
+    }
+
+    [HttpGet("home-feed")]
+    [Authorize]
+    public async Task<ActionResult<HomeFeedDto>> HomeFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var filter = new VideoFilterDto { Page = page, PageSize = pageSize };
+
+        var feed = new HomeFeedDto
+        {
+            Trending = await _videoService.GetTrendingVideosAsync(filter),
+            Recommended = await _videoService.GetRecommendedVideosAsync(userId, filter),
+            Subscribed = await _videoService.GetSubscribedChannelsVideosAsync(userId, filter)
+        };
+
+        return Ok(feed);
+    }
 }
 
 

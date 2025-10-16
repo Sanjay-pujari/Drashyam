@@ -464,6 +464,63 @@ public class VideoService : IVideoService
         };
     }
 
+    public async Task<PagedResult<VideoDto>> GetUserFavoriteVideosAsync(string userId, VideoFilterDto filter)
+    {
+        var favoriteVideoIds = await _context.VideoLikes
+            .Where(l => l.UserId == userId && l.Type == Models.LikeType.Like)
+            .Select(l => l.VideoId)
+            .ToListAsync();
+
+        var query = _context.Videos
+            .Include(v => v.User)
+            .Include(v => v.Channel)
+            .Where(v => favoriteVideoIds.Contains(v.Id) && v.Status == Models.VideoStatus.Ready);
+
+        var totalCount = await query.CountAsync();
+        var videos = await query
+            .OrderByDescending(v => v.CreatedAt)
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<VideoDto>
+        {
+            Items = _mapper.Map<List<VideoDto>>(videos),
+            TotalCount = totalCount,
+            Page = filter.Page,
+            PageSize = filter.PageSize
+        };
+    }
+
+    public async Task<PagedResult<VideoDto>> GetSubscribedChannelsVideosAsync(string userId, VideoFilterDto filter)
+    {
+        var subscribedChannelIds = await _context.ChannelSubscriptions
+            .Where(s => s.UserId == userId)
+            .Select(s => s.ChannelId)
+            .ToListAsync();
+
+        var query = _context.Videos
+            .Include(v => v.User)
+            .Include(v => v.Channel)
+            .Where(v => v.ChannelId != null && subscribedChannelIds.Contains(v.ChannelId.Value))
+            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .OrderByDescending(v => v.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var videos = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<VideoDto>
+        {
+            Items = _mapper.Map<List<VideoDto>>(videos),
+            TotalCount = totalCount,
+            Page = filter.Page,
+            PageSize = filter.PageSize
+        };
+    }
+
     private string GenerateShareToken()
     {
         using var rng = RandomNumberGenerator.Create();

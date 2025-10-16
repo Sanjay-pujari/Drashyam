@@ -11,6 +11,13 @@ public class PagedResult<T>
     public bool HasPreviousPage => Page > 1;
 }
 
+public class HomeFeedDto
+{
+    public PagedResult<VideoDto> Trending { get; set; } = new PagedResult<VideoDto>();
+    public PagedResult<VideoDto> Recommended { get; set; } = new PagedResult<VideoDto>();
+    public PagedResult<VideoDto> Subscribed { get; set; } = new PagedResult<VideoDto>();
+}
+
 public class VideoFilterDto
 {
     public string? Search { get; set; }
