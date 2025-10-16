@@ -20,7 +20,11 @@ export class LoginComponent {
 	constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {}
 
 	submit() {
-		if (this.form.invalid) return;
+		if (this.form.invalid) {
+			this.form.markAllAsTouched();
+			console.warn('Login form invalid', this.form.value);
+			return;
+		}
 		const { email, password } = this.form.value as { email: string; password: string };
 		this.auth.login({ email, password, rememberMe: false }).subscribe({
 			next: () => this.router.navigateByUrl('/'),
