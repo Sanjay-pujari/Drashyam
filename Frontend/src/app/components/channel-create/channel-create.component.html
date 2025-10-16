@@ -1,0 +1,142 @@
+<div class="channel-create-container">
+  <mat-card class="channel-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>add_circle</mat-icon>
+        Create New Channel
+      </mat-card-title>
+      <mat-card-subtitle>Set up your channel to start sharing content</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="channelForm" (ngSubmit)="onSubmit()">
+        <!-- Channel Images -->
+        <div class="images-section">
+          <h3>Channel Images</h3>
+          
+          <div class="image-upload-row">
+            <div class="image-upload-item">
+              <h4>Profile Picture</h4>
+              <div class="file-input-wrapper">
+                <input 
+                  type="file" 
+                  id="profilePicture" 
+                  accept="image/*"
+                  (change)="onProfilePictureSelected($event)">
+                <label for="profilePicture" class="file-input-label">
+                  <mat-icon>person</mat-icon>
+                  Choose Profile Picture
+                </label>
+              </div>
+              @if (selectedProfilePicture) {
+                <div class="file-info">
+                  <p>{{ selectedProfilePicture.name }}</p>
+                  <p>{{ formatFileSize(selectedProfilePicture.size) }}</p>
+                </div>
+              }
+            </div>
+            
+            <div class="image-upload-item">
+              <h4>Banner Image</h4>
+              <div class="file-input-wrapper">
+                <input 
+                  type="file" 
+                  id="bannerImage" 
+                  accept="image/*"
+                  (change)="onBannerSelected($event)">
+                <label for="bannerImage" class="file-input-label">
+                  <mat-icon>image</mat-icon>
+                  Choose Banner
+                </label>
+              </div>
+              @if (selectedBanner) {
+                <div class="file-info">
+                  <p>{{ selectedBanner.name }}</p>
+                  <p>{{ formatFileSize(selectedBanner.size) }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Channel Details -->
+        <div class="details-section">
+          <h3>Channel Details</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Channel Name *</mat-label>
+            <input matInput formControlName="name" placeholder="Enter your channel name">
+            <mat-error *ngIf="channelForm.get('name')?.hasError('required')">
+              Channel name is required
+            </mat-error>
+            <mat-error *ngIf="channelForm.get('name')?.hasError('maxlength')">
+              Name must be less than 100 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="4" placeholder="Tell viewers about your channel"></textarea>
+            <mat-error *ngIf="channelForm.get('description')?.hasError('maxlength')">
+              Description must be less than 500 characters
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Channel Type</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="Personal">Personal</mat-option>
+                <mat-option value="Business">Business</mat-option>
+                <mat-option value="Brand">Brand</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Custom URL</mat-label>
+              <input matInput formControlName="customUrl" placeholder="your-channel-name">
+              <mat-hint>This will be your channel's URL: drashyam.com/channel/your-channel-name</mat-hint>
+              <mat-error *ngIf="channelForm.get('customUrl')?.hasError('pattern')">
+                Only letters, numbers, hyphens, and underscores allowed
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Website URL</mat-label>
+            <input matInput formControlName="websiteUrl" placeholder="https://your-website.com">
+            <mat-error *ngIf="channelForm.get('websiteUrl')?.hasError('pattern')">
+              Please enter a valid URL starting with http:// or https://
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Social Media Links</mat-label>
+            <textarea matInput formControlName="socialLinks" rows="3" placeholder="Enter your social media links (one per line)"></textarea>
+            <mat-hint>One social media link per line</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="submit-section">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="!channelForm.valid || isCreating">
+            <mat-icon>add</mat-icon>
+            {{ isCreating ? 'Creating Channel...' : 'Create Channel' }}
+          </button>
+          
+          <button 
+            mat-button 
+            type="button" 
+            (click)="router.navigateByUrl('/channels')"
+            [disabled]="isCreating">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -99,3 +99,21 @@ export enum ChannelType {
   Business = 'Business',
   Brand = 'Brand'
 }
+
+export interface ChannelCreate {
+  name: string;
+  description?: string;
+  type: ChannelType;
+  customUrl?: string;
+  websiteUrl?: string;
+  socialLinks?: string;
+}
+
+export interface ChannelUpdate {
+  name?: string;
+  description?: string;
+  type?: ChannelType;
+  customUrl?: string;
+  websiteUrl?: string;
+  socialLinks?: string;
+}

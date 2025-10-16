@@ -1,0 +1,149 @@
+<div class="upload-container">
+  <mat-card class="upload-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>cloud_upload</mat-icon>
+        Upload Video
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+        <!-- Video File Upload -->
+        <div class="file-upload-section">
+          <h3>Select Video File</h3>
+          <div class="file-input-wrapper">
+            <input 
+              type="file" 
+              id="videoFile" 
+              accept="video/*"
+              (change)="onVideoFileSelected($event)"
+              #videoFileInput>
+            <label for="videoFile" class="file-input-label">
+              <mat-icon>videocam</mat-icon>
+              Choose Video File
+            </label>
+          </div>
+          
+          @if (selectedFile) {
+            <div class="file-info">
+              <p><strong>File:</strong> {{ selectedFile.name }}</p>
+              <p><strong>Size:</strong> {{ formatFileSize(selectedFile.size) }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Thumbnail Upload -->
+        <div class="file-upload-section">
+          <h3>Thumbnail (Optional)</h3>
+          <div class="file-input-wrapper">
+            <input 
+              type="file" 
+              id="thumbnailFile" 
+              accept="image/*"
+              (change)="onThumbnailSelected($event)"
+              #thumbnailFileInput>
+            <label for="thumbnailFile" class="file-input-label">
+              <mat-icon>image</mat-icon>
+              Choose Thumbnail
+            </label>
+          </div>
+        </div>
+
+        <!-- Video Details -->
+        <div class="form-section">
+          <h3>Video Details</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title *</mat-label>
+            <input matInput formControlName="title" placeholder="Enter video title">
+            <mat-error *ngIf="uploadForm.get('title')?.hasError('required')">
+              Title is required
+            </mat-error>
+            <mat-error *ngIf="uploadForm.get('title')?.hasError('maxlength')">
+              Title must be less than 200 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="4" placeholder="Describe your video"></textarea>
+            <mat-error *ngIf="uploadForm.get('description')?.hasError('maxlength')">
+              Description must be less than 1000 characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Channel</mat-label>
+            <mat-select formControlName="channelId">
+              <mat-option [value]="null">No Channel</mat-option>
+              @for (channel of userChannels; track channel.id) {
+                <mat-option [value]="channel.id">{{ channel.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Visibility</mat-label>
+            <mat-select formControlName="visibility">
+              <mat-option value="Public">Public</mat-option>
+              <mat-option value="Unlisted">Unlisted</mat-option>
+              <mat-option value="Private">Private</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="category">
+              <mat-option value="">Select Category</mat-option>
+              <mat-option value="Music">Music</mat-option>
+              <mat-option value="Gaming">Gaming</mat-option>
+              <mat-option value="Education">Education</mat-option>
+              <mat-option value="Entertainment">Entertainment</mat-option>
+              <mat-option value="Technology">Technology</mat-option>
+              <mat-option value="Sports">Sports</mat-option>
+              <mat-option value="News">News</mat-option>
+              <mat-option value="Lifestyle">Lifestyle</mat-option>
+              <mat-option value="Travel">Travel</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tags</mat-label>
+            <input matInput formControlName="tags" placeholder="Enter tags separated by commas">
+            <mat-hint>Separate tags with commas (e.g., tutorial, coding, javascript)</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Upload Progress -->
+        @if (isUploading) {
+          <div class="upload-progress">
+            <h4>Uploading...</h4>
+            <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+            <p>{{ uploadProgress }}% complete</p>
+          </div>
+        }
+
+        <!-- Submit Button -->
+        <div class="submit-section">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="!uploadForm.valid || !selectedFile || isUploading">
+            <mat-icon>upload</mat-icon>
+            {{ isUploading ? 'Uploading...' : 'Upload Video' }}
+          </button>
+          
+          <button 
+            mat-button 
+            type="button" 
+            (click)="router.navigateByUrl('/')"
+            [disabled]="isUploading">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
