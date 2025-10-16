@@ -5,7 +5,9 @@
   <!-- Main Content -->
   <div class="main-content">
     <!-- Sidebar -->
-    <app-sidebar *ngIf="isAuthenticated"></app-sidebar>
+    @if (isAuthenticated) {
+      <app-sidebar></app-sidebar>
+    }
 
     <!-- Router Outlet -->
     <div class="content-area" [class.with-sidebar]="isAuthenticated">

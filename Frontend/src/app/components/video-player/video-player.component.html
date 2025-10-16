@@ -1,136 +1,143 @@
-<div class="video-player-container" *ngIf="video">
-  <!-- Video Player -->
-  <div class="video-wrapper">
-    <video
-      #videoElement
-      class="video-js vjs-default-skin"
-      controls
-      preload="auto"
-      data-setup="{}">
-      <p class="vjs-no-js">
-        To view this video please enable JavaScript, and consider upgrading to a web browser that
-        <a href="https://videojs.com/html5-video-support/" target="_blank">
-          supports HTML5 video
-        </a>.
-      </p>
-    </video>
-  </div>
-
-  <!-- Video Info -->
-  <div class="video-info">
-    <h1 class="video-title">{{ video.title }}</h1>
-    
-    <!-- Video Stats -->
-    <div class="video-stats">
-      <div class="stats-item">
-        <span class="stat-value">{{ video.viewCount | number }}</span>
-        <span class="stat-label">views</span>
-      </div>
-      <div class="stats-item">
-        <span class="stat-value">{{ video.createdAt | date:'MMM d, y' }}</span>
-        <span class="stat-label">published</span>
-      </div>
+@if (video) {
+  <div class="video-player-container">
+    <!-- Video Player -->
+    <div class="video-wrapper">
+      <video
+        #videoElement
+        class="video-js vjs-default-skin"
+        controls
+        preload="auto"
+        data-setup="{}">
+        <p class="vjs-no-js">
+          To view this video please enable JavaScript, and consider upgrading to a web browser that
+          <a href="https://videojs.com/html5-video-support/" target="_blank">
+            supports HTML5 video
+          </a>.
+        </p>
+      </video>
     </div>
-
-    <!-- Video Actions -->
-    <div class="video-actions">
-      <button 
-        class="action-btn like-btn"
-        [class.active]="video.isLiked"
-        (click)="likeVideo()"
-        *ngIf="currentUser$ | async">
-        <mat-icon>{{ video.isLiked ? 'thumb_up' : 'thumb_up_outline' }}</mat-icon>
-        <span>{{ video.likeCount | number }}</span>
-      </button>
-
-      <button 
-        class="action-btn dislike-btn"
-        [class.active]="video.isDisliked"
-        (click)="dislikeVideo()"
-        *ngIf="currentUser$ | async">
-        <mat-icon>{{ video.isDisliked ? 'thumb_down' : 'thumb_down_outline' }}</mat-icon>
-        <span>{{ video.dislikeCount | number }}</span>
-      </button>
-
-      <button class="action-btn share-btn" (click)="shareVideo()">
-        <mat-icon>share</mat-icon>
-        <span>Share</span>
-      </button>
-
-      <button class="action-btn save-btn">
-        <mat-icon>playlist_add</mat-icon>
-        <span>Save</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Channel Info -->
-  <div class="channel-info" *ngIf="video.channel">
-    <div class="channel-avatar">
-      <img [src]="video.channel.profilePictureUrl || '/assets/default-avatar.png'" 
-           [alt]="video.channel.name">
-    </div>
-    <div class="channel-details">
-      <h3 class="channel-name">{{ video.channel.name }}</h3>
-      <p class="channel-subscribers">{{ video.channel.subscriberCount | number }} subscribers</p>
-    </div>
-    <button class="subscribe-btn" 
-            [class.subscribed]="video.channel.isSubscribed">
-      {{ video.channel.isSubscribed ? 'Subscribed' : 'Subscribe' }}
-    </button>
-  </div>
-
-  <!-- Video Description -->
-  <div class="video-description" *ngIf="video.description">
-    <div class="description-content">
-      <p>{{ video.description }}</p>
-    </div>
-    <button class="show-more-btn" *ngIf="video.description.length > 200">
-      Show more
-    </button>
-  </div>
-
-  <!-- Comments Section -->
-  <div class="comments-section">
-    <h3 class="comments-title">
-      {{ video.commentCount | number }} Comments
-    </h3>
-    
-    <!-- Add Comment -->
-    <div class="add-comment" *ngIf="currentUser$ | async">
-      <div class="comment-avatar">
-        <img [src]="(currentUser$ | async)?.profilePictureUrl || '/assets/default-avatar.png'" 
-             [alt]="(currentUser$ | async)?.firstName">
-      </div>
-      <div class="comment-input">
-        <textarea 
-          placeholder="Add a comment..."
-          rows="1"
-          class="comment-textarea">
-        </textarea>
-        <div class="comment-actions">
-          <button class="cancel-btn">Cancel</button>
-          <button class="comment-btn">Comment</button>
+    <!-- Video Info -->
+    <div class="video-info">
+      <h1 class="video-title">{{ video.title }}</h1>
+      <!-- Video Stats -->
+      <div class="video-stats">
+        <div class="stats-item">
+          <span class="stat-value">{{ video.viewCount | number }}</span>
+          <span class="stat-label">views</span>
+        </div>
+        <div class="stats-item">
+          <span class="stat-value">{{ video.createdAt | date:'MMM d, y' }}</span>
+          <span class="stat-label">published</span>
         </div>
       </div>
+      <!-- Video Actions -->
+      <div class="video-actions">
+        @if (currentUser$ | async) {
+          <button
+            class="action-btn like-btn"
+            [class.active]="video.isLiked"
+            (click)="likeVideo()"
+            >
+            <mat-icon>{{ video.isLiked ? 'thumb_up' : 'thumb_up_outline' }}</mat-icon>
+            <span>{{ video.likeCount | number }}</span>
+          </button>
+        }
+        @if (currentUser$ | async) {
+          <button
+            class="action-btn dislike-btn"
+            [class.active]="video.isDisliked"
+            (click)="dislikeVideo()"
+            >
+            <mat-icon>{{ video.isDisliked ? 'thumb_down' : 'thumb_down_outline' }}</mat-icon>
+            <span>{{ video.dislikeCount | number }}</span>
+          </button>
+        }
+        <button class="action-btn share-btn" (click)="shareVideo()">
+          <mat-icon>share</mat-icon>
+          <span>Share</span>
+        </button>
+        <button class="action-btn save-btn">
+          <mat-icon>playlist_add</mat-icon>
+          <span>Save</span>
+        </button>
+      </div>
     </div>
+    <!-- Channel Info -->
+    @if (video.channel) {
+      <div class="channel-info">
+        <div class="channel-avatar">
+          <img [src]="video.channel.profilePictureUrl || '/assets/default-avatar.png'"
+            [alt]="video.channel.name">
+          </div>
+          <div class="channel-details">
+            <h3 class="channel-name">{{ video.channel.name }}</h3>
+            <p class="channel-subscribers">{{ video.channel.subscriberCount | number }} subscribers</p>
+          </div>
+          <button class="subscribe-btn"
+            [class.subscribed]="video.channel.isSubscribed">
+            {{ video.channel.isSubscribed ? 'Subscribed' : 'Subscribe' }}
+          </button>
+        </div>
+      }
+      <!-- Video Description -->
+      @if (video.description) {
+        <div class="video-description">
+          <div class="description-content">
+            <p>{{ video.description }}</p>
+          </div>
+          @if (video.description.length > 200) {
+            <button class="show-more-btn">
+              Show more
+            </button>
+          }
+        </div>
+      }
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <h3 class="comments-title">
+          {{ video.commentCount | number }} Comments
+        </h3>
+        <!-- Add Comment -->
+        @if (currentUser$ | async) {
+          <div class="add-comment">
+            <div class="comment-avatar">
+              <img [src]="(currentUser$ | async)?.profilePictureUrl || '/assets/default-avatar.png'"
+                [alt]="(currentUser$ | async)?.firstName">
+              </div>
+              <div class="comment-input">
+                <textarea
+                  placeholder="Add a comment..."
+                  rows="1"
+                  class="comment-textarea">
+                </textarea>
+                <div class="comment-actions">
+                  <button class="cancel-btn">Cancel</button>
+                  <button class="comment-btn">Comment</button>
+                </div>
+              </div>
+            </div>
+          }
+          <!-- Comments List -->
+          <div class="comments-list">
+            <!-- Comments will be loaded here -->
+          </div>
+        </div>
+      </div>
+    }
 
-    <!-- Comments List -->
-    <div class="comments-list">
-      <!-- Comments will be loaded here -->
-    </div>
-  </div>
-</div>
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading video...</p>
+      </div>
+    }
 
-<!-- Loading State -->
-<div class="loading-container" *ngIf="isLoading">
-  <mat-spinner diameter="50"></mat-spinner>
-  <p>Loading video...</p>
-</div>
-
-<!-- Error State -->
-<div class="error-container" *ngIf="!video && !isLoading">
-  <mat-icon class="error-icon">error_outline</mat-icon>
-  <h3>Video not found</h3>
-  <p>The video you're looking for doesn't exist or has been removed.</p>
-</div>
+    <!-- Error State -->
+    @if (!video && !isLoading) {
+      <div class="error-container">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h3>Video not found</h3>
+        <p>The video you're looking for doesn't exist or has been removed.</p>
+      </div>
+    }
