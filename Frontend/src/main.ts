@@ -33,7 +33,9 @@ const routes: Routes = [
   { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
-  { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) }
+  { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) },
+  { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent) },
+  { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent) }
 ];
 
 bootstrapApplication(AppComponent, {

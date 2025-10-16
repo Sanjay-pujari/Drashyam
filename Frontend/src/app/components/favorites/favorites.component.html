@@ -1,0 +1,24 @@
+<div class="favorites-container">
+	<h2>Your Favorites</h2>
+	@if (loading) {
+		<div class="loading">
+			<mat-spinner diameter="40"></mat-spinner>
+		</div>
+	}
+	@if (error) {
+		<p class="error">{{ error }}</p>
+	}
+	@if (!loading && !error) {
+		<div class="video-grid">
+			@for (video of videos; track video.id) {
+				<div class="video-card">
+					<img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.title">
+					<h3>{{ video.title }}</h3>
+					<p>{{ video.channel?.name || (video.user?.firstName + ' ' + video.user?.lastName) }}</p>
+				</div>
+			}
+		</div>
+	}
+</div>
+
+

@@ -10,7 +10,9 @@ import { Observable, Subscription } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import { Video } from '../../models/video.model';
 import { selectVideos, selectVideoLoading, selectVideoError } from '../../store/video/video.selectors';
-import { loadVideos, loadTrendingVideos, loadRecommendedVideos } from '../../store/video/video.actions';
+import { loadVideos } from '../../store/video/video.actions';
+import { VideoService } from '../../services/video.service';
+import { ChannelService } from '../../services/channel.service';
 
 @Component({
     selector: 'app-home',
@@ -26,6 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   
   trendingVideos: Video[] = [];
   recommendedVideos: Video[] = [];
+  subscribedVideos: Video[] = [];
   categories = [
     'All',
     'Music',
@@ -42,7 +45,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedCategory = 'All';
   private subscriptions: Subscription[] = [];
 
-  constructor(@Inject(Store) private store: Store<AppState>) {
+  constructor(@Inject(Store) private store: Store<AppState>, private videoService: VideoService, private channelService: ChannelService) {
     this.videos$ = this.store.select(selectVideos);
     this.loading$ = this.store.select(selectVideoLoading);
     this.error$ = this.store.select(selectVideoError);
@@ -50,6 +53,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadInitialVideos();
+    this.loadHomeFeed();
   }
 
   ngOnDestroy() {
@@ -59,12 +63,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   loadInitialVideos() {
     // Load main videos
     this.store.dispatch(loadVideos({ page: 1, pageSize: 20 }));
-    
-    // Load trending videos
-    this.store.dispatch(loadTrendingVideos({ page: 1, pageSize: 10 }));
-    
-    // Load recommended videos
-    this.store.dispatch(loadRecommendedVideos({ page: 1, pageSize: 10 }));
+  }
+
+  loadHomeFeed() {
+    const sub = this.videoService.getHomeFeed({ page: 1, pageSize: 10 }).subscribe(feed => {
+      this.trendingVideos = feed.trending.items;
+      this.recommendedVideos = feed.recommended.items;
+      this.subscribedVideos = feed.subscribed.items;
+    });
+    this.subscriptions.push(sub);
   }
 
   onCategoryChange(category: string) {
@@ -88,6 +95,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   onChannelClick(channelId: number) {
     // Navigate to channel page
     console.log('Navigate to channel:', channelId);
+  }
+
+  toggleFavorite(video: Video) {
+    const likeType = video.isLiked ? 'dislike' : 'like';
+    const sub = this.videoService.likeVideo(video.id, likeType as any).subscribe(updated => {
+      video.isLiked = !video.isLiked;
+      video.likeCount = updated.likeCount;
+    });
+    this.subscriptions.push(sub);
+  }
+
+  toggleSubscribe(video: Video) {
+    if (!video.channelId) return;
+    const action$ = video.channel?.isSubscribed ? this.channelService.unsubscribeFromChannel(video.channelId) : this.channelService.subscribeToChannel(video.channelId);
+    const sub = action$.subscribe(() => {
+      if (video.channel) {
+        video.channel.isSubscribed = !video.channel.isSubscribed;
+      }
+    });
+    this.subscriptions.push(sub);
   }
 
   loadMoreVideos() {

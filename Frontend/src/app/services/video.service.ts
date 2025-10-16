@@ -121,4 +121,26 @@ export class VideoService {
   generateShareLink(id: number): Observable<{ shareToken: string }> {
     return this.http.post<{ shareToken: string }>(`${this.apiUrl}/${id}/share`, {});
   }
+
+  // New endpoints
+  getFavoriteVideos(filter: VideoFilter = {}): Observable<PagedResult<Video>> {
+    let params = new HttpParams();
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/favorites`, { params });
+  }
+
+  getSubscribedFeed(filter: VideoFilter = {}): Observable<PagedResult<Video>> {
+    let params = new HttpParams();
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/subscribed-feed`, { params });
+  }
+
+  getHomeFeed(filter: VideoFilter = {}): Observable<{ trending: PagedResult<Video>; recommended: PagedResult<Video>; subscribed: PagedResult<Video>; }> {
+    let params = new HttpParams();
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+    return this.http.get<{ trending: PagedResult<Video>; recommended: PagedResult<Video>; subscribed: PagedResult<Video>; }>(`${this.apiUrl}/home-feed`, { params });
+  }
 }

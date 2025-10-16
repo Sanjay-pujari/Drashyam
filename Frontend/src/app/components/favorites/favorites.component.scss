@@ -1,0 +1,7 @@
+.favorites-container { padding: 16px; }
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.video-card { cursor: pointer; }
+.loading { display: flex; justify-content: center; padding: 24px; }
+.error { color: #c00; }
+
+

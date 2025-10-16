@@ -56,6 +56,16 @@
                       <span>{{ video.viewCount | number }} views</span>
                       <span>{{ video.createdAt | date:'MMM d' }}</span>
                     </div>
+                    <div class="video-actions">
+                      <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
+                        <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                        {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+                      </button>
+                      <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
+                        <mat-icon>subscriptions</mat-icon>
+                        {{ video.channel?.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               }
@@ -89,12 +99,65 @@
                         <span>{{ video.viewCount | number }} views</span>
                         <span>{{ video.createdAt | date:'MMM d' }}</span>
                       </div>
+                      <div class="video-actions">
+                        <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
+                          <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                          {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+                        </button>
+                        <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
+                          <mat-icon>subscriptions</mat-icon>
+                          {{ video.channel?.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 }
               </div>
             </section>
           }
+
+          <!-- Subscribed Section -->
+          @if (subscribedVideos.length > 0) {
+            <section class="subscribed-section">
+              <h2 class="section-title">
+                <mat-icon>subscriptions</mat-icon>
+                From your subscriptions
+              </h2>
+              <div class="video-grid subscribed-grid">
+                @for (video of subscribedVideos; track trackByVideoId($index, video)) {
+                  <div
+                    class="video-card subscribed-card"
+                    (click)="onVideoClick(video)">
+                    <div class="video-thumbnail">
+                      <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                        [alt]="video.title">
+                        <div class="video-duration">{{ formatDuration(video.duration) }}</div>
+                      </div>
+                      <div class="video-info">
+                        <h3 class="video-title">{{ video.title }}</h3>
+                        <p class="video-channel" (click)="onChannelClick(video.channelId!)">
+                          {{ video.channel?.name || video.user?.firstName + ' ' + video.user?.lastName }}
+                        </p>
+                        <div class="video-stats">
+                          <span>{{ video.viewCount | number }} views</span>
+                          <span>{{ video.createdAt | date:'MMM d' }}</span>
+                        </div>
+                        <div class="video-actions">
+                          <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
+                            <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                            {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+                          </button>
+                          <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
+                            <mat-icon>subscriptions</mat-icon>
+                            {{ video.channel?.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </section>
+            }
 
           <!-- Main Video Grid -->
           <section class="videos-section">
@@ -159,6 +222,16 @@
                             <div class="video-stats">
                               <span>{{ video.viewCount | number }} views</span>
                               <span>{{ video.createdAt | date:'MMM d' }}</span>
+                            </div>
+                            <div class="video-actions">
+                              <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
+                                <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                                {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+                              </button>
+                              <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
+                                <mat-icon>subscriptions</mat-icon>
+                                {{ video.channel?.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                              </button>
                             </div>
                           </div>
                         </div>
