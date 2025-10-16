@@ -64,12 +64,13 @@ export class VideoService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  likeVideo(id: number, likeType: 'like' | 'dislike'): Observable<Video> {
-    return this.http.post<Video>(`${this.apiUrl}/${id}/like`, { type: likeType });
+  likeVideo(id: number, likeType: 'like' | 'dislike' = 'like'): Observable<Video> {
+    const typeQuery = likeType === 'like' ? 'Like' : 'Dislike';
+    return this.http.post<Video>(`${this.apiUrl}/${id}/like?type=${typeQuery}`, {});
   }
 
   recordVideoView(id: number, watchDuration: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${id}/view`, { watchDuration });
+    return this.http.post<void>(`${this.apiUrl}/${id}/view?secondsWatched=${watchDuration}`, {});
   }
 
   searchVideos(query: string, filter: VideoFilter = {}): Observable<PagedResult<Video>> {
@@ -78,7 +79,7 @@ export class VideoService {
     if (filter.page) params = params.set('page', filter.page.toString());
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
 
-    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/search`, { params });
+    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/search/all`, { params });
   }
 
   getTrendingVideos(filter: VideoFilter = {}): Observable<PagedResult<Video>> {

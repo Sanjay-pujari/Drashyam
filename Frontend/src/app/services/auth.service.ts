@@ -35,13 +35,8 @@ export class AuthService {
     );
   }
 
-  register(userData: UserRegistration): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData).pipe(
-      tap(response => {
-        localStorage.setItem('token', response.token);
-        this.currentUserSubject.next(response.user);
-      })
-    );
+  register(userData: UserRegistration): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/register`, userData);
   }
 
   logout(): void {
@@ -50,7 +45,7 @@ export class AuthService {
   }
 
   getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/me`).pipe(
+    return this.http.get<User>(`${environment.apiUrl}/api/user/me`).pipe(
       tap(user => this.currentUserSubject.next(user))
     );
   }
@@ -63,11 +58,10 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, {}).pipe(
+  refreshToken(): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, {} as any).pipe(
       tap(response => {
         localStorage.setItem('token', response.token);
-        this.currentUserSubject.next(response.user);
       })
     );
   }
@@ -91,15 +85,17 @@ export class AuthService {
   }
 
   updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/profile`, userData).pipe(
+    return this.http.put<User>(`${environment.apiUrl}/api/user/me`, userData).pipe(
       tap(user => this.currentUserSubject.next(user))
     );
   }
 
-  uploadProfilePicture(file: File): Observable<{ profilePictureUrl: string }> {
+  uploadProfilePicture(file: File): Observable<User> {
     const formData = new FormData();
     formData.append('profilePicture', file);
     
-    return this.http.post<{ profilePictureUrl: string }>(`${this.apiUrl}/profile-picture`, formData);
+    return this.http.post<User>(`${environment.apiUrl}/api/user/me/profile-picture`, formData).pipe(
+      tap(user => this.currentUserSubject.next(user))
+    );
   }
 }

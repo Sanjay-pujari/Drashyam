@@ -1,5 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
+import { Inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import { Video } from '../../models/video.model';
@@ -8,6 +14,8 @@ import { loadVideos, loadTrendingVideos, loadRecommendedVideos } from '../../sto
 
 @Component({
   selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -34,7 +42,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedCategory = 'All';
   private subscriptions: Subscription[] = [];
 
-  constructor(private store: Store<AppState>) {
+  constructor(@Inject(Store) private store: Store<AppState>) {
     this.videos$ = this.store.select(selectVideos);
     this.loading$ = this.store.select(selectVideoLoading);
     this.error$ = this.store.select(selectVideoError);

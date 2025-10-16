@@ -1,16 +1,20 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, interval } from 'rxjs';
 import { Video } from '../../models/video.model';
 import { AppState } from '../../store/app.state';
 import { selectCurrentUser } from '../../store/user/user.selectors';
 import { recordVideoView, likeVideo } from '../../store/video/video.actions';
+import { VideoService } from '../../services/video.service';
 import { User } from '../../models/user.model';
 
 declare var videojs: any;
 
 @Component({
   selector: 'app-video-player',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.scss']
 })
@@ -38,7 +42,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   currentUser$: Observable<User | null>;
 
   constructor(
-    private store: Store<AppState>
+    @Inject(Store) private store: Store<AppState>,
+    private videoService: VideoService
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
   }

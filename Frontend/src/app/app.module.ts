@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -25,16 +26,33 @@ import { VideoPlayerComponent } from './components/video-player/video-player.com
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HomeComponent } from './components/home/home.component';
 
-// Store
-import { AppStoreModule } from './store/app.module';
+// NgRx Store (standalone providers)
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
+
+// Reducers
+import { videoReducer } from './store/video/video.reducer';
+import { userReducer } from './store/user/user.reducer';
+import { channelReducer } from './store/channel/channel.reducer';
+import { commentReducer } from './store/comment/comment.reducer';
+import { liveStreamReducer } from './store/live-stream/live-stream.reducer';
+import { subscriptionReducer } from './store/subscription/subscription.reducer';
+
+// Effects
+import { VideoEffects } from './store/video/video.effects';
+import { UserEffects } from './store/user/user.effects';
+import { ChannelEffects } from './store/channel/channel.effects';
+import { CommentEffects } from './store/comment/comment.effects';
+import { LiveStreamEffects } from './store/live-stream/live-stream.effects';
+import { SubscriptionEffects } from './store/subscription/subscription.effects';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
-    VideoPlayerComponent,
-    SidebarComponent,
-    HomeComponent
+    SidebarComponent
   ],
   imports: [
     BrowserModule,
@@ -56,11 +74,24 @@ import { AppStoreModule } from './store/app.module';
     
     // Third-party modules
     NgxSpinnerModule,
-    
-    // Store
-    AppStoreModule
+
+    // Standalone components
+    VideoPlayerComponent,
+    HomeComponent
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideStore({
+      video: videoReducer,
+      user: userReducer,
+      channel: channelReducer,
+      comment: commentReducer,
+      liveStream: liveStreamReducer,
+      subscription: subscriptionReducer
+    }),
+    provideEffects([VideoEffects, UserEffects, ChannelEffects, CommentEffects, LiveStreamEffects, SubscriptionEffects]),
+    provideStoreDevtools({ maxAge: 25, logOnly: environment.production })
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
