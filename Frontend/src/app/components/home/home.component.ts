@@ -14,6 +14,7 @@ import { loadVideos, loadTrendingVideos, loadRecommendedVideos } from '../../sto
 
 @Component({
     selector: 'app-home',
+    standalone: true,
     imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
@@ -55,7 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  private loadInitialVideos() {
+  loadInitialVideos() {
     // Load main videos
     this.store.dispatch(loadVideos({ page: 1, pageSize: 20 }));
     

@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, interval } from 'rxjs';
 import { Video } from '../../models/video.model';
@@ -13,7 +15,8 @@ declare var videojs: any;
 
 @Component({
     selector: 'app-video-player',
-    imports: [CommonModule],
+    standalone: true,
+    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })

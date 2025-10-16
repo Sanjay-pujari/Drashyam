@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { User, UserLogin, UserRegistration } from '../models/user.model';
 
@@ -35,9 +35,24 @@ export class AuthService {
     );
   }
 
-  register(userData: UserRegistration): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/register`, userData);
+  register(userData: UserRegistration): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData).pipe(
+      tap(response => {
+        // Align behavior with login: persist token and set current user if provided
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        if (response.user) {
+          this.currentUserSubject.next(response.user);
+        }
+      })
+    );
   }
+
+  // Convenience observable for auth state
+  public isAuthenticated$ = this.currentUser$.pipe(
+    map(user => !!user || this.isAuthenticated())
+  );
 
   logout(): void {
     localStorage.removeItem('token');

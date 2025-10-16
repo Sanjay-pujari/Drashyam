@@ -1,4 +1,5 @@
-import { User, Channel } from './user.model';
+import { User } from './user.model';
+import { Channel } from './channel.model';
 
 export interface LiveStream {
   id: number;
