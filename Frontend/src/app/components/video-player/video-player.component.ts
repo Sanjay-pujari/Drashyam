@@ -12,11 +12,10 @@ import { User } from '../../models/user.model';
 declare var videojs: any;
 
 @Component({
-  selector: 'app-video-player',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './video-player.component.html',
-  styleUrls: ['./video-player.component.scss']
+    selector: 'app-video-player',
+    imports: [CommonModule],
+    templateUrl: './video-player.component.html',
+    styleUrls: ['./video-player.component.scss']
 })
 export class VideoPlayerComponent implements OnInit, OnDestroy {
   @Input() video: Video | null = null;

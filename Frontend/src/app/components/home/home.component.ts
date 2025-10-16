@@ -13,11 +13,10 @@ import { selectVideos, selectVideoLoading, selectVideoError } from '../../store/
 import { loadVideos, loadTrendingVideos, loadRecommendedVideos } from '../../store/video/video.actions';
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'app-home',
+    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
   videos$: Observable<Video[]>;
