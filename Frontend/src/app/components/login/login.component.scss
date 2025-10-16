@@ -1,0 +1,28 @@
+.page {
+	padding: 16px;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+label {
+	display: flex;
+	flex-direction: column;
+}
+
+input {
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+button {
+	width: 120px;
+	padding: 8px 12px;
+}
+
+
+

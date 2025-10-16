@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -8,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
     standalone: true,
-    imports: [CommonModule, MatToolbarModule, MatButtonModule]
+    imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule]
 })
 export class HeaderComponent {
   title = 'Drashyam';

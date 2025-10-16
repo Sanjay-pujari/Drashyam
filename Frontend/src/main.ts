@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Routes } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 
@@ -29,9 +29,16 @@ import { SubscriptionEffects } from './app/store/subscription/subscription.effec
 // HTTP interceptor (functional)
 import { authInterceptor } from './app/interceptors/auth.interceptor';
 
+const routes: Routes = [
+  { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
+  { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
+  { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
+  { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) }
+];
+
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter([]),
+    provideRouter(routes),
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor])),
     // If some legacy features still rely on module-based providers, bring them in via importProvidersFrom(...) here.
