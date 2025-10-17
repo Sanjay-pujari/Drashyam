@@ -9,7 +9,7 @@ import { PagedResult } from './video.service';
   providedIn: 'root'
 })
 export class ChannelService {
-  private apiUrl = `${environment.apiUrl}/api/channels`;
+  private apiUrl = `${environment.apiUrl}/api/channel`;
 
   constructor(private http: HttpClient) {}
 
@@ -27,11 +27,13 @@ export class ChannelService {
   }
 
   getChannelByCustomUrl(customUrl: string): Observable<Channel> {
-    return this.http.get<Channel>(`${this.apiUrl}/custom/${customUrl}`);
+    return this.http.get<Channel>(`${this.apiUrl}/by-url/${customUrl}`);
   }
 
   createChannel(channelData: ChannelCreate): Observable<Channel> {
-    return this.http.post<Channel>(this.apiUrl, channelData);
+    // Wrap the data in createDto as expected by backend
+    const requestBody = { createDto: channelData };
+    return this.http.post<Channel>(this.apiUrl, requestBody);
   }
 
   updateChannel(id: number, channelData: ChannelUpdate): Observable<Channel> {
@@ -48,6 +50,9 @@ export class ChannelService {
     if (filter.page) params = params.set('page', filter.page.toString());
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
 
+    if (userId === 'me') {
+      return this.http.get<PagedResult<Channel>>(`${this.apiUrl}/me`, { params });
+    }
     return this.http.get<PagedResult<Channel>>(`${this.apiUrl}/user/${userId}`, { params });
   }
 
@@ -68,8 +73,8 @@ export class ChannelService {
     return this.http.post<Channel>(`${this.apiUrl}/${channelId}/unsubscribe`, {});
   }
 
-  isSubscribed(channelId: number): Observable<{ isSubscribed: boolean }> {
-    return this.http.get<{ isSubscribed: boolean }>(`${this.apiUrl}/${channelId}/subscription-status`);
+  isSubscribed(channelId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/${channelId}/is-subscribed`);
   }
 
   getSubscribedChannels(filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<Channel>> {

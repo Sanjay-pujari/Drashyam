@@ -40,5 +40,19 @@ public class MappingProfile : Profile
 
         // Analytics mappings
         CreateMap<Analytics, AnalyticsDto>();
+
+        // Invite mappings
+        CreateMap<UserInvite, UserInviteDto>()
+            .ForMember(dest => dest.InviterName, opt => opt.MapFrom(src => $"{src.Inviter.FirstName} {src.Inviter.LastName}"))
+            .ForMember(dest => dest.AcceptedUserName, opt => opt.MapFrom(src => src.AcceptedUser != null ? $"{src.AcceptedUser.FirstName} {src.AcceptedUser.LastName}" : null));
+
+        // Referral mappings
+        CreateMap<Referral, ReferralDto>()
+            .ForMember(dest => dest.ReferrerName, opt => opt.MapFrom(src => $"{src.Referrer.FirstName} {src.Referrer.LastName}"))
+            .ForMember(dest => dest.ReferredUserName, opt => opt.MapFrom(src => $"{src.ReferredUser.FirstName} {src.ReferredUser.LastName}"));
+
+        // ReferralReward mappings
+        CreateMap<ReferralReward, ReferralRewardDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
     }
 }

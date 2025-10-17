@@ -1,0 +1,116 @@
+<div class="invite-accept">
+  <div class="container">
+    <div class="invite-card" *ngIf="invite && !loading; else loadingTemplate">
+      <div class="invite-header">
+        <h2>You're Invited!</h2>
+        <p class="inviter-name">{{ invite.inviterName }} has invited you to join Drashyam</p>
+        <p class="invite-message" *ngIf="invite?.personalMessage">
+          "{{ invite.personalMessage! }}"
+        </p>
+      </div>
+
+      <div class="form-section">
+        <h3>Create Your Account</h3>
+        <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" class="accept-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                formControlName="firstName"
+                placeholder="Enter your first name"
+                class="form-control"
+                [class.error]="getFieldError('firstName')"
+              >
+              <div class="error-message" *ngIf="getFieldError('firstName')">
+                {{ getFieldError('firstName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                formControlName="lastName"
+                placeholder="Enter your last name"
+                class="form-control"
+                [class.error]="getFieldError('lastName')"
+              >
+              <div class="error-message" *ngIf="getFieldError('lastName')">
+                {{ getFieldError('lastName') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <input 
+              type="password" 
+              id="password" 
+              formControlName="password"
+              placeholder="Create a secure password"
+              class="form-control"
+              [class.error]="getFieldError('password')"
+            >
+            <div class="error-message" *ngIf="getFieldError('password')">
+              {{ getFieldError('password') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password *</label>
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              formControlName="confirmPassword"
+              placeholder="Confirm your password"
+              class="form-control"
+              [class.error]="getFieldError('confirmPassword')"
+            >
+            <div class="error-message" *ngIf="getFieldError('confirmPassword')">
+              {{ getFieldError('confirmPassword') }}
+            </div>
+          </div>
+
+          <div class="error-message" *ngIf="error" class="form-error">
+            {{ error }}
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="inviteForm.invalid || loading"
+          >
+            <span *ngIf="loading" class="spinner"></span>
+            {{ loading ? 'Creating Account...' : 'Accept Invitation & Join' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="invite-footer">
+        <p class="email-info">
+          Your account will be created with: <strong>{{ invite?.inviteeEmail }}</strong>
+        </p>
+        <p class="expiry-info" *ngIf="invite?.expiresAt">
+          This invitation expires on {{ invite?.expiresAt | date:'medium' }}
+        </p>
+      </div>
+    </div>
+
+    <ng-template #loadingTemplate>
+      <div class="loading-card">
+        <div class="spinner-large"></div>
+        <p>Loading invitation...</p>
+      </div>
+    </ng-template>
+
+    <div class="error-card" *ngIf="error && !loading">
+      <h3>Invalid Invitation</h3>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" routerLink="/login">
+        Go to Login
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ using System;
 using Drashyam.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Drashyam.API.Migrations
 {
     [DbContext(typeof(DrashyamDbContext))]
-    partial class DrashyamDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251017143950_AddReferralAndInviteFeatures")]
+    partial class AddReferralAndInviteFeatures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -789,7 +792,12 @@ namespace Drashyam.API.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("ReferralId")
+                    b.Property<string>("ReferralId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<int>("ReferralId1")
                         .HasColumnType("integer");
 
                     b.Property<string>("RewardType")
@@ -808,6 +816,8 @@ namespace Drashyam.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ReferralId");
+
+                    b.HasIndex("ReferralId1");
 
                     b.HasIndex("Status");
 
@@ -1563,7 +1573,7 @@ namespace Drashyam.API.Migrations
                 {
                     b.HasOne("Drashyam.API.Models.Referral", "Referral")
                         .WithMany()
-                        .HasForeignKey("ReferralId")
+                        .HasForeignKey("ReferralId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

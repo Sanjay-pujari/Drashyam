@@ -37,7 +37,10 @@ const routes: Routes = [
   { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent) },
   { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent) },
   { path: 'upload', loadComponent: () => import('./app/components/video-upload/video-upload.component').then(m => m.VideoUploadComponent) },
-  { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent) }
+  { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent) },
+  { path: 'invites', loadComponent: () => import('./app/components/invite-management/invite-management.component').then(m => m.InviteManagementComponent) },
+  { path: 'referrals', loadComponent: () => import('./app/components/referral-management/referral-management.component').then(m => m.ReferralManagementComponent) },
+  { path: 'invite/:token', loadComponent: () => import('./app/components/invite-accept/invite-accept.component').then(m => m.InviteAcceptComponent) }
 ];
 
 bootstrapApplication(AppComponent, {

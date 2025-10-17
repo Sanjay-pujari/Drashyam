@@ -27,6 +27,9 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AdCampaign> AdCampaigns { get; set; }
     public DbSet<AdImpression> AdImpressions { get; set; }
+    public DbSet<UserInvite> UserInvites { get; set; }
+    public DbSet<Referral> Referrals { get; set; }
+    public DbSet<ReferralReward> ReferralRewards { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -163,6 +166,36 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.AdCampaignId);
             entity.HasIndex(e => e.VideoId);
             entity.HasIndex(e => e.UserId);
+        });
+
+        // Configure UserInvite entity
+        builder.Entity<UserInvite>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.InviterId);
+            entity.HasIndex(e => e.InviteeEmail);
+            entity.HasIndex(e => e.InviteToken).IsUnique();
+            entity.HasIndex(e => e.AcceptedUserId);
+            entity.HasIndex(e => e.Status);
+        });
+
+        // Configure Referral entity
+        builder.Entity<Referral>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ReferrerId);
+            entity.HasIndex(e => e.ReferredUserId);
+            entity.HasIndex(e => e.ReferralCode);
+            entity.HasIndex(e => e.Status);
+        });
+
+        // Configure ReferralReward entity
+        builder.Entity<ReferralReward>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ReferralId);
+            entity.HasIndex(e => e.Status);
         });
 
         // Seed data

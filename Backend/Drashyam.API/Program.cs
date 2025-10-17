@@ -107,6 +107,8 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IInviteService, InviteService>();
+builder.Services.AddScoped<IReferralService, ReferralService>();
 
 var app = builder.Build();
 

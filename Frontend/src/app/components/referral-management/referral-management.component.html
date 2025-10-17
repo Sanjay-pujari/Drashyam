@@ -1,0 +1,276 @@
+<div class="referral-management">
+  <div class="header">
+    <h2>Referral Management</h2>
+    <p>Track your referrals and earn rewards for bringing new users to Drashyam</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats?.totalReferrals || 0 }}</div>
+      <div class="stat-label">Total Referrals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats?.completedReferrals || 0 }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${{ (stats?.totalRewards || 0) | number:'1.2-2' }}</div>
+      <div class="stat-label">Total Rewards</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ (stats?.conversionRate || 0) | number:'1.1-1' }}%</div>
+      <div class="stat-label">Conversion Rate</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button 
+      class="tab-button"
+      [class.active]="activeTab === 'referrals'"
+      (click)="setActiveTab('referrals')"
+    >
+      My Referrals
+    </button>
+    <button 
+      class="tab-button"
+      [class.active]="activeTab === 'rewards'"
+      (click)="setActiveTab('rewards')"
+    >
+      Rewards
+    </button>
+    <button 
+      class="tab-button"
+      [class.active]="activeTab === 'code'"
+      (click)="setActiveTab('code')"
+    >
+      Referral Code
+    </button>
+  </div>
+
+  <!-- Referrals Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'referrals'">
+    <div class="section-header">
+      <h3>My Referrals</h3>
+      <button class="btn btn-primary" (click)="setActiveTab('code')">
+        Create Referral Code
+      </button>
+    </div>
+
+    <div class="referrals-list" *ngIf="referrals.length > 0; else noReferrals">
+      <div class="referral-item" *ngFor="let referral of referrals">
+        <div class="referral-info">
+          <div class="referral-user">{{ referral.referredUserName }}</div>
+          <div class="referral-date">{{ referral.createdAt | date:'medium' }}</div>
+          <div class="referral-code" *ngIf="referral.referralCode">
+            Code: {{ referral.referralCode }}
+          </div>
+        </div>
+        
+        <div class="referral-status">
+          <span 
+            class="status-badge"
+            [ngClass]="getStatusClass(referral.status)"
+          >
+            {{ getStatusText(referral.status) }}
+          </span>
+          <div class="referral-reward" *ngIf="referral.rewardAmount">
+            ${{ referral.rewardAmount | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noReferrals>
+      <div class="no-referrals">
+        <p>No referrals yet. Create a referral code to start earning rewards!</p>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button 
+        class="btn btn-sm"
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+      >
+        Previous
+      </button>
+      <span class="page-info">
+        Page {{ currentPage }} of {{ Math.ceil(totalCount / pageSize) }}
+      </span>
+      <button 
+        class="btn btn-sm"
+        [disabled]="currentPage * pageSize >= totalCount"
+        (click)="onPageChange(currentPage + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- Rewards Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'rewards'">
+    <h3>My Rewards</h3>
+    
+    <div class="rewards-list" *ngIf="rewards.length > 0; else noRewards">
+      <div class="reward-item" *ngFor="let reward of rewards">
+        <div class="reward-info">
+          <div class="reward-amount">${{ reward.amount | number:'1.2-2' }}</div>
+          <div class="reward-type">{{ reward.rewardType }}</div>
+          <div class="reward-date">{{ reward.createdAt | date:'medium' }}</div>
+          <div class="reward-description" *ngIf="reward.description">
+            {{ reward.description }}
+          </div>
+        </div>
+        
+        <div class="reward-status">
+          <span 
+            class="status-badge"
+            [ngClass]="getRewardStatusClass(reward.status)"
+          >
+            {{ getRewardStatusText(reward.status) }}
+          </span>
+          <button 
+            class="btn btn-sm btn-primary"
+            *ngIf="reward.status === 'Pending'"
+            (click)="claimReward(reward.id)"
+          >
+            Claim
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noRewards>
+      <div class="no-rewards">
+        <p>No rewards yet. Start referring users to earn rewards!</p>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="rewardsTotalCount > pageSize">
+      <button 
+        class="btn btn-sm"
+        [disabled]="rewardsPage === 1"
+        (click)="onRewardsPageChange(rewardsPage - 1)"
+      >
+        Previous
+      </button>
+      <span class="page-info">
+        Page {{ rewardsPage }} of {{ Math.ceil(rewardsTotalCount / pageSize) }}
+      </span>
+      <button 
+        class="btn btn-sm"
+        [disabled]="rewardsPage * pageSize >= rewardsTotalCount"
+        (click)="onRewardsPageChange(rewardsPage + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- Referral Code Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'code'">
+    <h3>Referral Code</h3>
+    
+    <!-- Existing Code -->
+    <div class="existing-code" *ngIf="referralCode && referralCode.code">
+      <div class="code-display">
+        <div class="code-label">Your Referral Code:</div>
+        <div class="code-value">{{ referralCode.code }}</div>
+        <button 
+          class="btn btn-secondary"
+          (click)="copyReferralCode()"
+        >
+          Copy Code
+        </button>
+      </div>
+      <div class="code-stats">
+        <div class="stat">
+          <span class="stat-label">Usage Count:</span>
+          <span class="stat-value">{{ referralCode.usageCount }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Max Usage:</span>
+          <span class="stat-value">{{ referralCode.maxUsage === 2147483647 ? 'Unlimited' : referralCode.maxUsage }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Created:</span>
+          <span class="stat-value">{{ referralCode.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create New Code Form -->
+    <div class="code-form-section">
+      <h4>{{ referralCode && referralCode.code ? 'Create New Code' : 'Create Referral Code' }}</h4>
+      <form [formGroup]="codeForm" (ngSubmit)="onCreateReferralCode()" class="code-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="code">Custom Code (Optional)</label>
+            <input 
+              type="text" 
+              id="code" 
+              formControlName="code"
+              placeholder="Enter custom code"
+              class="form-control"
+            >
+          </div>
+          <div class="form-group">
+            <label for="maxUsage">Max Usage</label>
+            <input 
+              type="number" 
+              id="maxUsage" 
+              formControlName="maxUsage"
+              placeholder="Unlimited if empty"
+              class="form-control"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rewardAmount">Reward Amount</label>
+            <input 
+              type="number" 
+              id="rewardAmount" 
+              formControlName="rewardAmount"
+              step="0.01"
+              min="0"
+              class="form-control"
+            >
+          </div>
+          <div class="form-group">
+            <label for="rewardType">Reward Type</label>
+            <select id="rewardType" formControlName="rewardType" class="form-control">
+              <option value="Points">Points</option>
+              <option value="Credits">Credits</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="expiresAt">Expiration Date (Optional)</label>
+          <input 
+            type="datetime-local" 
+            id="expiresAt" 
+            formControlName="expiresAt"
+            class="form-control"
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="codeForm.invalid || loading"
+        >
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Creating...' : 'Create Code' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,186 @@
+<div class="invite-management">
+  <div class="header">
+    <h2>Invite Management</h2>
+    <p>Invite friends to join Drashyam and grow your network</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.totalInvites }}</div>
+      <div class="stat-label">Total Invites</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.pendingInvites }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.acceptedInvites }}</div>
+      <div class="stat-label">Accepted</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.conversionRate | number:'1.1-1' }}%</div>
+      <div class="stat-label">Conversion Rate</div>
+    </div>
+  </div>
+
+  <!-- Invite Form -->
+  <div class="invite-form-section">
+    <h3>Send Invitation</h3>
+    <form [formGroup]="inviteForm" (ngSubmit)="onSubmit()" class="invite-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inviteeEmail">Email Address *</label>
+          <input 
+            type="email" 
+            id="inviteeEmail" 
+            formControlName="inviteeEmail"
+            placeholder="Enter email address"
+            class="form-control"
+          >
+          <div class="error-message" *ngIf="inviteForm.get('inviteeEmail')?.invalid && inviteForm.get('inviteeEmail')?.touched">
+            Please enter a valid email address
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="inviteeFirstName">First Name</label>
+          <input 
+            type="text" 
+            id="inviteeFirstName" 
+            formControlName="inviteeFirstName"
+            placeholder="Enter first name"
+            class="form-control"
+          >
+        </div>
+        <div class="form-group">
+          <label for="inviteeLastName">Last Name</label>
+          <input 
+            type="text" 
+            id="inviteeLastName" 
+            formControlName="inviteeLastName"
+            placeholder="Enter last name"
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="personalMessage">Personal Message</label>
+        <textarea 
+          id="personalMessage" 
+          formControlName="personalMessage"
+          placeholder="Add a personal message (optional)"
+          class="form-control"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Invite Type</label>
+          <select id="type" formControlName="type" class="form-control">
+            <option [value]="InviteType.Email">Email</option>
+            <option [value]="InviteType.Social">Social Media</option>
+            <option [value]="InviteType.DirectLink">Direct Link</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="expirationDays">Expiration (Days)</label>
+          <input 
+            type="number" 
+            id="expirationDays" 
+            formControlName="expirationDays"
+            min="1"
+            max="30"
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="inviteForm.invalid || loading"
+      >
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Sending...' : 'Send Invitation' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Invites List -->
+  <div class="invites-section">
+    <h3>Your Invitations</h3>
+    
+    <div class="invites-list" *ngIf="invites.length > 0; else noInvites">
+      <div class="invite-item" *ngFor="let invite of invites">
+        <div class="invite-info">
+          <div class="invite-email">{{ invite.inviteeEmail }}</div>
+          <div class="invite-name" *ngIf="invite.inviteeFirstName || invite.inviteeLastName">
+            {{ invite.inviteeFirstName }} {{ invite.inviteeLastName }}
+          </div>
+          <div class="invite-message" *ngIf="invite.personalMessage">
+            "{{ invite.personalMessage }}"
+          </div>
+          <div class="invite-meta">
+            <span class="invite-date">{{ invite.createdAt | date:'medium' }}</span>
+            <span class="invite-type">{{ invite.type }}</span>
+          </div>
+        </div>
+        
+        <div class="invite-status">
+          <span 
+            class="status-badge"
+            [ngClass]="getStatusClass(invite.status)"
+          >
+            {{ getStatusText(invite.status) }}
+          </span>
+          <div class="invite-actions" *ngIf="invite.status === InviteStatus.Pending">
+            <button 
+              class="btn btn-sm btn-secondary"
+              (click)="resendInvite(invite.id)"
+            >
+              Resend
+            </button>
+            <button 
+              class="btn btn-sm btn-danger"
+              (click)="cancelInvite(invite.id)"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noInvites>
+      <div class="no-invites">
+        <p>No invitations sent yet. Start by inviting your friends!</p>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button 
+        class="btn btn-sm"
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+      >
+        Previous
+      </button>
+      <span class="page-info">
+        Page {{ currentPage }} of {{ Math.ceil(totalCount / pageSize) }}
+      </span>
+      <button 
+        class="btn btn-sm"
+        [disabled]="currentPage * pageSize >= totalCount"
+        (click)="onPageChange(currentPage + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>

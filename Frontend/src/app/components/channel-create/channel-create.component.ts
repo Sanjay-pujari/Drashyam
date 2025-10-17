@@ -77,7 +77,7 @@ export class ChannelCreateComponent implements OnInit {
       const channelData: ChannelCreate = {
         name: this.channelForm.value.name,
         description: this.channelForm.value.description,
-        type: this.channelForm.value.type,
+        type: this.channelForm.value.type as any, // Cast to match backend enum
         customUrl: this.channelForm.value.customUrl,
         websiteUrl: this.channelForm.value.websiteUrl,
         socialLinks: this.channelForm.value.socialLinks
