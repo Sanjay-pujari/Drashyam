@@ -29,19 +29,26 @@ import { SubscriptionEffects } from './app/store/subscription/subscription.effec
 // HTTP interceptors (functional)
 import { authInterceptor } from './app/interceptors/auth.interceptor';
 import { errorInterceptor } from './app/interceptors/error.interceptor';
+import { authGuard } from './app/guards/auth.guard';
 
 const routes: Routes = [
   { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
   { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) },
-  { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent) },
-  { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent) },
-  { path: 'upload', loadComponent: () => import('./app/components/video-upload/video-upload.component').then(m => m.VideoUploadComponent) },
-  { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent) },
-  { path: 'invites', loadComponent: () => import('./app/components/invite-management/invite-management.component').then(m => m.InviteManagementComponent) },
-  { path: 'referrals', loadComponent: () => import('./app/components/referral-management/referral-management.component').then(m => m.ReferralManagementComponent) },
-  { path: 'invite/:token', loadComponent: () => import('./app/components/invite-accept/invite-accept.component').then(m => m.InviteAcceptComponent) }
+  // Protected routes
+  { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent), canActivate: [authGuard] },
+  { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },
+  { path: 'upload', loadComponent: () => import('./app/components/video-upload/video-upload.component').then(m => m.VideoUploadComponent), canActivate: [authGuard] },
+  { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent), canActivate: [authGuard] },
+  { path: 'invites', loadComponent: () => import('./app/components/invite-management/invite-management.component').then(m => m.InviteManagementComponent), canActivate: [authGuard] },
+  { path: 'referrals', loadComponent: () => import('./app/components/referral-management/referral-management.component').then(m => m.ReferralManagementComponent), canActivate: [authGuard] },
+  { path: 'invite/:token', loadComponent: () => import('./app/components/invite-accept/invite-accept.component').then(m => m.InviteAcceptComponent) },
+  // User content routes (protected)
+  { path: 'liked-videos', loadComponent: () => import('./app/components/liked-videos/liked-videos.component').then(m => m.LikedVideosComponent), canActivate: [authGuard] },
+  { path: 'history', loadComponent: () => import('./app/components/history/history.component').then(m => m.HistoryComponent), canActivate: [authGuard] },
+  { path: 'watch-later', loadComponent: () => import('./app/components/watch-later/watch-later.component').then(m => m.WatchLaterComponent), canActivate: [authGuard] },
+  { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {
