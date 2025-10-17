@@ -3,6 +3,7 @@ using Drashyam.API.Models;
 using Drashyam.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Drashyam.API.Controllers;
 
@@ -25,7 +26,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -67,7 +68,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -101,7 +102,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -120,7 +121,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -143,7 +144,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -178,7 +179,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -205,7 +206,7 @@ public class ReferralController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 

@@ -41,7 +41,7 @@ export interface ChannelUpdate {
 }
 
 export enum ChannelType {
-  Personal = 'Personal',
-  Business = 'Business',
-  Brand = 'Brand'
+  Personal = 0,
+  Business = 1,
+  Brand = 2
 }

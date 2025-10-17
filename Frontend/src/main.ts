@@ -26,8 +26,9 @@ import { CommentEffects } from './app/store/comment/comment.effects';
 import { LiveStreamEffects } from './app/store/live-stream/live-stream.effects';
 import { SubscriptionEffects } from './app/store/subscription/subscription.effects';
 
-// HTTP interceptor (functional)
+// HTTP interceptors (functional)
 import { authInterceptor } from './app/interceptors/auth.interceptor';
+import { errorInterceptor } from './app/interceptors/error.interceptor';
 
 const routes: Routes = [
   { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
@@ -47,7 +48,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     // If some legacy features still rely on module-based providers, bring them in via importProvidersFrom(...) here.
     provideStore({
       video: videoReducer,

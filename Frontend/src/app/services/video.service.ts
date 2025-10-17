@@ -27,7 +27,7 @@ export interface VideoFilter {
   providedIn: 'root'
 })
 export class VideoService {
-  private apiUrl = `${environment.apiUrl}/api/videos`;
+  private apiUrl = `${environment.apiUrl}/api/video`;
 
   constructor(private http: HttpClient) {}
 

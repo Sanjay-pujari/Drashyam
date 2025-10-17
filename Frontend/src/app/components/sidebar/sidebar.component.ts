@@ -49,7 +49,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscriptions$.add(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
-        if (user) {
+        if (user && this.authService.isUserLoaded()) {
           this.loadUserData();
         }
       })
@@ -79,7 +79,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         channelId: 'channel1',
         channel: {
           name: 'Tech Channel',
-          profilePictureUrl: '/assets/default-avatar.png',
+          profilePictureUrl: '/assets/default-avatar.svg',
           subscriberCount: 150000
         },
         isActive: true,
@@ -90,7 +90,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         channelId: 'channel2',
         channel: {
           name: 'Gaming Hub',
-          profilePictureUrl: '/assets/default-avatar.png',
+          profilePictureUrl: '/assets/default-avatar.svg',
           subscriberCount: 250000
         },
         isActive: true,
@@ -101,7 +101,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         channelId: 'channel3',
         channel: {
           name: 'Music World',
-          profilePictureUrl: '/assets/default-avatar.png',
+          profilePictureUrl: '/assets/default-avatar.svg',
           subscriberCount: 500000
         },
         isActive: false,

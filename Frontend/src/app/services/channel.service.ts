@@ -97,7 +97,7 @@ export class ChannelService {
 
   updateChannelBanner(channelId: number, bannerFile: File): Observable<Channel> {
     const formData = new FormData();
-    formData.append('banner', bannerFile);
+    formData.append('bannerFile', bannerFile);
     
     return this.http.post<Channel>(`${this.apiUrl}/${channelId}/banner`, formData);
   }

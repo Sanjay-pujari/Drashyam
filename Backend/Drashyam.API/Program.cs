@@ -2,6 +2,7 @@ using Drashyam.API.Data;
 using Drashyam.API.Models;
 using Drashyam.API.Services;
 using Drashyam.API.Hubs;
+using Drashyam.API.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +14,8 @@ using Drashyam.API.Validators;
 using Drashyam.API.Mapping;
 using Drashyam.API.Middleware;
 using Microsoft.AspNetCore.Http.Features;
+using Azure.Storage.Blobs;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +97,14 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateReferralValidator>();
 
 // Email Configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Azure Storage Configuration
+builder.Services.Configure<AzureStorageSettings>(builder.Configuration.GetSection("AzureStorage"));
+builder.Services.AddSingleton(provider =>
+{
+    var settings = provider.GetRequiredService<IOptions<AzureStorageSettings>>().Value;
+    return new BlobServiceClient(settings.ConnectionString);
+});
 
 // File upload limits
 builder.Services.Configure<FormOptions>(options =>

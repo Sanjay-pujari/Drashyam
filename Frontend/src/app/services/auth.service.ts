@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { User, UserLogin, UserRegistration } from '../models/user.model';
 
@@ -19,11 +19,8 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Check for existing token on service initialization
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.getCurrentUser().subscribe();
-    }
+    // Don't automatically load user in constructor to avoid circular dependency
+    // User will be loaded when initializeAuth() is called from app.component
   }
 
   login(credentials: UserLogin): Observable<AuthResponse> {
@@ -51,8 +48,13 @@ export class AuthService {
 
   // Convenience observable for auth state
   public isAuthenticated$ = this.currentUser$.pipe(
-    map(user => !!user || this.isAuthenticated())
+    map(user => !!user)
   );
+
+  // Check if user is loaded and authenticated
+  isUserLoaded(): boolean {
+    return this.currentUserSubject.value !== null;
+  }
 
   logout(): void {
     localStorage.removeItem('token');
@@ -66,7 +68,17 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    
+    // Check if token is expired (basic check)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp > currentTime;
+    } catch {
+      return false;
+    }
   }
 
   getToken(): string | null {
@@ -77,8 +89,39 @@ export class AuthService {
     return this.http.post<{ token: string }>(`${this.apiUrl}/refresh-token`, {} as any).pipe(
       tap(response => {
         localStorage.setItem('token', response.token);
+      }),
+      catchError(error => {
+        console.error('Failed to refresh token:', error);
+        this.logout();
+        throw error;
       })
     );
+  }
+
+  // Check if token needs refresh and refresh if necessary
+  ensureValidToken(): Observable<boolean> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return of(false);
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      const timeUntilExpiry = payload.exp - currentTime;
+      
+      // If token expires in less than 5 minutes, try to refresh
+      if (timeUntilExpiry < 300) {
+        return this.refreshToken().pipe(
+          map(() => true),
+          catchError(() => of(false))
+        );
+      }
+      
+      return of(true);
+    } catch {
+      return of(false);
+    }
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
@@ -111,6 +154,25 @@ export class AuthService {
     
     return this.http.post<User>(`${environment.apiUrl}/api/user/me/profile-picture`, formData).pipe(
       tap(user => this.currentUserSubject.next(user))
+    );
+  }
+
+  // Initialize authentication state on app startup
+  initializeAuth(): Observable<User | null> {
+    const token = localStorage.getItem('token');
+    if (!token || !this.isAuthenticated()) {
+      this.currentUserSubject.next(null);
+      return this.currentUser$;
+    }
+
+    return this.getCurrentUser().pipe(
+      tap(user => this.currentUserSubject.next(user)),
+      map(user => user),
+      catchError(error => {
+        console.error('Failed to initialize auth:', error);
+        this.logout();
+        return of(null);
+      })
     );
   }
 }
