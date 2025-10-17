@@ -93,6 +93,30 @@
   }
 }
 
+.required {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.file-required {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff3e0;
+  border: 1px solid #ff9800;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 0.9rem;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .form-row {
   display: flex;
   gap: 20px;

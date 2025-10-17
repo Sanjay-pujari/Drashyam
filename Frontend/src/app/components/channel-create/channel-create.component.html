@@ -37,13 +37,14 @@
             </div>
             
             <div class="image-upload-item">
-              <h4>Banner Image</h4>
+              <h4>Banner Image <span class="required">*</span></h4>
               <div class="file-input-wrapper">
                 <input 
                   type="file" 
                   id="bannerImage" 
                   accept="image/*"
-                  (change)="onBannerSelected($event)">
+                  (change)="onBannerSelected($event)"
+                  required>
                 <label for="bannerImage" class="file-input-label">
                   <mat-icon>image</mat-icon>
                   Choose Banner
@@ -53,6 +54,11 @@
                 <div class="file-info">
                   <p>{{ selectedBanner.name }}</p>
                   <p>{{ formatFileSize(selectedBanner.size) }}</p>
+                </div>
+              } @else {
+                <div class="file-required">
+                  <mat-icon>warning</mat-icon>
+                  <span>Banner image is required</span>
                 </div>
               }
             </div>

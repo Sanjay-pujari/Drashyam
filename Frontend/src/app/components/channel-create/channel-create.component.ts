@@ -83,19 +83,43 @@ export class ChannelCreateComponent implements OnInit {
         socialLinks: this.channelForm.value.socialLinks
       };
 
+      // Check if banner is required
+      if (!this.selectedBanner) {
+        alert('Banner image is required. Please select a banner image for your channel.');
+        this.isCreating = false;
+        return;
+      }
+
       this.channelService.createChannel(channelData).subscribe({
         next: (channel) => {
           // Upload banner if selected
           if (this.selectedBanner) {
-            this.channelService.updateChannelBanner(channel.id, this.selectedBanner).subscribe();
+            this.channelService.updateChannelBanner(channel.id, this.selectedBanner).subscribe({
+              next: () => {
+                // Upload profile picture if selected
+                if (this.selectedProfilePicture) {
+                  this.channelService.updateChannelProfilePicture(channel.id, this.selectedProfilePicture).subscribe({
+                    next: () => {
+                      this.router.navigate(['/channels', channel.id]);
+                    },
+                    error: (err) => {
+                      console.error('Failed to upload profile picture:', err);
+                      this.router.navigate(['/channels', channel.id]);
+                    }
+                  });
+                } else {
+                  this.router.navigate(['/channels', channel.id]);
+                }
+              },
+              error: (err) => {
+                console.error('Failed to upload banner:', err);
+                alert('Channel created but failed to upload banner. Please try updating it later.');
+                this.router.navigate(['/channels', channel.id]);
+              }
+            });
+          } else {
+            this.router.navigate(['/channels', channel.id]);
           }
-          
-          // Upload profile picture if selected
-          if (this.selectedProfilePicture) {
-            this.channelService.updateChannelProfilePicture(channel.id, this.selectedProfilePicture).subscribe();
-          }
-          
-          this.router.navigate(['/channels', channel.id]);
         },
         error: (err) => {
           this.isCreating = false;
