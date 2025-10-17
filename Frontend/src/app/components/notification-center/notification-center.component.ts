@@ -100,4 +100,8 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     if (days < 7) return `${days}d ago`;
     return new Date(timestamp).toLocaleDateString();
   }
+
+  trackByTimestamp(index: number, notification: Notification): any {
+    return notification.timestamp;
+  }
 }
