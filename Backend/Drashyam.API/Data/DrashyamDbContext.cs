@@ -30,6 +30,10 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<UserInvite> UserInvites { get; set; }
     public DbSet<Referral> Referrals { get; set; }
     public DbSet<ReferralReward> ReferralRewards { get; set; }
+    public DbSet<InviteAnalytics> InviteAnalytics { get; set; }
+    public DbSet<ReferralAnalytics> ReferralAnalytics { get; set; }
+    public DbSet<InviteEvent> InviteEvents { get; set; }
+    public DbSet<ReferralEvent> ReferralEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -196,6 +200,44 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.ReferralId);
             entity.HasIndex(e => e.Status);
+        });
+
+        // Configure InviteAnalytics entity
+        builder.Entity<InviteAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => new { e.UserId, e.Date }).IsUnique();
+        });
+
+        // Configure ReferralAnalytics entity
+        builder.Entity<ReferralAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => new { e.UserId, e.Date }).IsUnique();
+        });
+
+        // Configure InviteEvent entity
+        builder.Entity<InviteEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.InviteId);
+            entity.HasIndex(e => e.EventType);
+            entity.HasIndex(e => e.Timestamp);
+        });
+
+        // Configure ReferralEvent entity
+        builder.Entity<ReferralEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ReferralId);
+            entity.HasIndex(e => e.EventType);
+            entity.HasIndex(e => e.Timestamp);
         });
 
         // Seed data

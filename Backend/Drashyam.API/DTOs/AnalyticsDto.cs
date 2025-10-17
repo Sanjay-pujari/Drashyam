@@ -1,122 +1,76 @@
+using Drashyam.API.Models;
+
 namespace Drashyam.API.DTOs;
 
-public class AnalyticsDto
+public class InviteAnalyticsDto
 {
-    public long TotalViews { get; set; }
-    public long UniqueViews { get; set; }
-    public long TotalLikes { get; set; }
-    public long TotalDislikes { get; set; }
-    public long TotalComments { get; set; }
-    public long TotalShares { get; set; }
-    public long TotalSubscribers { get; set; }
-    public decimal TotalRevenue { get; set; }
-    public TimeSpan AverageWatchTime { get; set; }
-    public double EngagementRate { get; set; }
-    public List<DailyMetricsDto> DailyMetrics { get; set; } = new();
-    public List<VideoMetricsDto> TopVideos { get; set; } = new();
-    public List<GeographicDataDto> GeographicData { get; set; } = new();
-    public List<DeviceDataDto> DeviceData { get; set; } = new();
-    public List<AgeGroupDataDto> AgeGroupData { get; set; } = new();
-    public List<GenderDataDto> GenderData { get; set; } = new();
-}
-
-public class DailyMetricsDto
-{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public DateTime Date { get; set; }
-    public long Views { get; set; }
-    public long Likes { get; set; }
-    public long Comments { get; set; }
-    public long Shares { get; set; }
-    public long Subscribers { get; set; }
-    public decimal Revenue { get; set; }
-    public TimeSpan AverageWatchTime { get; set; }
+    public int InvitesSent { get; set; }
+    public int InvitesAccepted { get; set; }
+    public int InvitesExpired { get; set; }
+    public int InvitesCancelled { get; set; }
+    public decimal ConversionRate { get; set; }
+    public int EmailInvites { get; set; }
+    public int SocialInvites { get; set; }
+    public int DirectLinkInvites { get; set; }
+    public int BulkInvites { get; set; }
+    public TimeSpan AverageTimeToAccept { get; set; }
+    public int Resends { get; set; }
 }
 
-public class VideoMetricsDto
+public class ReferralAnalyticsDto
 {
-    public int VideoId { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public long Views { get; set; }
-    public long Likes { get; set; }
-    public long Comments { get; set; }
-    public decimal Revenue { get; set; }
-    public TimeSpan AverageWatchTime { get; set; }
-    public double EngagementRate { get; set; }
-}
-
-public class RevenueDto
-{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public DateTime Date { get; set; }
-    public decimal Amount { get; set; }
-    public string Source { get; set; } = string.Empty; // Ads, Subscriptions, Donations, etc.
-    public string Description { get; set; } = string.Empty;
+    public int ReferralsCreated { get; set; }
+    public int ReferralsCompleted { get; set; }
+    public int ReferralsRewarded { get; set; }
+    public decimal TotalRewardsEarned { get; set; }
+    public decimal TotalRewardsClaimed { get; set; }
+    public decimal ConversionRate { get; set; }
+    public int ReferralCodesGenerated { get; set; }
+    public int ReferralCodesUsed { get; set; }
+    public decimal AverageRewardAmount { get; set; }
+    public TimeSpan AverageTimeToComplete { get; set; }
 }
 
-public class TopVideoDto
+public class InviteEventDto
 {
-    public int VideoId { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string ThumbnailUrl { get; set; } = string.Empty;
-    public long Views { get; set; }
-    public long Likes { get; set; }
-    public decimal Revenue { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public int? InviteId { get; set; }
+    public InviteEventType EventType { get; set; }
+    public DateTime Timestamp { get; set; }
+    public string? Details { get; set; }
+    public string? Source { get; set; }
+    public string? UserAgent { get; set; }
+    public string? IpAddress { get; set; }
 }
 
-public class AudienceInsightDto
+public class ReferralEventDto
 {
-    public string Category { get; set; } = string.Empty;
-    public long Count { get; set; }
-    public double Percentage { get; set; }
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public int? ReferralId { get; set; }
+    public ReferralEventType EventType { get; set; }
+    public DateTime Timestamp { get; set; }
+    public string? Details { get; set; }
+    public string? Source { get; set; }
+    public string? UserAgent { get; set; }
+    public string? IpAddress { get; set; }
 }
 
-public class GeographicDataDto
+public class AnalyticsSummaryDto
 {
-    public string Country { get; set; } = string.Empty;
-    public string CountryCode { get; set; } = string.Empty;
-    public long Views { get; set; }
-    public double Percentage { get; set; }
-    public decimal Revenue { get; set; }
-}
-
-public class DeviceDataDto
-{
-    public string DeviceType { get; set; } = string.Empty; // Mobile, Desktop, Tablet, TV
-    public long Views { get; set; }
-    public double Percentage { get; set; }
-    public TimeSpan AverageWatchTime { get; set; }
-}
-
-public class AgeGroupDataDto
-{
-    public string AgeGroup { get; set; } = string.Empty; // 18-24, 25-34, 35-44, etc.
-    public long Views { get; set; }
-    public double Percentage { get; set; }
-}
-
-public class GenderDataDto
-{
-    public string Gender { get; set; } = string.Empty; // Male, Female, Other
-    public long Views { get; set; }
-    public double Percentage { get; set; }
-}
-
-public class EngagementMetricsDto
-{
-    public double LikeRate { get; set; }
-    public double CommentRate { get; set; }
-    public double ShareRate { get; set; }
-    public double SubscriptionRate { get; set; }
-    public TimeSpan AverageWatchTime { get; set; }
-    public double RetentionRate { get; set; }
-    public List<EngagementTrendDto> Trends { get; set; } = new();
-}
-
-public class EngagementTrendDto
-{
-    public DateTime Date { get; set; }
-    public double LikeRate { get; set; }
-    public double CommentRate { get; set; }
-    public double ShareRate { get; set; }
-    public double SubscriptionRate { get; set; }
+    public InviteAnalyticsDto InviteAnalytics { get; set; } = new();
+    public ReferralAnalyticsDto ReferralAnalytics { get; set; } = new();
+    public int TotalInvitesSent { get; set; }
+    public int TotalReferralsCreated { get; set; }
+    public decimal TotalRewardsEarned { get; set; }
+    public decimal TotalRewardsClaimed { get; set; }
+    public decimal OverallConversionRate { get; set; }
+    public DateTime LastActivity { get; set; }
 }

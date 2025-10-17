@@ -11,17 +11,26 @@ public class InviteService : IInviteService
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
+    private readonly IEmailTemplateService _templateService;
+    private readonly IAnalyticsService _analyticsService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<InviteService> _logger;
 
     public InviteService(
         DrashyamDbContext context,
         IMapper mapper,
         IEmailService emailService,
+        IEmailTemplateService templateService,
+        IAnalyticsService analyticsService,
+        INotificationService notificationService,
         ILogger<InviteService> logger)
     {
         _context = context;
         _mapper = mapper;
         _emailService = emailService;
+        _templateService = templateService;
+        _analyticsService = analyticsService;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -59,6 +68,14 @@ public class InviteService : IInviteService
 
         // Send invite email
         await SendInviteEmailAsync(invite);
+
+        // Track analytics
+        await _analyticsService.TrackInviteEventAsync(inviterId, InviteEventType.Created, invite.Id, "Invite created", createDto.Type.ToString());
+
+        // Send notification
+        await _notificationService.SendInviteNotificationAsync(inviterId, 
+            $"Invitation sent to {createDto.InviteeEmail}", 
+            NotificationType.Success);
 
         return await GetInviteDtoAsync(invite.Id);
     }
@@ -113,6 +130,15 @@ public class InviteService : IInviteService
 
         // Create referral if applicable
         await CreateReferralFromInviteAsync(invite, user.Id);
+
+        // Track analytics
+        await _analyticsService.TrackInviteEventAsync(invite.InviterId, InviteEventType.Accepted, invite.Id, "Invite accepted");
+
+        // Send notification to inviter
+        await _notificationService.SendInviteAcceptedNotificationAsync(
+            invite.InviterId, 
+            $"{acceptDto.FirstName} {acceptDto.LastName}", 
+            invite.InviteeEmail);
 
         return await GetInviteDtoAsync(invite.Id);
     }
@@ -315,15 +341,16 @@ public class InviteService : IInviteService
         var inviter = await _context.Users.FindAsync(invite.InviterId);
         if (inviter == null) return;
 
-        var subject = $"{inviter.FirstName} {inviter.LastName} invited you to join Drashyam";
-        var body = $@"
-            <h2>You're invited to join Drashyam!</h2>
-            <p>{inviter.FirstName} {inviter.LastName} has invited you to join our platform.</p>
-            {(!string.IsNullOrEmpty(invite.PersonalMessage) ? $"<p><em>Personal message: {invite.PersonalMessage}</em></p>" : "")}
-            <p>Click the link below to accept your invitation:</p>
-            <a href='https://yourdomain.com/invite/{invite.InviteToken}'>Accept Invitation</a>
-            <p>This invitation expires on {invite.ExpiresAt:MMM dd, yyyy}.</p>
-        ";
+        var inviterName = $"{inviter.FirstName} {inviter.LastName}";
+        var inviteLink = $"https://yourdomain.com/invite/{invite.InviteToken}";
+        
+        var subject = $"{inviterName} invited you to join Drashyam";
+        var body = _templateService.GetInviteEmailTemplate(
+            inviterName, 
+            invite.PersonalMessage ?? "", 
+            inviteLink, 
+            invite.ExpiresAt ?? DateTime.UtcNow.AddDays(7)
+        );
 
         await _emailService.SendEmailAsync(invite.InviteeEmail, subject, body);
     }

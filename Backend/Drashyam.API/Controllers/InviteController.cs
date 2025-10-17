@@ -1,5 +1,6 @@
 using Drashyam.API.DTOs;
 using Drashyam.API.Services;
+using Drashyam.API.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ public class InviteController : ControllerBase
     }
 
     [HttpPost]
+    [RateLimit(10, 60)] // 10 invites per minute
     public async Task<ActionResult<UserInviteDto>> CreateInvite([FromBody] CreateInviteDto createDto)
     {
         try
@@ -43,6 +45,7 @@ public class InviteController : ControllerBase
     }
 
     [HttpPost("bulk")]
+    [RateLimit(5, 300)] // 5 bulk operations per 5 minutes
     public async Task<ActionResult<List<UserInviteDto>>> BulkCreateInvites([FromBody] BulkInviteDto bulkDto)
     {
         try
@@ -83,6 +86,7 @@ public class InviteController : ControllerBase
 
     [HttpPost("accept/{token}")]
     [AllowAnonymous]
+    [RateLimit(3, 300)] // 3 attempts per 5 minutes for anonymous users
     public async Task<ActionResult<UserInviteDto>> AcceptInvite(string token, [FromBody] AcceptInviteDto acceptDto)
     {
         try

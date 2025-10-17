@@ -89,6 +89,11 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<UserRegistrationValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateInviteValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateReferralValidator>();
+
+// Email Configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 // File upload limits
 builder.Services.Configure<FormOptions>(options =>
@@ -109,6 +114,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IInviteService, InviteService>();
 builder.Services.AddScoped<IReferralService, ReferralService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 
@@ -125,6 +132,7 @@ app.UseCors("AllowFrontend");
 // Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<RateLimitingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

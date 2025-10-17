@@ -1,0 +1,46 @@
+<div class="notification-center">
+  <button 
+    class="notification-toggle" 
+    (click)="toggleCenter()"
+    [class.has-notifications]="notifications.length > 0">
+    <span class="notification-icon">🔔</span>
+    <span class="notification-count" *ngIf="notifications.length > 0">
+      {{ notifications.length }}
+    </span>
+  </button>
+
+  <div class="notification-panel" [class.open]="isOpen" *ngIf="isOpen">
+    <div class="notification-header">
+      <h3>Notifications</h3>
+      <div class="notification-actions">
+        <button class="clear-all-btn" (click)="clearAll()" *ngIf="notifications.length > 0">
+          Clear All
+        </button>
+        <button class="close-btn" (click)="closeCenter()">×</button>
+      </div>
+    </div>
+
+    <div class="notification-list">
+      <div 
+        *ngFor="let notification of notifications; trackBy: trackByTimestamp" 
+        class="notification-item"
+        [ngClass]="getNotificationClass(notification.type)"
+        (click)="markAsRead(notification)">
+        
+        <div class="notification-content">
+          <div class="notification-icon">
+            {{ getNotificationIcon(notification.type) }}
+          </div>
+          <div class="notification-body">
+            <p class="notification-message">{{ notification.message }}</p>
+            <span class="notification-time">{{ formatTimestamp(notification.timestamp) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-notifications" *ngIf="notifications.length === 0">
+        <p>No notifications yet</p>
+      </div>
+    </div>
+  </div>
+</div>
