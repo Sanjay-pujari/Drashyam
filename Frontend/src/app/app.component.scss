@@ -64,6 +64,8 @@ body {
 .mat-toolbar {
   background-color: #1976d2 !important;
   color: white !important;
+  position: relative;
+  z-index: 100; // Ensure header stays above sidebar
 }
 
 .mat-sidenav {

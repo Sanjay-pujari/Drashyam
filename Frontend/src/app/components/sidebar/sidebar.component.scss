@@ -1,15 +1,14 @@
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-  height: 100vh;
+  height: calc(100vh - 64px); // Account for header height
   position: fixed;
   left: 0;
-  top: 0;
-  padding-top: 80px; // Account for header height
+  top: 64px; // Start below the header
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
   border-right: 1px solid #e1e5e9;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 50; // Lower than header
 
   // Custom scrollbar
   &::-webkit-scrollbar {

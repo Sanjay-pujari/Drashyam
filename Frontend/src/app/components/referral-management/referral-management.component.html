@@ -7,19 +7,19 @@
   <!-- Stats Cards -->
   <div class="stats-grid" *ngIf="stats">
     <div class="stat-card">
-      <div class="stat-value">{{ stats?.totalReferrals || 0 }}</div>
+      <div class="stat-value">{{ stats.totalReferrals || 0 }}</div>
       <div class="stat-label">Total Referrals</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">{{ stats?.completedReferrals || 0 }}</div>
+      <div class="stat-value">{{ stats.completedReferrals || 0 }}</div>
       <div class="stat-label">Completed</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">${{ (stats?.totalRewards || 0) | number:'1.2-2' }}</div>
+      <div class="stat-value">${{ (stats.totalRewards || 0) | number:'1.2-2' }}</div>
       <div class="stat-label">Total Rewards</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value">{{ (stats?.conversionRate || 0) | number:'1.1-1' }}%</div>
+      <div class="stat-value">{{ (stats.conversionRate || 0) | number:'1.1-1' }}%</div>
       <div class="stat-label">Conversion Rate</div>
     </div>
   </div>

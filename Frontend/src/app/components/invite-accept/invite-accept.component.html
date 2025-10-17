@@ -90,10 +90,10 @@
 
       <div class="invite-footer">
         <p class="email-info">
-          Your account will be created with: <strong>{{ invite?.inviteeEmail }}</strong>
+          Your account will be created with: <strong>{{ invite!.inviteeEmail }}</strong>
         </p>
-        <p class="expiry-info" *ngIf="invite?.expiresAt">
-          This invitation expires on {{ invite?.expiresAt | date:'medium' }}
+        <p class="expiry-info" *ngIf="invite!.expiresAt">
+          This invitation expires on {{ invite!.expiresAt | date:'medium' }}
         </p>
       </div>
     </div>
