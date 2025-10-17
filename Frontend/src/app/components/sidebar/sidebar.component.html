@@ -1,10 +1,141 @@
 <div class="sidebar">
+  <!-- Main Navigation -->
   <nav class="sidebar-nav">
-    <ul>
-      <li><a routerLink="/dashboard">Dashboard</a></li>
-      <li><a routerLink="/videos">Videos</a></li>
-      <li><a routerLink="/upload">Upload</a></li>
-      <li><a routerLink="/profile">Profile</a></li>
-    </ul>
+    <div class="nav-section">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+            <mat-icon>dashboard</mat-icon>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/videos" routerLinkActive="active" class="nav-link">
+            <mat-icon>video_library</mat-icon>
+            <span>Videos</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/upload" routerLinkActive="active" class="nav-link">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>Upload</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/profile" routerLinkActive="active" class="nav-link">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Me Section -->
+    <div class="nav-section">
+      <div class="section-header">
+        <mat-icon>person</mat-icon>
+        <span>Me</span>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/liked-videos" routerLinkActive="active" class="nav-link">
+            <mat-icon>thumb_up</mat-icon>
+            <span>Liked Videos</span>
+            <span class="nav-count" *ngIf="likedVideosCount > 0">{{ likedVideosCount }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/history" routerLinkActive="active" class="nav-link">
+            <mat-icon>history</mat-icon>
+            <span>History</span>
+            <span class="nav-count" *ngIf="historyCount > 0">{{ historyCount }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/watch-later" routerLinkActive="active" class="nav-link">
+            <mat-icon>watch_later</mat-icon>
+            <span>Watch Later</span>
+            <span class="nav-count" *ngIf="watchLaterCount > 0">{{ watchLaterCount }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/playlists" routerLinkActive="active" class="nav-link">
+            <mat-icon>playlist_play</mat-icon>
+            <span>Playlists</span>
+            <span class="nav-count" *ngIf="playlistsCount > 0">{{ playlistsCount }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- My Subscriptions Section -->
+    <div class="nav-section">
+      <div class="section-header">
+        <mat-icon>subscriptions</mat-icon>
+        <span>My Subscriptions</span>
+      </div>
+      <div class="subscriptions-container">
+        <div class="subscriptions-list" *ngIf="subscriptions.length > 0; else noSubscriptions">
+          <div 
+            *ngFor="let subscription of subscriptions" 
+            class="subscription-item"
+            (click)="navigateToChannel(subscription.channelId)">
+            <div class="subscription-avatar">
+              <img 
+                [src]="subscription.channel.profilePictureUrl || '/assets/default-avatar.png'" 
+                [alt]="subscription.channel.name"
+                class="avatar-img">
+            </div>
+            <div class="subscription-info">
+              <span class="subscription-name">{{ subscription.channel.name }}</span>
+              <span class="subscription-subscribers">{{ subscription.channel.subscriberCount | number }} subscribers</span>
+            </div>
+            <div class="subscription-status">
+              <mat-icon class="status-icon" [class.active]="subscription.isActive">
+                {{ subscription.isActive ? 'notifications' : 'notifications_off' }}
+              </mat-icon>
+            </div>
+          </div>
+        </div>
+        
+        <ng-template #noSubscriptions>
+          <div class="no-subscriptions">
+            <mat-icon>subscriptions</mat-icon>
+            <p>No subscriptions yet</p>
+            <button class="explore-channels-btn" (click)="navigateToChannels()">
+              Explore Channels
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="nav-section">
+      <div class="section-header">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/settings" routerLinkActive="active" class="nav-link">
+            <mat-icon>settings</mat-icon>
+            <span>General</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/notifications" routerLinkActive="active" class="nav-link">
+            <mat-icon>notifications</mat-icon>
+            <span>Notifications</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/privacy" routerLinkActive="active" class="nav-link">
+            <mat-icon>privacy_tip</mat-icon>
+            <span>Privacy</span>
+          </a>
+        </li>
+      </ul>
+    </div>
   </nav>
 </div>
