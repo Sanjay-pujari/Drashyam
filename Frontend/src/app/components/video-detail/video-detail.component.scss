@@ -1,0 +1,169 @@
+.video-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.video-player-section {
+  margin-bottom: 30px;
+  
+  app-video-player {
+    display: block;
+    width: 100%;
+  }
+}
+
+.video-info {
+  .video-header {
+    margin-bottom: 20px;
+    
+    .video-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 15px 0;
+      color: #333;
+    }
+    
+    .video-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: #666;
+      font-size: 0.9rem;
+      
+      span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+  
+  .video-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+  
+  .video-description {
+    margin-bottom: 30px;
+    
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    p {
+      line-height: 1.6;
+      color: #666;
+      white-space: pre-wrap;
+    }
+  }
+  
+  .video-tags {
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      
+      mat-chip {
+        background-color: #f0f0f0;
+        color: #333;
+        
+        &:hover {
+          background-color: #e0e0e0;
+        }
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  
+  mat-spinner {
+    margin-bottom: 20px;
+  }
+  
+  p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: #f44336;
+    margin-bottom: 20px;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  p {
+    color: #666;
+    margin-bottom: 30px;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .video-detail {
+    padding: 10px;
+  }
+  
+  .video-header {
+    .video-stats {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+  
+  .video-actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

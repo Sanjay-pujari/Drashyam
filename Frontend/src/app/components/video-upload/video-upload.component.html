@@ -48,6 +48,13 @@
               Choose Thumbnail
             </label>
           </div>
+          
+          @if (selectedThumbnail) {
+            <div class="file-info">
+              <p><strong>Thumbnail:</strong> {{ selectedThumbnail.name }}</p>
+              <p><strong>Size:</strong> {{ formatFileSize(selectedThumbnail.size) }}</p>
+            </div>
+          }
         </div>
 
         <!-- Video Details -->
@@ -75,12 +82,25 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Channel</mat-label>
-            <mat-select formControlName="channelId">
+            <mat-select formControlName="channelId" [disabled]="isLoadingChannels">
               <mat-option [value]="null">No Channel</mat-option>
               @for (channel of userChannels; track channel.id) {
                 <mat-option [value]="channel.id">{{ channel.name }}</mat-option>
               }
+              @if (!isLoadingChannels && userChannels.length === 0) {
+                <mat-option disabled>No channels available - Create a channel first</mat-option>
+              }
             </mat-select>
+            <mat-hint>
+              @if (isLoadingChannels) {
+                Loading channels...
+              } @else {
+                Available channels: {{ userChannels.length }}
+                @if (userChannels.length === 0) {
+                  <a href="/channel/create" target="_blank">Create a channel</a>
+                }
+              }
+            </mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">

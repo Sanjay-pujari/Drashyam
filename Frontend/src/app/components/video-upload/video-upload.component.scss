@@ -33,8 +33,10 @@
   input[type="file"] {
     position: absolute;
     opacity: 0;
-    width: 0;
-    height: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
   }
   
   .file-input-label {
@@ -47,6 +49,8 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
     
     &:hover {
       background: #e8f4fd;

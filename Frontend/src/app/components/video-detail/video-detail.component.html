@@ -1,0 +1,80 @@
+<div class="video-detail" *ngIf="!isLoading && video">
+  <!-- Video Player -->
+  <div class="video-player-section">
+    <app-video-player [video]="video" [autoplay]="false"></app-video-player>
+  </div>
+
+  <!-- Video Information -->
+  <div class="video-info">
+    <div class="video-header">
+      <h1 class="video-title">{{ video.title }}</h1>
+      
+      <div class="video-stats">
+        <span class="view-count">
+          <mat-icon>visibility</mat-icon>
+          {{ formatViewCount(video.viewCount) }} views
+        </span>
+        <span class="like-count">
+          <mat-icon>thumb_up</mat-icon>
+          {{ formatViewCount(video.likeCount) }}
+        </span>
+        <span class="comment-count">
+          <mat-icon>comment</mat-icon>
+          {{ formatViewCount(video.commentCount) }}
+        </span>
+        <span class="video-date">
+          <mat-icon>schedule</mat-icon>
+          {{ video.createdAt | date:'MMM d, y' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="video-actions">
+      <button mat-raised-button color="primary" (click)="video.isLiked ? null : likeVideo()">
+        <mat-icon>{{ video.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
+        {{ video.likeCount || 0 }}
+      </button>
+      
+      <button mat-raised-button (click)="video.isDisliked ? null : dislikeVideo()">
+        <mat-icon>{{ video.isDisliked ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
+        {{ video.dislikeCount || 0 }}
+      </button>
+      
+      <button mat-raised-button (click)="shareVideo()">
+        <mat-icon>share</mat-icon>
+        Share
+      </button>
+    </div>
+
+    <div class="video-description">
+      <h3>Description</h3>
+      <p>{{ video.description || 'No description available.' }}</p>
+    </div>
+
+    <div class="video-tags" *ngIf="video.tags">
+      <h4>Tags</h4>
+      <div class="tags-container">
+        <mat-chip *ngFor="let tag of video.tags.split(',')" [value]="tag.trim()">
+          {{ tag.trim() }}
+        </mat-chip>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+  <p>Loading video...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !video">
+  <mat-icon>error</mat-icon>
+  <h3>Video not found</h3>
+  <p>The video you're looking for doesn't exist or has been removed.</p>
+  <button mat-raised-button color="primary" (click)="goBackToVideos()">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Videos
+  </button>
+</div>
