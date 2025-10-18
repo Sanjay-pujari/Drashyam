@@ -27,6 +27,18 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> GetMe()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User not authenticated");
+
+        var user = await _userService.GetUserByIdAsync(userId);
+        return Ok(user);
+    }
+
     [HttpGet("by-email")]
     [Authorize]
     public async Task<ActionResult<UserDto>> GetByEmail([FromQuery] string email)

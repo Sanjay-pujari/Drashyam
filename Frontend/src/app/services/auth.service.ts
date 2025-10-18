@@ -81,8 +81,19 @@ export class AuthService {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Date.now() / 1000;
-      return payload.exp > currentTime;
+      const isValid = payload.exp > currentTime;
+      
+      if (!isValid) {
+        // Token is expired, remove it
+        localStorage.removeItem('token');
+        this.currentUserSubject.next(null);
+      }
+      
+      return isValid;
     } catch {
+      // Invalid token format, remove it
+      localStorage.removeItem('token');
+      this.currentUserSubject.next(null);
       return false;
     }
   }
@@ -168,15 +179,30 @@ export class AuthService {
     const token = localStorage.getItem('token');
     if (!token || !this.isAuthenticated()) {
       this.currentUserSubject.next(null);
-      return this.currentUser$;
+      return of(null);
     }
 
     return this.getCurrentUser().pipe(
-      tap(user => this.currentUserSubject.next(user)),
+      tap(user => {
+        this.currentUserSubject.next(user);
+        console.log('User authenticated successfully:', user);
+      }),
       map(user => user),
       catchError(error => {
         console.error('Failed to initialize auth:', error);
-        this.logout();
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
+        
+        // If it's a 401 or 403, the token is invalid
+        if (error.status === 401 || error.status === 403) {
+          console.log('Token is invalid, logging out user');
+          this.logout();
+        }
+        
         return of(null);
       })
     );

@@ -230,7 +230,7 @@ public class AuthController : ControllerBase
         var secretKey = jwtSettings["SecretKey"];
         var issuer = jwtSettings["Issuer"];
         var audience = jwtSettings["Audience"];
-        var expiryHours = int.Parse(jwtSettings["ExpiryHours"] ?? "24");
+        var expiryMinutes = int.Parse(jwtSettings["ExpiryInMinutes"] ?? "60");
 
         var claims = new List<Claim>
         {
@@ -251,7 +251,7 @@ public class AuthController : ControllerBase
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(expiryHours),
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: credentials
         );
 
