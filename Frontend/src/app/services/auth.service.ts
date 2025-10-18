@@ -24,8 +24,14 @@ export class AuthService {
   }
 
   login(credentials: UserLogin): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+    const url = `${this.apiUrl}/login`;
+    console.log('Auth service - API URL:', this.apiUrl);
+    console.log('Auth service - Login URL:', url);
+    console.log('Auth service - Credentials:', credentials);
+    
+    return this.http.post<AuthResponse>(url, credentials).pipe(
       tap(response => {
+        console.log('Login successful:', response);
         localStorage.setItem('token', response.token);
         this.currentUserSubject.next(response.user);
       })

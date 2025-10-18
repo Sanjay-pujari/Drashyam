@@ -88,6 +88,26 @@ public class ChannelService : IChannelService
         return true;
     }
 
+    public async Task<PagedResult<ChannelDto>> GetChannelsAsync(int page = 1, int pageSize = 20)
+    {
+        var channels = await _context.Channels
+            .Include(c => c.User)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var totalCount = await _context.Channels.CountAsync();
+
+        return new PagedResult<ChannelDto>
+        {
+            Items = _mapper.Map<List<ChannelDto>>(channels),
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<PagedResult<ChannelDto>> GetUserChannelsAsync(string userId, int page = 1, int pageSize = 20)
     {
         var channels = await _context.Channels

@@ -1,7 +1,57 @@
-<div class="page">
+<div class="channels-page">
 	<h2>Channels</h2>
-	<p>Channels listing goes here.</p>
+	
+	<!-- Loading State -->
+	<div class="loading-container" *ngIf="isLoading">
+		<mat-spinner></mat-spinner>
+		<p>Loading channels...</p>
+	</div>
+
+	<!-- Error State -->
+	<div class="error-container" *ngIf="error && !isLoading">
+		<mat-icon>error</mat-icon>
+		<h3>Error Loading Channels</h3>
+		<p>{{ error }}</p>
+		<button mat-raised-button color="primary" (click)="loadChannels()">
+			<mat-icon>refresh</mat-icon>
+			Try Again
+		</button>
+	</div>
+
+	<!-- Channels Grid -->
+	<div class="channels-grid" *ngIf="!isLoading && !error && channels.length > 0">
+		<mat-card class="channel-card" *ngFor="let channel of channels" (click)="goToChannel(channel.id)">
+			<div class="channel-avatar">
+				<img [src]="getSafeImageUrl(channel.profilePictureUrl ?? null)" 
+					 [alt]="channel.name + ' avatar'"
+					 (error)="onImageError($event)">
+			</div>
+			<mat-card-content>
+				<h3 class="channel-name">{{ channel.name }}</h3>
+				<p class="channel-description" *ngIf="channel.description">{{ channel.description }}</p>
+				<div class="channel-stats">
+					<span class="subscriber-count">
+						<mat-icon>people</mat-icon>
+						{{ formatSubscriberCount(channel.subscriberCount) }} subscribers
+					</span>
+					<span class="video-count">
+						<mat-icon>video_library</mat-icon>
+						{{ channel.videoCount }} videos
+					</span>
+				</div>
+			</mat-card-content>
+		</mat-card>
+	</div>
+
+	<!-- No Channels State -->
+	<div class="no-channels" *ngIf="!isLoading && !error && channels.length === 0">
+		<mat-icon>video_library</mat-icon>
+		<h3>No Channels Found</h3>
+		<p>There are no channels available at the moment.</p>
+	</div>
 </div>
+
+
 
 
 

@@ -61,6 +61,13 @@ public class ChannelController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<ChannelDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var channels = await _channelService.GetChannelsAsync(page, pageSize);
+        return Ok(channels);
+    }
+
     [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult<PagedResult<ChannelDto>>> GetMyChannels([FromQuery] int page = 1, [FromQuery] int pageSize = 20)

@@ -1,29 +1,23 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+  const authService = inject(AuthService);
+  
+  // Get the token from the auth service
+  const token = authService.getToken();
+  
+  // If there's a token, add it to the Authorization header
   if (token) {
-    // Check if token is expired
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      if (payload.exp <= currentTime) {
-        console.warn('Token is expired, removing from localStorage');
-        localStorage.removeItem('token');
-        return next(req);
-      }
-    } catch (error) {
-      console.warn('Invalid token format, removing from localStorage');
-      localStorage.removeItem('token');
-      return next(req);
-    }
-
-    const cloned = req.clone({
+    const authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
     });
-    return next(cloned);
+    return next(authReq);
   }
+  
+  // If no token, proceed with the original request
   return next(req);
 };

@@ -119,7 +119,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   navigateToChannel(channelId: string): void {
-    this.router.navigate(['/channel', channelId]);
+    this.router.navigate(['/channels', channelId]);
   }
 
   navigateToChannels(): void {

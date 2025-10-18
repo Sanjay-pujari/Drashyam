@@ -9,6 +9,7 @@ public interface IChannelService
     Task<ChannelDto> GetChannelByCustomUrlAsync(string customUrl);
     Task<ChannelDto> UpdateChannelAsync(int channelId, ChannelUpdateDto updateDto, string userId);
     Task<bool> DeleteChannelAsync(int channelId, string userId);
+    Task<PagedResult<ChannelDto>> GetChannelsAsync(int page = 1, int pageSize = 20);
     Task<PagedResult<ChannelDto>> GetUserChannelsAsync(string userId, int page = 1, int pageSize = 20);
     Task<PagedResult<ChannelDto>> SearchChannelsAsync(string query, int page = 1, int pageSize = 20);
     Task<ChannelDto> SubscribeToChannelAsync(int channelId, string userId);

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Channel, ChannelCreate, ChannelUpdate } from '../models/channel.model';
 import { PagedResult } from './video.service';
@@ -107,5 +108,27 @@ export class ChannelService {
     formData.append('profilePicture', profilePictureFile);
     
     return this.http.post<Channel>(`${this.apiUrl}/${channelId}/profile-picture`, formData);
+  }
+
+  // Additional methods for channel detail component
+  getChannel(id: number): Observable<Channel> {
+    const url = `${this.apiUrl}/${id}`;
+    console.log('Channel service - API URL:', this.apiUrl);
+    console.log('Channel service - Full URL:', url);
+    return this.http.get<Channel>(url);
+  }
+
+  getSubscriptionStatus(channelId: number): Observable<{ isSubscribed: boolean }> {
+    return this.http.get<boolean>(`${this.apiUrl}/${channelId}/is-subscribed`).pipe(
+      map(isSubscribed => ({ isSubscribed }))
+    );
+  }
+
+  subscribe(channelId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${channelId}/subscribe`, {});
+  }
+
+  unsubscribe(channelId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${channelId}/unsubscribe`, {});
   }
 }

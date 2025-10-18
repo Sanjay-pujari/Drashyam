@@ -143,4 +143,14 @@ export class VideoService {
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
     return this.http.get<{ trending: PagedResult<Video>; recommended: PagedResult<Video>; subscribed: PagedResult<Video>; }>(`${this.apiUrl}/home-feed`, { params });
   }
+
+  getVideosByChannel(channelId: number, filter: VideoFilter = {}): Observable<Video[]> {
+    let params = new HttpParams();
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+    if (filter.sortBy) params = params.set('sortBy', filter.sortBy);
+    if (filter.sortOrder) params = params.set('sortOrder', filter.sortOrder);
+    
+    return this.http.get<Video[]>(`${this.apiUrl}/channel/${channelId}`, { params });
+  }
 }

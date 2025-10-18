@@ -1,0 +1,112 @@
+<div class="channel-detail" *ngIf="!isLoading && channel">
+  <!-- Channel Header -->
+  <div class="channel-header">
+    <div class="channel-banner" *ngIf="channel.bannerUrl">
+      <img [src]="channel.bannerUrl" [alt]="channel.name + ' banner'">
+    </div>
+    
+    <div class="channel-info">
+      <div class="channel-avatar">
+        <img [src]="getSafeImageUrl(channel.profilePictureUrl ?? null)" 
+             [alt]="channel.name + ' avatar'"
+             (error)="onImageError($event)">
+      </div>
+      
+      <div class="channel-details">
+        <h1 class="channel-name">{{ channel.name }}</h1>
+        <p class="channel-description" *ngIf="channel.description">{{ channel.description }}</p>
+        
+        <div class="channel-stats">
+          <span class="subscriber-count">
+            <mat-icon>people</mat-icon>
+            {{ formatSubscriberCount(channel.subscriberCount) }} subscribers
+          </span>
+          <span class="video-count" *ngIf="videos.length > 0">
+            <mat-icon>video_library</mat-icon>
+            {{ videos.length }} videos
+          </span>
+        </div>
+        
+        <div class="channel-actions">
+          <button mat-raised-button 
+                  [color]="isSubscribed ? 'warn' : 'primary'"
+                  (click)="toggleSubscription()"
+                  *ngIf="!isOwner">
+            <mat-icon>{{ isSubscribed ? 'notifications_off' : 'notifications' }}</mat-icon>
+            {{ isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+          </button>
+          
+          <button mat-raised-button 
+                  color="accent"
+                  (click)="editChannel()"
+                  *ngIf="isOwner">
+            <mat-icon>edit</mat-icon>
+            Edit Channel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel Content -->
+  <mat-tab-group class="channel-tabs">
+    <mat-tab label="Videos">
+      <div class="videos-grid" *ngIf="videos.length > 0; else noVideos">
+        <mat-card class="video-card" *ngFor="let video of videos" (click)="goToVideo(video.id)">
+          <div class="video-thumbnail">
+            <img [src]="getSafeImageUrl(video.thumbnailUrl ?? null)" [alt]="video.title" (error)="onImageError($event)">
+            <div class="video-duration">{{ video.duration }}</div>
+          </div>
+          <mat-card-content>
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-views">{{ video.viewCount }} views</p>
+            <p class="video-date">{{ video.createdAt | date:'MMM d, y' }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      
+      <ng-template #noVideos>
+        <div class="no-content">
+          <mat-icon>video_library</mat-icon>
+          <h3>No videos yet</h3>
+          <p>This channel hasn't uploaded any videos.</p>
+        </div>
+      </ng-template>
+    </mat-tab>
+    
+    <mat-tab label="About">
+      <div class="about-section">
+        <div class="about-content">
+          <h3>About {{ channel.name }}</h3>
+          <p *ngIf="channel.description">{{ channel.description }}</p>
+          <p *ngIf="!channel.description">No description provided.</p>
+          
+          <div class="channel-links" *ngIf="channel.websiteUrl">
+            <h4>Links</h4>
+            <a [href]="channel.websiteUrl" target="_blank" rel="noopener noreferrer">
+              <mat-icon>link</mat-icon>
+              Website
+            </a>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+  <p>Loading channel...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="!isLoading && !channel">
+  <mat-icon>error</mat-icon>
+  <h3>Channel not found</h3>
+  <p>The channel you're looking for doesn't exist or has been removed.</p>
+  <button mat-raised-button color="primary" (click)="goBackToChannels()">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Channels
+  </button>
+</div>

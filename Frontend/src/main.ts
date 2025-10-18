@@ -35,6 +35,8 @@ const routes: Routes = [
   { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
+  { path: 'channels/:id', loadComponent: () => import('./app/components/channel-detail/channel-detail.component').then(m => m.ChannelDetailComponent) },
+  { path: 'channel/edit/:id', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent), canActivate: [authGuard] },
   { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) },
   // Protected routes
   { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent), canActivate: [authGuard] },
