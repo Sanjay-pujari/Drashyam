@@ -104,11 +104,11 @@ public class VideoController : ControllerBase
 
     [HttpPost("{id:int}/view")]
     [Authorize]
-    public async Task<IActionResult> RecordView([FromRoute] int id, [FromQuery] int secondsWatched)
+    public async Task<ActionResult<VideoDto>> RecordView([FromRoute] int id, [FromQuery] int secondsWatched)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        await _videoService.RecordVideoViewAsync(id, userId, TimeSpan.FromSeconds(secondsWatched));
-        return Ok();
+        var updatedVideo = await _videoService.RecordVideoViewAsync(id, userId, TimeSpan.FromSeconds(secondsWatched));
+        return Ok(updatedVideo);
     }
 
     [HttpPost("{id:int}/share")]
@@ -117,7 +117,14 @@ public class VideoController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var token = await _videoService.GenerateShareLinkAsync(id, userId);
-        return Ok(new { token });
+        return Ok(new { shareToken = token });
+    }
+
+    [HttpGet("shared/{token}")]
+    public async Task<ActionResult<VideoDto>> GetVideoByShareToken([FromRoute] string token)
+    {
+        var video = await _videoService.GetVideoByShareTokenAsync(token);
+        return Ok(video);
     }
 
     [HttpGet("search/all")]

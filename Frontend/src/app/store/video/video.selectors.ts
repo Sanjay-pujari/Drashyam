@@ -47,3 +47,8 @@ export const selectVideoSelectedCategory = createSelector(
   selectVideoState,
   (state) => state.selectedCategory
 );
+
+export const selectVideoById = createSelector(
+  selectVideos,
+  (videos: any[], props: { id: number }) => videos.find(video => video.id === props.id)
+);

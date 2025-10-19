@@ -222,7 +222,12 @@ export class VideoUploadComponent implements OnInit {
         
         canvas.toBlob((blob) => {
           if (blob) {
-            this.selectedThumbnail = blob;
+            // Convert Blob to File
+            const thumbnailFile = new File([blob], 'thumbnail.jpg', {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            this.selectedThumbnail = thumbnailFile;
             console.log('Thumbnail generated for recorded video');
           }
         }, 'image/jpeg', 0.8);

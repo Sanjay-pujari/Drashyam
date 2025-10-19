@@ -89,6 +89,26 @@ export const videoReducer = createReducer(
     error
   })),
 
+  // Record Video View
+  on(VideoActions.recordVideoView, (state) => ({
+    ...state,
+    loading: true,
+    error: null
+  })),
+  
+  on(VideoActions.recordVideoViewSuccess, (state, { video }) => ({
+    ...state,
+    videos: state.videos.map(v => v.id === video.id ? video : v),
+    loading: false,
+    error: null
+  })),
+  
+  on(VideoActions.recordVideoViewFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error
+  })),
+
   // Search Videos
   on(VideoActions.searchVideos, (state, { query }) => ({
     ...state,

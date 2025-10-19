@@ -48,9 +48,6 @@ export class VideoService {
     return this.http.get<Video>(`${this.apiUrl}/${id}`);
   }
 
-  getVideoByShareToken(shareToken: string): Observable<Video> {
-    return this.http.get<Video>(`${this.apiUrl}/share/${shareToken}`);
-  }
 
   uploadVideo(videoData: FormData): Observable<Video> {
     return this.http.post<Video>(`${this.apiUrl}/upload`, videoData);
@@ -69,8 +66,8 @@ export class VideoService {
     return this.http.post<Video>(`${this.apiUrl}/${id}/like?type=${typeQuery}`, {});
   }
 
-  recordVideoView(id: number, watchDuration: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${id}/view?secondsWatched=${watchDuration}`, {});
+  recordVideoView(id: number, watchDuration: number): Observable<Video> {
+    return this.http.post<Video>(`${this.apiUrl}/${id}/view?secondsWatched=${watchDuration}`, {});
   }
 
   searchVideos(query: string, filter: VideoFilter = {}): Observable<PagedResult<Video>> {
@@ -120,6 +117,10 @@ export class VideoService {
 
   generateShareLink(id: number): Observable<{ shareToken: string }> {
     return this.http.post<{ shareToken: string }>(`${this.apiUrl}/${id}/share`, {});
+  }
+
+  getVideoByShareToken(token: string): Observable<Video> {
+    return this.http.get<Video>(`${this.apiUrl}/shared/${token}`);
   }
 
   // New endpoints

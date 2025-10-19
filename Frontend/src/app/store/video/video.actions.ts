@@ -72,7 +72,8 @@ export const recordVideoView = createAction(
 );
 
 export const recordVideoViewSuccess = createAction(
-  '[Video] Record Video View Success'
+  '[Video] Record Video View Success',
+  props<{ video: Video }>()
 );
 
 export const recordVideoViewFailure = createAction(

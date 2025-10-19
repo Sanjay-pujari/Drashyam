@@ -1,7 +1,7 @@
 <div class="video-detail" *ngIf="!isLoading && video">
   <!-- Video Player -->
   <div class="video-player-section">
-    <app-video-player [video]="video" [autoplay]="false"></app-video-player>
+    <app-video-player #videoPlayer [video]="video" [autoplay]="false"></app-video-player>
   </div>
 
   <!-- Video Information -->

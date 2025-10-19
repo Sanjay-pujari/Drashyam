@@ -7,9 +7,11 @@ import { Observable, Subscription, interval } from 'rxjs';
 import { Video } from '../../models/video.model';
 import { AppState } from '../../store/app.state';
 import { selectCurrentUser } from '../../store/user/user.selectors';
+import { selectVideoById } from '../../store/video/video.selectors';
 import { recordVideoView, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { User } from '../../models/user.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 // Declare global videojs
 declare var videojs: any;
 
@@ -47,13 +49,26 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     @Inject(Store) private store: Store<AppState>,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private snackBar: MatSnackBar
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
   }
 
   ngOnInit() {
-    // Initialization logic if needed
+    // Subscribe to video updates from the store
+    if (this.video?.id) {
+      this.store.select(selectVideoById, { id: this.video.id }).subscribe(updatedVideo => {
+        if (updatedVideo && this.video && updatedVideo.id === this.video!.id) {
+          this.video = updatedVideo;
+        }
+      });
+    }
+
+    // Record view when user navigates away
+    window.addEventListener('beforeunload', () => {
+      this.recordView();
+    });
   }
 
   ngAfterViewInit() {
@@ -67,7 +82,22 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.cleanup();
+    this.recordView();
+    
+    if (this.player) {
+      this.player.dispose();
+      this.player = null;
+    }
+    
+    if (this.watchTimer) {
+      this.watchTimer.unsubscribe();
+      this.watchTimer = undefined;
+    }
+    
+    // Remove event listener
+    window.removeEventListener('beforeunload', () => {
+      this.recordView();
+    });
   }
 
   private initializePlayer() {
@@ -193,7 +223,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         watchDuration 
       }));
       this.viewRecorded = true;
-      this.video.viewCount++;
+      // Don't update local count - let the store handle it
     }
   }
 
@@ -259,6 +289,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       videoId: this.video.id, 
       likeType: likeType as 'like' | 'dislike' 
     }));
+
+    // Show immediate feedback
+    if (this.video.isLiked) {
+      this.snackBar.open('Like removed', 'Close', { duration: 2000 });
+    } else {
+      this.snackBar.open('Video liked!', 'Close', { duration: 2000 });
+    }
   }
 
   dislikeVideo() {
@@ -269,6 +306,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       videoId: this.video.id, 
       likeType: likeType as 'like' | 'dislike' 
     }));
+
+    // Show immediate feedback
+    if (this.video.isDisliked) {
+      this.snackBar.open('Dislike removed', 'Close', { duration: 2000 });
+    } else {
+      this.snackBar.open('Video disliked', 'Close', { duration: 2000 });
+    }
   }
 
   shareVideo() {
@@ -279,17 +323,45 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         const shareUrl = `${window.location.origin}/watch/${response.shareToken}`;
         this.copyToClipboard(shareUrl);
       },
-      error: (error) => console.error('Error generating share link:', error)
+      error: (error) => {
+        console.error('Error generating share link:', error);
+        this.snackBar.open('Failed to generate share link', 'Close', { duration: 3000 });
+      }
     });
   }
 
   private copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      // Show success message
-      console.log('Share link copied to clipboard');
-    }).catch(err => {
-      console.error('Failed to copy share link:', err);
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.snackBar.open('Share link copied to clipboard!', 'Close', { duration: 3000 });
+      }).catch(err => {
+        console.error('Failed to copy share link:', err);
+        this.fallbackCopyToClipboard(text);
+      });
+    } else {
+      this.fallbackCopyToClipboard(text);
+    }
+  }
+
+  private fallbackCopyToClipboard(text: string) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      this.snackBar.open('Share link copied to clipboard!', 'Close', { duration: 3000 });
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      this.snackBar.open('Share link: ' + text, 'Close', { duration: 5000 });
+    }
+    
+    document.body.removeChild(textArea);
   }
 
   private cleanup() {

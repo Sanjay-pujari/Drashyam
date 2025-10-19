@@ -360,10 +360,10 @@ public class VideoService : IVideoService
         return await GetVideoByIdAsync(videoId);
     }
 
-    public async Task RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration)
+    public async Task<VideoDto> RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration)
     {
         var video = await _context.Videos.FindAsync(videoId);
-        if (video == null) return;
+        if (video == null) throw new ArgumentException("Video not found");
 
         // Record view
         _context.VideoViews.Add(new VideoView
@@ -376,6 +376,9 @@ public class VideoService : IVideoService
 
         video.ViewCount++;
         await _context.SaveChangesAsync();
+
+        // Return updated video
+        return await GetVideoByIdAsync(videoId);
     }
 
     public async Task<string> GenerateShareLinkAsync(int videoId, string userId)

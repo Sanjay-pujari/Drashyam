@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -33,9 +33,11 @@ export class VideoDetailComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.videoId = +params['id'];
-      if (this.videoId) {
+      if (params['id']) {
+        this.videoId = +params['id'];
         this.loadVideo();
+      } else if (params['token']) {
+        this.loadVideoByShareToken(params['token']);
       }
     });
   }
@@ -61,6 +63,25 @@ export class VideoDetailComponent implements OnInit {
         this.isLoading = false;
         if (err.status === 404) {
           console.log('Video not found, redirecting to videos list');
+          this.router.navigate(['/videos']);
+        }
+      }
+    });
+  }
+
+  loadVideoByShareToken(token: string) {
+    console.log('Loading video with share token:', token);
+    this.videoService.getVideoByShareToken(token).subscribe({
+      next: (video) => {
+        console.log('Video loaded successfully via share token:', video);
+        this.video = video;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load video via share token:', err);
+        this.isLoading = false;
+        if (err.status === 404) {
+          console.log('Shared video not found');
           this.router.navigate(['/videos']);
         }
       }
@@ -93,21 +114,23 @@ export class VideoDetailComponent implements OnInit {
     return count.toString();
   }
 
+  @ViewChild('videoPlayer') videoPlayer!: VideoPlayerComponent;
+
   likeVideo() {
-    if (!this.video) return;
-    // This would be handled by the video player component
-    console.log('Like video:', this.video.id);
+    if (this.videoPlayer) {
+      this.videoPlayer.likeVideo();
+    }
   }
 
   dislikeVideo() {
-    if (!this.video) return;
-    // This would be handled by the video player component
-    console.log('Dislike video:', this.video.id);
+    if (this.videoPlayer) {
+      this.videoPlayer.dislikeVideo();
+    }
   }
 
   shareVideo() {
-    if (!this.video) return;
-    // This would be handled by the video player component
-    console.log('Share video:', this.video.id);
+    if (this.videoPlayer) {
+      this.videoPlayer.shareVideo();
+    }
   }
 }
