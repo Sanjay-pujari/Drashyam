@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -10,7 +10,7 @@ import { selectCurrentUser } from '../../store/user/user.selectors';
 import { recordVideoView, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { User } from '../../models/user.model';
-
+// Declare global videojs
 declare var videojs: any;
 
 @Component({
@@ -20,16 +20,16 @@ declare var videojs: any;
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })
-export class VideoPlayerComponent implements OnInit, OnDestroy {
+export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() video: Video | null = null;
   @Input() autoplay = false;
   @Output() videoEnded = new EventEmitter<void>();
   @Output() videoPaused = new EventEmitter<void>();
   @Output() videoPlaying = new EventEmitter<void>();
 
-  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef;
+  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
-  player: any;
+  player: any = null;
   isPlaying = false;
   currentTime = 0;
   duration = 0;
@@ -37,6 +37,8 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   isMuted = false;
   isFullscreen = false;
   isLoading = true;
+  hasError = false;
+  errorMessage = '';
   watchStartTime = 0;
   private watchTimer?: Subscription;
   private viewRecorded = false;
@@ -51,8 +53,16 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Initialization logic if needed
+  }
+
+  ngAfterViewInit() {
+    // Initialize player after view is fully loaded
     if (this.video) {
-      this.initializePlayer();
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        this.initializePlayer();
+      }, 100);
     }
   }
 
@@ -63,25 +73,50 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   private initializePlayer() {
     if (!this.video) return;
 
+    // Wait for the DOM element to be available
+    if (!this.videoElement?.nativeElement) {
+      console.error('Video element not found');
+      this.isLoading = false;
+      return;
+    }
+
+    // Check if videojs is available
+    if (typeof videojs === 'undefined') {
+      console.error('Video.js is not loaded');
+      this.isLoading = false;
+      return;
+    }
+    
     // Initialize Video.js player
     this.player = videojs(this.videoElement.nativeElement, {
       controls: true,
       responsive: true,
       fluid: true,
-      playbackRates: [0.5, 1, 1.25, 1.5, 2],
-      plugins: {
-        hotkeys: {
-          volumeStep: 0.1,
-          seekStep: 5,
-          enableModifiersForNumbers: false
-        }
-      }
+      playbackRates: [0.5, 1, 1.25, 1.5, 2]
     });
 
     // Set video source
+    console.log('Setting video source:', this.video.videoUrl);
+    
+    // Check if the video URL is a placeholder or invalid
+    let videoUrl = this.video.videoUrl;
+    if (!videoUrl || videoUrl.includes('example.com') || videoUrl.includes('placeholder')) {
+      console.warn('Using placeholder video URL, video may not load properly');
+      // You can set a fallback video URL here or show an error message
+    }
+    
     this.player.src({
-      src: this.video.videoUrl,
+      src: videoUrl,
       type: 'video/mp4'
+    });
+
+    // Add error handling
+    this.player.on('error', (error: any) => {
+      console.error('Video player error:', error);
+      console.error('Video URL:', this.video?.videoUrl);
+      this.isLoading = false;
+      this.hasError = true;
+      this.errorMessage = 'Failed to load video. Please check the video URL or try again later.';
     });
 
     // Player event listeners

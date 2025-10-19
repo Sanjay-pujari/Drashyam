@@ -9,15 +9,23 @@
 		<p class="error">{{ error }}</p>
 	}
 	@if (!loading && !error) {
-		<div class="video-grid">
-			@for (video of videos; track video.id) {
-				<div class="video-card">
-					<img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.title">
-					<h3>{{ video.title }}</h3>
-					<p>{{ video.channel?.name || (video.user?.firstName + ' ' + video.user?.lastName) }}</p>
-				</div>
-			}
-		</div>
+		@if (videos.length === 0) {
+			<div class="no-favorites">
+				<mat-icon>favorite_border</mat-icon>
+				<h3>No favorite videos yet</h3>
+				<p>Start liking videos to see them here!</p>
+			</div>
+		} @else {
+			<div class="video-grid">
+				@for (video of videos; track video.id) {
+					<div class="video-card" (click)="onVideoClick(video)">
+						<img [src]="getSafeImageUrl(video.thumbnailUrl)" [alt]="video.title" (error)="onImageError($event)">
+						<h3>{{ video.title }}</h3>
+						<p>{{ getChannelOrUserName(video) }}</p>
+					</div>
+				}
+			</div>
+		}
 		<div class="load-more" *ngIf="hasNextPage">
 			<div #loadMoreTrigger class="load-more-trigger">
 				@if (loadingMore) {
