@@ -1,0 +1,45 @@
+<div class="video-record-upload-container">
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>Create Video</mat-card-title>
+      <mat-card-subtitle>Record a new video or upload an existing one</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group 
+        [selectedIndex]="selectedTabIndex" 
+        (selectedTabChange)="onTabChange($event.index)"
+        class="video-tabs">
+        
+        <!-- Record Tab -->
+        <mat-tab label="Record Video">
+          <div class="tab-content">
+            <app-video-recorder
+              (recordingComplete)="onRecordingComplete($event)"
+              (recordingCanceled)="onRecordingCanceled()">
+            </app-video-recorder>
+          </div>
+        </mat-tab>
+
+        <!-- Upload Tab -->
+        <mat-tab label="Upload Video">
+          <div class="tab-content">
+            @if (recordedVideoBlob) {
+              <div class="recording-success">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+                <h3>Video Recorded Successfully!</h3>
+                <p>Your recorded video is ready for upload. Add details below.</p>
+                <button mat-stroked-button color="primary" (click)="resetRecording()">
+                  <mat-icon>refresh</mat-icon>
+                  Record Another Video
+                </button>
+              </div>
+            }
+            
+            <app-video-upload #videoUpload></app-video-upload>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

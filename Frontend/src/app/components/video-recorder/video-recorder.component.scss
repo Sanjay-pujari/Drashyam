@@ -1,0 +1,197 @@
+.video-recorder-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.recorder-card {
+  mat-card-header {
+    margin-bottom: 20px;
+  }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  .error-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: #f44336;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  p {
+    margin: 0 0 20px 0;
+    color: #666;
+    line-height: 1.5;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+
+  p {
+    margin-top: 20px;
+    color: #666;
+  }
+}
+
+.camera-preview {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 20px auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+
+  .camera-video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+.recording-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+
+  .recording-indicator {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+
+    .recording-dot {
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.recording-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+
+  .record-button {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .recording-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .control-button {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    .cancel-button {
+      margin-left: 20px;
+      
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+.recording-info {
+  text-align: center;
+  margin-top: 16px;
+
+  .recording-time {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #f44336;
+    margin: 0 0 4px 0;
+  }
+
+  .max-time {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .video-recorder-container {
+    padding: 10px;
+  }
+
+  .recording-controls {
+    .record-button {
+      width: 70px;
+      height: 70px;
+    }
+
+    .recording-buttons {
+      .control-button {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  }
+
+  .camera-preview {
+    max-width: 100%;
+  }
+}

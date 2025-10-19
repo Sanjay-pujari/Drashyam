@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
@@ -41,6 +42,7 @@ export class VideoUploadComponent implements OnInit {
     private fb: FormBuilder,
     private videoService: VideoService,
     private channelService: ChannelService,
+    private snackBar: MatSnackBar,
     public router: Router
   ) {
     this.uploadForm = this.fb.group({
@@ -199,5 +201,54 @@ export class VideoUploadComponent implements OnInit {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  generateThumbnail(file: File) {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    
+    video.onloadedmetadata = () => {
+      video.currentTime = 1; // Seek to 1 second
+    };
+    
+    video.onseeked = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (ctx) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            this.selectedThumbnail = blob;
+            console.log('Thumbnail generated for recorded video');
+          }
+        }, 'image/jpeg', 0.8);
+      }
+    };
+    
+    video.src = URL.createObjectURL(file);
+  }
+
+  setRecordedVideo(file: File) {
+    console.log('Setting recorded video:', file);
+    this.selectedFile = file;
+    
+    // Update the file input display
+    const fileInput = document.getElementById('videoFile') as HTMLInputElement;
+    if (fileInput) {
+      // Create a new FileList with the recorded file
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
+    }
+    
+    // Generate thumbnail for recorded video
+    this.generateThumbnail(file);
+    
+    // Show success message
+    this.snackBar.open('Recorded video loaded successfully!', 'Close', { duration: 3000 });
   }
 }

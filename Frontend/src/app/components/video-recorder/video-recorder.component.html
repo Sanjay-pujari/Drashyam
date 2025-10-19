@@ -1,0 +1,112 @@
+<div class="video-recorder-container">
+  <mat-card class="recorder-card">
+    <mat-card-header>
+      <mat-card-title>Record Video</mat-card-title>
+      <mat-card-subtitle>Record a new video for your channel</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Camera Permission Error -->
+      @if (error && !hasPermission) {
+        <div class="error-container">
+          <mat-icon class="error-icon">videocam_off</mat-icon>
+          <h3>Camera Access Required</h3>
+          <p>{{ error }}</p>
+          <button mat-raised-button color="primary" (click)="retryCamera()">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+        </div>
+      }
+
+      <!-- Camera Loading -->
+      @if (isInitializing) {
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Initializing camera...</p>
+        </div>
+      }
+
+      <!-- Camera Preview -->
+      @if (hasPermission && !error) {
+        <div class="camera-preview">
+          <video
+            #videoElement
+            autoplay
+            muted
+            playsinline
+            class="camera-video">
+          </video>
+          
+          <!-- Recording Overlay -->
+          @if (isRecording) {
+            <div class="recording-overlay">
+              <div class="recording-indicator">
+                <div class="recording-dot"></div>
+                <span>REC {{ formatTime(recordingTime) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="recording-controls">
+          @if (!isRecording) {
+            <button 
+              mat-fab 
+              color="primary" 
+              (click)="startRecording()"
+              class="record-button">
+              <mat-icon>videocam</mat-icon>
+            </button>
+          } @else {
+            <div class="recording-buttons">
+              @if (isPaused) {
+                <button 
+                  mat-fab 
+                  color="primary" 
+                  (click)="resumeRecording()"
+                  class="control-button">
+                  <mat-icon>play_arrow</mat-icon>
+                </button>
+              } @else {
+                <button 
+                  mat-fab 
+                  color="warn" 
+                  (click)="pauseRecording()"
+                  class="control-button">
+                  <mat-icon>pause</mat-icon>
+                </button>
+              }
+              
+              <button 
+                mat-fab 
+                color="primary" 
+                (click)="stopRecording()"
+                class="control-button">
+                <mat-icon>stop</mat-icon>
+              </button>
+              
+              <button 
+                mat-stroked-button 
+                color="warn" 
+                (click)="cancelRecording()"
+                class="cancel-button">
+                <mat-icon>cancel</mat-icon>
+                Cancel
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Recording Info -->
+        @if (isRecording) {
+          <div class="recording-info">
+            <p class="recording-time">Recording: {{ formatTime(recordingTime) }}</p>
+            <p class="max-time">Maximum: {{ formatTime(maxRecordingTime) }}</p>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

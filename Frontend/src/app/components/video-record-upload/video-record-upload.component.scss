@@ -1,0 +1,83 @@
+.video-record-upload-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.main-card {
+  mat-card-header {
+    margin-bottom: 20px;
+  }
+}
+
+.video-tabs {
+  .mat-tab-group {
+    .mat-tab-header {
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.recording-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin-bottom: 30px;
+  background: #f3f8ff;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  text-align: center;
+
+  .success-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    color: #4caf50;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 1.3rem;
+  }
+
+  p {
+    margin: 0 0 16px 0;
+    color: #666;
+  }
+
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .video-record-upload-container {
+    padding: 10px;
+  }
+
+  .tab-content {
+    padding: 10px 0;
+  }
+
+  .recording-success {
+    padding: 16px;
+    margin-bottom: 20px;
+
+    .success-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+}

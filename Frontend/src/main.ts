@@ -43,6 +43,7 @@ const routes: Routes = [
   { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent), canActivate: [authGuard] },
   { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },
   { path: 'upload', loadComponent: () => import('./app/components/video-upload/video-upload.component').then(m => m.VideoUploadComponent), canActivate: [authGuard] },
+  { path: 'record', loadComponent: () => import('./app/components/video-record-upload/video-record-upload.component').then(m => m.VideoRecordUploadComponent), canActivate: [authGuard] },
   { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent), canActivate: [authGuard] },
   { path: 'invites', loadComponent: () => import('./app/components/invite-management/invite-management.component').then(m => m.InviteManagementComponent), canActivate: [authGuard] },
   { path: 'referrals', loadComponent: () => import('./app/components/referral-management/referral-management.component').then(m => m.ReferralManagementComponent), canActivate: [authGuard] },
