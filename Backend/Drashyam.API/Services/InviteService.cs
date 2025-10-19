@@ -72,10 +72,7 @@ public class InviteService : IInviteService
         // Track analytics
         await _analyticsService.TrackInviteEventAsync(inviterId, InviteEventType.Created, invite.Id, "Invite created", createDto.Type.ToString());
 
-        // Send notification
-        await _notificationService.SendInviteNotificationAsync(inviterId, 
-            $"Invitation sent to {createDto.InviteeEmail}", 
-            NotificationType.Success);
+        // TODO: Add notification for invite sent if needed
 
         return await GetInviteDtoAsync(invite.Id);
     }
@@ -134,11 +131,7 @@ public class InviteService : IInviteService
         // Track analytics
         await _analyticsService.TrackInviteEventAsync(invite.InviterId, InviteEventType.Accepted, invite.Id, "Invite accepted");
 
-        // Send notification to inviter
-        await _notificationService.SendInviteAcceptedNotificationAsync(
-            invite.InviterId, 
-            $"{acceptDto.FirstName} {acceptDto.LastName}", 
-            invite.InviteeEmail);
+        // TODO: Add notification for invite accepted if needed
 
         return await GetInviteDtoAsync(invite.Id);
     }

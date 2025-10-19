@@ -6,8 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { NotificationService, VideoNotification } from '../../services/notification.service';
 import { User } from '../../models/video.model';
 import { Observable, Subscription } from 'rxjs';
 
@@ -16,23 +18,28 @@ import { Observable, Subscription } from 'rxjs';
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
     standalone: true,
-    imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule]
+    imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, MatProgressSpinnerModule]
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   title = 'Drashyam';
   currentUser$: Observable<User | null>;
   isAuthenticated$: Observable<boolean>;
   isSidebarCollapsed$: Observable<boolean>;
+  unreadCount$: Observable<number>;
+  notifications: VideoNotification[] = [];
+  isLoadingNotifications = false;
   private subscription?: Subscription;
 
   constructor(
     private authService: AuthService,
     private sidebarService: SidebarService,
+    private notificationService: NotificationService,
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
     this.isAuthenticated$ = this.authService.isAuthenticated$;
     this.isSidebarCollapsed$ = this.sidebarService.isCollapsed$;
+    this.unreadCount$ = this.notificationService.unreadCount$;
   }
 
   ngOnInit() {
@@ -41,6 +48,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (!isAuth && this.authService.isAuthenticated()) {
         // If token exists but user not in state, fetch current user
         this.authService.getCurrentUser().subscribe();
+      }
+      if (isAuth) {
+        // Load notification count when user is authenticated
+        this.notificationService.refreshUnreadCount();
       }
     });
   }
@@ -56,6 +67,66 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     this.router.navigateByUrl('/');
+  }
+
+  loadNotifications() {
+    this.isLoadingNotifications = true;
+    this.notificationService.getNotifications(1, 10).subscribe({
+      next: (result) => {
+        this.notifications = result.items || [];
+        this.isLoadingNotifications = false;
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+        this.isLoadingNotifications = false;
+      }
+    });
+  }
+
+  onNotificationClick(notification: VideoNotification) {
+    // Mark as read if not already read
+    if (!notification.isRead) {
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => {
+          notification.isRead = true;
+          this.notificationService.refreshUnreadCount();
+        },
+        error: (error) => {
+          console.error('Error marking notification as read:', error);
+        }
+      });
+    }
+
+    // Navigate to video
+    this.router.navigate(['/videos', notification.videoId]);
+  }
+
+  markAllAsRead() {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.forEach(n => n.isRead = true);
+        this.notificationService.refreshUnreadCount();
+      },
+      error: (error) => {
+        console.error('Error marking all notifications as read:', error);
+      }
+    });
+  }
+
+  deleteNotification(notificationId: number) {
+    this.notificationService.deleteNotification(notificationId).subscribe({
+      next: () => {
+        this.notifications = this.notifications.filter(n => n.id !== notificationId);
+        this.notificationService.refreshUnreadCount();
+      },
+      error: (error) => {
+        console.error('Error deleting notification:', error);
+      }
+    });
+  }
+
+  onImageError(event: any) {
+    event.target.src = '/assets/default-video-thumbnail.svg';
   }
 }
 

@@ -14,17 +14,20 @@ public class VideoService : IVideoService
     private readonly IMapper _mapper;
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<VideoService> _logger;
+    private readonly INotificationService _notificationService;
 
     public VideoService(
         DrashyamDbContext context,
         IMapper mapper,
         IFileStorageService fileStorage,
-        ILogger<VideoService> logger)
+        ILogger<VideoService> logger,
+        INotificationService notificationService)
     {
         _context = context;
         _mapper = mapper;
         _fileStorage = fileStorage;
         _logger = logger;
+        _notificationService = notificationService;
     }
 
     public async Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId)
@@ -99,6 +102,9 @@ public class VideoService : IVideoService
                     channel.VideoCount++;
                     await _context.SaveChangesAsync();
                 }
+
+                // Create notifications for subscribers
+                await _notificationService.CreateVideoNotificationAsync(video.Id, uploadDto.ChannelId.Value);
             }
 
             _logger.LogInformation("Video uploaded successfully: {VideoId}", video.Id);

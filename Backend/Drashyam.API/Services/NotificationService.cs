@@ -1,134 +1,152 @@
-using Microsoft.AspNetCore.SignalR;
-using Drashyam.API.Hubs;
+using AutoMapper;
+using Drashyam.API.Data;
 using Drashyam.API.DTOs;
+using Drashyam.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Drashyam.API.Services;
 
 public class NotificationService : INotificationService
 {
-    private readonly IHubContext<NotificationHub> _hubContext;
-    private readonly ILogger<NotificationService> _logger;
+    private readonly DrashyamDbContext _context;
+    private readonly IMapper _mapper;
 
-    public NotificationService(
-        IHubContext<NotificationHub> hubContext,
-        ILogger<NotificationService> logger)
+    public NotificationService(DrashyamDbContext context, IMapper mapper)
     {
-        _hubContext = hubContext;
-        _logger = logger;
+        _context = context;
+        _mapper = mapper;
     }
 
-    public async Task SendInviteNotificationAsync(string userId, string message, NotificationType type, object? data = null)
+    public async Task<PagedResult<VideoNotificationDto>> GetUserNotificationsAsync(string userId, int page = 1, int pageSize = 20)
     {
-        try
+        var query = _context.Notifications
+            .Where(n => n.UserId == userId)
+            .Include(n => n.RelatedEntityId)
+            .OrderByDescending(n => n.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var notifications = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var videoNotifications = new List<VideoNotificationDto>();
+
+        foreach (var notification in notifications)
         {
-            var notification = new
+            if (notification.RelatedEntityType == "Video" && int.TryParse(notification.RelatedEntityId, out int videoId))
             {
-                Type = type.ToString(),
-                Message = message,
-                Timestamp = DateTime.UtcNow,
-                Data = data
-            };
+                var video = await _context.Videos
+                    .Include(v => v.Channel)
+                    .Include(v => v.User)
+                    .FirstOrDefaultAsync(v => v.Id == videoId);
 
-            await _hubContext.Clients.Group($"user_{userId}").SendAsync("InviteNotification", notification);
-            _logger.LogInformation("Sent invite notification to user {UserId}: {Message}", userId, message);
+                if (video != null)
+                {
+                    videoNotifications.Add(new VideoNotificationDto
+                    {
+                        Id = notification.Id,
+                        VideoId = video.Id,
+                        VideoTitle = video.Title,
+                        VideoThumbnailUrl = video.ThumbnailUrl ?? string.Empty,
+                        VideoDuration = video.Duration,
+                        VideoViewCount = video.ViewCount,
+                        ChannelId = video.ChannelId ?? 0,
+                        ChannelName = video.Channel?.Name ?? $"{video.User.FirstName} {video.User.LastName}",
+                        ChannelProfilePictureUrl = video.Channel?.ProfilePictureUrl ?? video.User.ProfilePictureUrl ?? string.Empty,
+                        CreatedAt = notification.CreatedAt,
+                        IsRead = notification.IsRead,
+                        ReadAt = notification.ReadAt,
+                        NotificationType = "new_video",
+                        Message = $"New video: {video.Title}"
+                    });
+                }
+            }
         }
-        catch (Exception ex)
+
+        return new PagedResult<VideoNotificationDto>
         {
-            _logger.LogError(ex, "Error sending invite notification to user {UserId}", userId);
-        }
+            Items = videoNotifications,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
-    public async Task SendReferralNotificationAsync(string userId, string message, NotificationType type, object? data = null)
+    public async Task<int> GetUnreadNotificationCountAsync(string userId)
     {
-        try
+        return await _context.Notifications
+            .CountAsync(n => n.UserId == userId && !n.IsRead);
+    }
+
+    public async Task MarkNotificationAsReadAsync(int notificationId, string userId)
+    {
+        var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+        if (notification != null)
         {
-            var notification = new
-            {
-                Type = type.ToString(),
-                Message = message,
-                Timestamp = DateTime.UtcNow,
-                Data = data
-            };
-
-            await _hubContext.Clients.Group($"user_{userId}").SendAsync("ReferralNotification", notification);
-            _logger.LogInformation("Sent referral notification to user {UserId}: {Message}", userId, message);
+            notification.IsRead = true;
+            notification.ReadAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
-        catch (Exception ex)
+    }
+
+    public async Task MarkAllNotificationsAsReadAsync(string userId)
+    {
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId == userId && !n.IsRead)
+            .ToListAsync();
+
+        foreach (var notification in notifications)
         {
-            _logger.LogError(ex, "Error sending referral notification to user {UserId}", userId);
+            notification.IsRead = true;
+            notification.ReadAt = DateTime.UtcNow;
         }
+
+        await _context.SaveChangesAsync();
     }
 
-    public async Task SendInviteAcceptedNotificationAsync(string inviterId, string inviteeName, string inviteeEmail)
+    public async Task CreateVideoNotificationAsync(int videoId, int channelId)
     {
-        var message = $"🎉 {inviteeName} ({inviteeEmail}) accepted your invitation!";
-        var data = new { InviteeName = inviteeName, InviteeEmail = inviteeEmail };
-        
-        await SendInviteNotificationAsync(inviterId, message, NotificationType.Success, data);
+        // Get all subscribers who have notifications enabled for this channel
+        var subscribers = await _context.ChannelSubscriptions
+            .Where(cs => cs.ChannelId == channelId && cs.IsActive && cs.NotificationsEnabled)
+            .Select(cs => cs.UserId)
+            .ToListAsync();
+
+        var video = await _context.Videos
+            .Include(v => v.Channel)
+            .FirstOrDefaultAsync(v => v.Id == videoId);
+
+        if (video == null) return;
+
+        var notifications = subscribers.Select(userId => new Notification
+        {
+            UserId = userId,
+            Title = "New Video",
+            Message = $"New video uploaded: {video.Title}",
+            Type = NotificationType.VideoUploaded,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow,
+            RelatedEntityId = videoId.ToString(),
+            RelatedEntityType = "Video",
+            ActionUrl = $"/videos/{videoId}"
+        }).ToList();
+
+        _context.Notifications.AddRange(notifications);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task SendReferralCompletedNotificationAsync(string referrerId, string referredUserName)
+    public async Task DeleteNotificationAsync(int notificationId, string userId)
     {
-        var message = $"🎉 {referredUserName} completed your referral! You've earned a reward.";
-        var data = new { ReferredUserName = referredUserName };
-        
-        await SendReferralNotificationAsync(referrerId, message, NotificationType.Success, data);
-    }
+        var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
 
-    public async Task SendRewardEarnedNotificationAsync(string userId, decimal amount, string rewardType)
-    {
-        var message = $"💰 You earned {amount:C} in {rewardType}! Check your rewards to claim it.";
-        var data = new { Amount = amount, RewardType = rewardType };
-        
-        await SendReferralNotificationAsync(userId, message, NotificationType.Reward, data);
-    }
-
-    public async Task SendRewardClaimedNotificationAsync(string userId, decimal amount, string rewardType)
-    {
-        var message = $"✅ You successfully claimed {amount:C} in {rewardType}!";
-        var data = new { Amount = amount, RewardType = rewardType };
-        
-        await SendReferralNotificationAsync(userId, message, NotificationType.Success, data);
-    }
-
-    public async Task SendInviteExpiredNotificationAsync(string userId, string inviteeEmail)
-    {
-        var message = $"⏰ Your invitation to {inviteeEmail} has expired.";
-        var data = new { InviteeEmail = inviteeEmail };
-        
-        await SendInviteNotificationAsync(userId, message, NotificationType.Warning, data);
-    }
-
-    public async Task SendReferralCodeUsedNotificationAsync(string userId, string code, string usedBy)
-    {
-        var message = $"🔗 Your referral code '{code}' was used by {usedBy}!";
-        var data = new { Code = code, UsedBy = usedBy };
-        
-        await SendReferralNotificationAsync(userId, message, NotificationType.Referral, data);
-    }
-
-    public async Task SendBulkInviteNotificationAsync(string userId, int successCount, int failureCount)
-    {
-        var message = $"📧 Bulk invite completed: {successCount} sent successfully, {failureCount} failed.";
-        var data = new { SuccessCount = successCount, FailureCount = failureCount };
-        
-        await SendInviteNotificationAsync(userId, message, 
-            failureCount > 0 ? NotificationType.Warning : NotificationType.Success, data);
-    }
-
-    public async Task SendReferralStatsUpdateAsync(string userId, ReferralStatsDto stats)
-    {
-        var message = $"📊 Your referral stats updated: {stats.CompletedReferrals} completed, {stats.TotalRewards:C} earned";
-        var data = new { Stats = stats };
-        
-        await SendReferralNotificationAsync(userId, message, NotificationType.Stats, data);
-    }
-
-    public async Task SendInviteStatsUpdateAsync(string userId, InviteStatsDto stats)
-    {
-        var message = $"📊 Your invite stats updated: {stats.AcceptedInvites} accepted, {stats.ConversionRate:F1}% conversion rate";
-        var data = new { Stats = stats };
-        
-        await SendInviteNotificationAsync(userId, message, NotificationType.Stats, data);
+        if (notification != null)
+        {
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -1,101 +1,66 @@
 import { Injectable } from '@angular/core';
-import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { PagedResult } from './video.service';
 
-export interface Notification {
-  type: string;
+export interface VideoNotification {
+  id: number;
+  videoId: number;
+  videoTitle: string;
+  videoThumbnailUrl: string;
+  videoDuration: string;
+  videoViewCount: number;
+  channelId: number;
+  channelName: string;
+  channelProfilePictureUrl: string;
+  createdAt: Date;
+  isRead: boolean;
+  readAt?: Date;
+  notificationType: string;
   message: string;
-  timestamp: Date;
-  data?: any;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  private hubConnection: HubConnection;
-  private notificationsSubject = new BehaviorSubject<Notification[]>([]);
-  public notifications$ = this.notificationsSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/api/notification`;
+  private unreadCountSubject = new BehaviorSubject<number>(0);
+  public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  constructor() {
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/notificationHub`)
-      .withAutomaticReconnect()
-      .build();
+  constructor(private http: HttpClient) {}
 
-    this.startConnection();
-    this.setupEventHandlers();
+  getNotifications(page: number = 1, pageSize: number = 20): Observable<PagedResult<VideoNotification>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<PagedResult<VideoNotification>>(this.apiUrl, { params });
   }
 
-  private startConnection(): void {
-    this.hubConnection.start()
-      .then(() => {
-        console.log('Connected to notification hub');
-      })
-      .catch(err => {
-        console.error('Error connecting to notification hub:', err);
-        setTimeout(() => this.startConnection(), 5000);
-      });
+  getUnreadCount(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/count`).pipe(
+      tap(count => this.unreadCountSubject.next(count))
+    );
   }
 
-  private setupEventHandlers(): void {
-    // Invite notifications
-    this.hubConnection.on('InviteNotification', (notification: Notification) => {
-      this.addNotification(notification);
-    });
-
-    // Referral notifications
-    this.hubConnection.on('ReferralNotification', (notification: Notification) => {
-      this.addNotification(notification);
-    });
-
-    // Connection state changes
-    this.hubConnection.onclose(() => {
-      console.log('Disconnected from notification hub');
-    });
-
-    this.hubConnection.onreconnecting(() => {
-      console.log('Reconnecting to notification hub...');
-    });
-
-    this.hubConnection.onreconnected(() => {
-      console.log('Reconnected to notification hub');
-    });
+  markAsRead(notificationId: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${notificationId}/read`, {});
   }
 
-  private addNotification(notification: Notification): void {
-    const currentNotifications = this.notificationsSubject.value;
-    const newNotifications = [notification, ...currentNotifications].slice(0, 50); // Keep last 50 notifications
-    this.notificationsSubject.next(newNotifications);
+  markAllAsRead(): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/read-all`, {}).pipe(
+      tap(() => this.unreadCountSubject.next(0))
+    );
   }
 
-  public getNotifications(): Observable<Notification[]> {
-    return this.notifications$;
+  deleteNotification(notificationId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${notificationId}`);
   }
 
-  public clearNotifications(): void {
-    this.notificationsSubject.next([]);
-  }
-
-  public markAsRead(notification: Notification): void {
-    // Implementation for marking notifications as read
-    // This could involve updating a local state or calling an API
-  }
-
-  public getUnreadCount(): number {
-    // Implementation for getting unread notification count
-    // This would depend on your notification model
-    return this.notificationsSubject.value.length;
-  }
-
-  public isConnected(): boolean {
-    return this.hubConnection.state === HubConnectionState.Connected;
-  }
-
-  public async disconnect(): Promise<void> {
-    if (this.hubConnection.state === HubConnectionState.Connected) {
-      await this.hubConnection.stop();
-    }
+  refreshUnreadCount(): void {
+    this.getUnreadCount().subscribe();
   }
 }

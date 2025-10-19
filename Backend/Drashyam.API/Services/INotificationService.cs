@@ -4,27 +4,10 @@ namespace Drashyam.API.Services;
 
 public interface INotificationService
 {
-    Task SendInviteNotificationAsync(string userId, string message, NotificationType type, object? data = null);
-    Task SendReferralNotificationAsync(string userId, string message, NotificationType type, object? data = null);
-    Task SendInviteAcceptedNotificationAsync(string inviterId, string inviteeName, string inviteeEmail);
-    Task SendReferralCompletedNotificationAsync(string referrerId, string referredUserName);
-    Task SendRewardEarnedNotificationAsync(string userId, decimal amount, string rewardType);
-    Task SendRewardClaimedNotificationAsync(string userId, decimal amount, string rewardType);
-    Task SendInviteExpiredNotificationAsync(string userId, string inviteeEmail);
-    Task SendReferralCodeUsedNotificationAsync(string userId, string code, string usedBy);
-    Task SendBulkInviteNotificationAsync(string userId, int successCount, int failureCount);
-    Task SendReferralStatsUpdateAsync(string userId, ReferralStatsDto stats);
-    Task SendInviteStatsUpdateAsync(string userId, InviteStatsDto stats);
-}
-
-public enum NotificationType
-{
-    Info,
-    Success,
-    Warning,
-    Error,
-    Invite,
-    Referral,
-    Reward,
-    Stats
+    Task<PagedResult<VideoNotificationDto>> GetUserNotificationsAsync(string userId, int page = 1, int pageSize = 20);
+    Task<int> GetUnreadNotificationCountAsync(string userId);
+    Task MarkNotificationAsReadAsync(int notificationId, string userId);
+    Task MarkAllNotificationsAsReadAsync(string userId);
+    Task CreateVideoNotificationAsync(int videoId, int channelId);
+    Task DeleteNotificationAsync(int notificationId, string userId);
 }
