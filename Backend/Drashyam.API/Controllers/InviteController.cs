@@ -40,7 +40,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating invite");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -60,7 +59,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating bulk invites");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -80,7 +78,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting invite by token");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -105,7 +102,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error accepting invite");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -124,7 +120,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting user invites");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -139,7 +134,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting invites by email");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -161,7 +155,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error cancelling invite");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -183,7 +176,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error resending invite");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -202,7 +194,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting invite stats");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -221,7 +212,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating invite link");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -237,7 +227,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating invite token");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -255,7 +244,6 @@ public class InviteController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error expiring invite");
             return StatusCode(500, "Internal server error");
         }
     }

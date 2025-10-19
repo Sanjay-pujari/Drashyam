@@ -17,18 +17,10 @@ public class RequestLoggingMiddleware
     {
         var stopwatch = Stopwatch.StartNew();
         
-        _logger.LogInformation("Request started: {Method} {Path}", 
-            context.Request.Method, 
-            context.Request.Path);
 
         await _next(context);
 
         stopwatch.Stop();
         
-        _logger.LogInformation("Request completed: {Method} {Path} - {StatusCode} in {ElapsedMs}ms", 
-            context.Request.Method, 
-            context.Request.Path,
-            context.Response.StatusCode,
-            stopwatch.ElapsedMilliseconds);
     }
 }

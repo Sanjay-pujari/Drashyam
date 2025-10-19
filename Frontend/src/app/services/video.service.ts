@@ -68,7 +68,6 @@ export class VideoService {
   }
 
   recordVideoView(id: number, watchDuration: number): Observable<Video> {
-    console.log('Recording view for video:', id, 'Duration:', watchDuration);
     return this.http.post<Video>(`${this.apiUrl}/${id}/view?secondsWatched=${watchDuration}`, {});
   }
 
@@ -179,7 +178,6 @@ export class VideoService {
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
     
     const url = `${this.apiUrl}/favorites`;
-    console.log('Calling liked videos API:', url, 'with params:', params.toString());
     
     return this.http.get<PagedResult<Video>>(url, { params });
   }

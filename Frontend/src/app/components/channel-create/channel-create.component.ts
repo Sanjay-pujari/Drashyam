@@ -11,7 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { ChannelService } from '../../services/channel.service';
 import { AuthService } from '../../services/auth.service';
-import { ChannelCreate } from '../../models/video.model';
+import { ChannelCreate } from '../../models/channel.model';
 
 @Component({
   selector: 'app-channel-create',
@@ -38,7 +38,7 @@ export class ChannelCreateComponent implements OnInit {
     this.channelForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
-      type: ['Personal', Validators.required],
+      type: [0, Validators.required], // 0 = Personal, 1 = Business, 2 = Creator, 3 = Brand
       customUrl: ['', [Validators.pattern(/^[a-zA-Z0-9-_]+$/)]],
       websiteUrl: ['', [Validators.pattern(/^https?:\/\/.+/)]],
       socialLinks: ['']
@@ -73,6 +73,7 @@ export class ChannelCreateComponent implements OnInit {
   }
 
   onSubmit() {
+    
     if (this.channelForm.valid) {
       this.isCreating = true;
       
@@ -84,6 +85,7 @@ export class ChannelCreateComponent implements OnInit {
         websiteUrl: this.channelForm.value.websiteUrl,
         socialLinks: this.channelForm.value.socialLinks
       };
+      
 
       // Check if banner is required
       if (!this.selectedBanner) {
@@ -94,7 +96,6 @@ export class ChannelCreateComponent implements OnInit {
 
       this.channelService.createChannel(channelData).subscribe({
         next: (channel) => {
-          console.log('Channel created successfully:', channel);
           
           // Upload banner if selected
           if (this.selectedBanner) {
@@ -109,12 +110,10 @@ export class ChannelCreateComponent implements OnInit {
                 
                 // Add a small delay to ensure the channel is fully created
                 setTimeout(() => {
-                  console.log('Uploading banner...');
                   this.uploadBannerWithRetry(channel.id, this.selectedBanner!, 3);
                 }, 1000); // 1 second delay
               },
               error: (err) => {
-                console.error('Failed to validate token:', err);
                 alert('Authentication error. Please log in again.');
                 this.router.navigate(['/login']);
               }
@@ -125,7 +124,6 @@ export class ChannelCreateComponent implements OnInit {
         },
         error: (err) => {
           this.isCreating = false;
-          console.error('Failed to create channel:', err);
           if (err.status === 401) {
             alert('Authentication expired. Please log in again.');
             this.router.navigate(['/login']);
@@ -146,21 +144,16 @@ export class ChannelCreateComponent implements OnInit {
   }
 
   private uploadBannerWithRetry(channelId: number, bannerFile: File, retries: number): void {
-    console.log(`Attempting banner upload for channel ${channelId}, file: ${bannerFile.name}, retries left: ${retries}`);
     
     this.channelService.updateChannelBanner(channelId, bannerFile).subscribe({
       next: (result) => {
-        console.log('Banner uploaded successfully:', result);
         // Upload profile picture if selected
         if (this.selectedProfilePicture) {
-          console.log('Uploading profile picture...');
           this.channelService.updateChannelProfilePicture(channelId, this.selectedProfilePicture).subscribe({
             next: () => {
-              console.log('Profile picture uploaded successfully');
               this.router.navigate(['/channels', channelId]);
             },
             error: (err) => {
-              console.error('Failed to upload profile picture:', err);
               this.router.navigate(['/channels', channelId]);
             }
           });
@@ -169,13 +162,6 @@ export class ChannelCreateComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error(`Failed to upload banner (${retries} retries left):`, err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
         
         if (err.status === 401) {
           alert('Authentication expired. Please log in again.');
@@ -183,12 +169,10 @@ export class ChannelCreateComponent implements OnInit {
         } else if (retries > 0) {
           // Retry with exponential backoff
           const delay = Math.pow(2, 3 - retries) * 1000; // 1s, 2s, 4s
-          console.log(`Retrying banner upload in ${delay}ms...`);
           setTimeout(() => {
             this.uploadBannerWithRetry(channelId, bannerFile, retries - 1);
           }, delay);
         } else {
-          console.error('All retry attempts exhausted for banner upload');
           alert('Channel created but failed to upload banner after multiple attempts. Please try updating it later.');
           this.router.navigate(['/channels', channelId]);
         }

@@ -21,7 +21,6 @@ public class HistoryService : IHistoryService
 
     public async Task<List<HistoryDto>> GetUserHistoryAsync(string userId, int page = 1, int pageSize = 20)
     {
-        _logger.LogInformation("Getting history for user {UserId}, page {Page}, pageSize {PageSize}", userId, page, pageSize);
 
         var historyItems = await _context.VideoViews
             .Where(vv => vv.UserId == userId)
@@ -48,13 +47,11 @@ public class HistoryService : IHistoryService
             })
             .ToListAsync();
 
-        _logger.LogInformation("Retrieved {Count} history items for user {UserId}", historyItems.Count, userId);
         return historyItems;
     }
 
     public async Task<HistoryDto> AddToHistoryAsync(string userId, HistoryCreateDto historyDto)
     {
-        _logger.LogInformation("Adding video {VideoId} to history for user {UserId}", historyDto.VideoId, userId);
 
         // Check if video exists
         var video = await _context.Videos
@@ -136,7 +133,6 @@ public class HistoryService : IHistoryService
 
     public async Task<HistoryDto> UpdateHistoryAsync(int historyId, string userId, HistoryUpdateDto historyDto)
     {
-        _logger.LogInformation("Updating history item {HistoryId} for user {UserId}", historyId, userId);
 
         var historyItem = await _context.VideoViews
             .Include(vv => vv.Video)
@@ -171,7 +167,6 @@ public class HistoryService : IHistoryService
 
     public async Task<bool> RemoveFromHistoryAsync(int historyId, string userId)
     {
-        _logger.LogInformation("Removing history item {HistoryId} for user {UserId}", historyId, userId);
 
         var historyItem = await _context.VideoViews
             .FirstOrDefaultAsync(vv => vv.Id == historyId && vv.UserId == userId);
@@ -184,13 +179,11 @@ public class HistoryService : IHistoryService
         _context.VideoViews.Remove(historyItem);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Removed history item {HistoryId} for user {UserId}", historyId, userId);
         return true;
     }
 
     public async Task<bool> ClearUserHistoryAsync(string userId)
     {
-        _logger.LogInformation("Clearing all history for user {UserId}", userId);
 
         var historyItems = await _context.VideoViews
             .Where(vv => vv.UserId == userId)
@@ -202,7 +195,6 @@ public class HistoryService : IHistoryService
             await _context.SaveChangesAsync();
         }
 
-        _logger.LogInformation("Cleared {Count} history items for user {UserId}", historyItems.Count, userId);
         return true;
     }
 

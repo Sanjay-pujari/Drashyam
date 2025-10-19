@@ -58,24 +58,14 @@ export class VideoDetailComponent implements OnInit {
   loadVideo() {
     if (!this.videoId) return;
     
-    console.log('Loading video with ID:', this.videoId);
     this.videoService.getVideoById(this.videoId).subscribe({
       next: (video) => {
-        console.log('Video loaded successfully:', video);
         this.video = video;
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load video:', err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
         this.isLoading = false;
         if (err.status === 404) {
-          console.log('Video not found, redirecting to videos list');
           this.router.navigate(['/videos']);
         }
       }
@@ -83,18 +73,14 @@ export class VideoDetailComponent implements OnInit {
   }
 
   loadVideoByShareToken(token: string) {
-    console.log('Loading video with share token:', token);
     this.videoService.getVideoByShareToken(token).subscribe({
       next: (video) => {
-        console.log('Video loaded successfully via share token:', video);
         this.video = video;
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load video via share token:', err);
         this.isLoading = false;
         if (err.status === 404) {
-          console.log('Shared video not found');
           this.router.navigate(['/videos']);
         }
       }
@@ -150,7 +136,6 @@ export class VideoDetailComponent implements OnInit {
       this.router.navigate(['/channels', this.video.channel.id]);
     } else if (this.video?.user) {
       // For users without channels, you might want to create a user profile page
-      console.log('User profile navigation not implemented yet');
     }
   }
 

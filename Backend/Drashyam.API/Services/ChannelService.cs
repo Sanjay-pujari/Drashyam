@@ -27,12 +27,15 @@ public class ChannelService : IChannelService
 
     public async Task<ChannelDto> CreateChannelAsync(ChannelCreateDto createDto, string userId)
     {
+        
         var channel = _mapper.Map<Channel>(createDto);
         channel.UserId = userId;
         channel.CreatedAt = DateTime.UtcNow;
+        
 
         _context.Channels.Add(channel);
         await _context.SaveChangesAsync();
+        
 
         return _mapper.Map<ChannelDto>(channel);
     }

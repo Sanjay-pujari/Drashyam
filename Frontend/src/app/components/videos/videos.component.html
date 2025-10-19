@@ -57,7 +57,7 @@
 									[alt]="video.title"
 									(error)="onImageError($event)">
 								<div class="video-duration">{{ video.duration }}</div>
-								@if (video.status === 'Processing') {
+								@if (video.status === 1) {
 									<div class="processing-overlay">
 										<mat-icon>hourglass_empty</mat-icon>
 										<span>Processing</span>

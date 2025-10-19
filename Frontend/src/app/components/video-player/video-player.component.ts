@@ -129,14 +129,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
     // Wait for the DOM element to be available
     if (!this.videoElement?.nativeElement) {
-      console.error('Video element not found');
       this.isLoading = false;
       return;
     }
 
     // Check if videojs is available
     if (typeof videojs === 'undefined') {
-      console.error('Video.js is not loaded');
       this.isLoading = false;
       return;
     }
@@ -150,12 +148,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     });
 
     // Set video source
-    console.log('Setting video source:', this.video.videoUrl);
     
     // Check if the video URL is a placeholder or invalid
     let videoUrl = this.video.videoUrl;
     if (!videoUrl || videoUrl.includes('example.com') || videoUrl.includes('placeholder')) {
-      console.warn('Using placeholder video URL, video may not load properly');
       // You can set a fallback video URL here or show an error message
     }
     
@@ -166,8 +162,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
     // Add error handling
     this.player.on('error', (error: any) => {
-      console.error('Video player error:', error);
-      console.error('Video URL:', this.video?.videoUrl);
       this.isLoading = false;
       this.hasError = true;
       this.errorMessage = 'Failed to load video. Please check the video URL or try again later.';
@@ -242,12 +236,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       return;
     }
 
-    console.log('Recording initial view for video:', this.video.id);
     
     // Record initial view with minimal duration
     this.videoService.recordVideoView(this.video.id, 1).subscribe({
       next: (updatedVideo) => {
-        console.log('Initial view recorded successfully:', updatedVideo);
         // Update the video in the store
         this.store.dispatch(recordVideoView({
           videoId: this.video!.id,
@@ -255,7 +247,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         }));
       },
       error: (error) => {
-        console.error('Error recording initial view:', error);
       }
     });
   }
@@ -267,12 +258,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
     const watchDuration = (Date.now() - this.watchStartTime) / 1000;
     if (watchDuration > 5) { // Only record if watched for more than 5 seconds
-      console.log('Recording view for video:', this.video.id, 'Duration:', watchDuration);
       
       // Record view using the video service endpoint (this also creates history entries)
       this.videoService.recordVideoView(this.video.id, Math.round(watchDuration)).subscribe({
         next: (updatedVideo) => {
-          console.log('View recorded successfully:', updatedVideo);
           // Update the video in the store
           this.store.dispatch(recordVideoView({ 
             videoId: this.video!.id, 
@@ -280,7 +269,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
           }));
         },
         error: (error) => {
-          console.error('Error recording view:', error);
         }
       });
       
@@ -388,7 +376,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.copyToClipboard(shareUrl);
       },
       error: (error) => {
-        console.error('Error generating share link:', error);
         this.snackBar.open('Failed to generate share link', 'Close', { duration: 3000 });
       }
     });
@@ -399,7 +386,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       navigator.clipboard.writeText(text).then(() => {
         this.snackBar.open('Share link copied to clipboard!', 'Close', { duration: 3000 });
       }).catch(err => {
-        console.error('Failed to copy share link:', err);
         this.fallbackCopyToClipboard(text);
       });
     } else {
@@ -421,7 +407,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       document.execCommand('copy');
       this.snackBar.open('Share link copied to clipboard!', 'Close', { duration: 3000 });
     } catch (err) {
-      console.error('Fallback copy failed:', err);
       this.snackBar.open('Share link: ' + text, 'Close', { duration: 5000 });
     }
     
@@ -457,7 +442,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.snackBar.open('Added to watch later', 'Close', { duration: 3000 });
       },
       error: (error) => {
-        console.error('Error adding to watch later:', error);
         this.snackBar.open('Failed to add to watch later', 'Close', { duration: 3000 });
       }
     });
@@ -472,7 +456,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.snackBar.open('Removed from watch later', 'Close', { duration: 3000 });
       },
       error: (error) => {
-        console.error('Error removing from watch later:', error);
         this.snackBar.open('Failed to remove from watch later', 'Close', { duration: 3000 });
       }
     });
@@ -494,7 +477,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.snackBar.open('Added to playlist', 'Close', { duration: 3000 });
       },
       error: (error) => {
-        console.error('Error adding to playlist:', error);
         this.snackBar.open('Failed to add to playlist', 'Close', { duration: 3000 });
       }
     });
@@ -508,7 +490,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.checkVideoPlaylistStatus();
       },
       error: (error) => {
-        console.error('Error loading playlists:', error);
       }
     });
   }
@@ -521,7 +502,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.isInWatchLater = isInWatchLater;
       },
       error: (error) => {
-        console.error('Error checking watch later status:', error);
       }
     });
   }
@@ -540,7 +520,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
           this.videoPlaylistStatus[playlist.id] = isInPlaylist;
         },
         error: (error) => {
-          console.error(`Error checking playlist ${playlist.id} status:`, error);
           this.videoPlaylistStatus[playlist.id] = false;
         }
       });

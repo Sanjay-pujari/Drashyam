@@ -62,7 +62,6 @@ public class AuthController : ControllerBase
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await _emailService.SendEmailVerificationAsync(user.Email, token);
 
-                _logger.LogInformation("User {Email} registered successfully", user.Email);
                 return Ok(new { message = "Registration successful. Please check your email to confirm your account." });
             }
 
@@ -70,7 +69,6 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during user registration");
             return StatusCode(500, "An error occurred during registration");
         }
     }
@@ -98,12 +96,10 @@ public class AuthController : ControllerBase
             user.LastLoginAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            _logger.LogInformation("User {Email} logged in successfully", user.Email);
             return Ok(new { token, user = MapToUserDto(user) });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during user login");
             return StatusCode(500, "An error occurred during login");
         }
     }
@@ -120,7 +116,6 @@ public class AuthController : ControllerBase
             var result = await _userManager.ConfirmEmailAsync(user, model.Token);
             if (result.Succeeded)
             {
-                _logger.LogInformation("Email confirmed for user {Email}", user.Email);
                 return Ok(new { message = "Email confirmed successfully" });
             }
 
@@ -128,7 +123,6 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during email confirmation");
             return StatusCode(500, "An error occurred during email confirmation");
         }
     }
@@ -145,12 +139,10 @@ public class AuthController : ControllerBase
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             await _emailService.SendPasswordResetEmailAsync(user.Email, token);
 
-            _logger.LogInformation("Password reset requested for user {Email}", user.Email);
             return Ok(new { message = "If the email exists, a password reset link has been sent" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during password reset request");
             return StatusCode(500, "An error occurred during password reset request");
         }
     }
@@ -170,7 +162,6 @@ public class AuthController : ControllerBase
             var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
             if (result.Succeeded)
             {
-                _logger.LogInformation("Password reset successful for user {Email}", user.Email);
                 return Ok(new { message = "Password reset successfully" });
             }
 
@@ -178,7 +169,6 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during password reset");
             return StatusCode(500, "An error occurred during password reset");
         }
     }
@@ -190,12 +180,10 @@ public class AuthController : ControllerBase
         try
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out");
             return Ok(new { message = "Logged out successfully" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during logout");
             return StatusCode(500, "An error occurred during logout");
         }
     }
@@ -219,7 +207,6 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during token refresh");
             return StatusCode(500, "An error occurred during token refresh");
         }
     }

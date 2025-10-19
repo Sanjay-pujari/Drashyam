@@ -45,14 +45,12 @@ export class ChannelDetailComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.channelId = +params['id'];
-      console.log('Channel ID from route:', this.channelId);
       if (this.channelId) {
         this.loadChannel();
         this.loadChannelVideos();
         this.checkSubscription();
         this.checkOwnership();
       } else {
-        console.error('Invalid channel ID:', params['id']);
       }
     });
   }
@@ -60,27 +58,16 @@ export class ChannelDetailComponent implements OnInit {
   loadChannel() {
     if (!this.channelId) return;
     
-    console.log('Loading channel with ID:', this.channelId);
     this.channelService.getChannel(this.channelId).subscribe({
       next: (channel) => {
-        console.log('Channel loaded successfully:', channel);
         this.channel = channel;
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load channel:', err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
         this.isLoading = false;
         if (err.status === 404) {
-          console.log('Channel not found, redirecting to channels list');
           this.router.navigate(['/channels']);
         } else if (err.status === 0) {
-          console.error('Network error - API might not be running or CORS issue');
         }
       }
     });
@@ -89,20 +76,11 @@ export class ChannelDetailComponent implements OnInit {
   loadChannelVideos() {
     if (!this.channelId) return;
     
-    console.log('Loading videos for channel ID:', this.channelId);
     this.videoService.getVideosByChannel(this.channelId).subscribe({
       next: (videos) => {
-        console.log('Videos loaded successfully:', videos);
         this.videos = videos;
       },
       error: (err) => {
-        console.error('Failed to load channel videos:', err);
-        console.error('Video loading error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
       }
     });
   }
@@ -115,7 +93,6 @@ export class ChannelDetailComponent implements OnInit {
         this.isSubscribed = status.isSubscribed;
       },
       error: (err) => {
-        console.error('Failed to check subscription status:', err);
       }
     });
   }
@@ -140,7 +117,6 @@ export class ChannelDetailComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Failed to unsubscribe:', err);
         }
       });
     } else {
@@ -154,7 +130,6 @@ export class ChannelDetailComponent implements OnInit {
           this.loadNotificationPreference();
         },
         error: (err) => {
-          console.error('Failed to subscribe:', err);
         }
       });
     }
@@ -198,7 +173,6 @@ export class ChannelDetailComponent implements OnInit {
   onImageError(event: any) {
     // Only log once per image to reduce console noise
     if (!event.target.dataset.fallbackApplied) {
-      console.log('Image failed to load, using default image');
       event.target.dataset.fallbackApplied = 'true';
     }
     
@@ -219,10 +193,8 @@ export class ChannelDetailComponent implements OnInit {
       next: () => {
         this.notificationsEnabled = enabled;
         this.isUpdatingNotifications = false;
-        console.log('Notification preference updated:', enabled);
       },
       error: (error) => {
-        console.error('Error updating notification preference:', error);
         this.isUpdatingNotifications = false;
         // Revert the toggle state
         this.notificationsEnabled = !enabled;
@@ -236,10 +208,8 @@ export class ChannelDetailComponent implements OnInit {
     this.channelService.getNotificationPreference(this.channelId).subscribe({
       next: (enabled) => {
         this.notificationsEnabled = enabled;
-        console.log('Notification preference loaded:', enabled);
       },
       error: (error) => {
-        console.error('Error loading notification preference:', error);
         this.notificationsEnabled = true; // Default to enabled
       }
     });

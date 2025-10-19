@@ -31,13 +31,9 @@ export class AuthService {
 
   login(credentials: UserLogin): Observable<AuthResponse> {
     const url = `${this.apiUrl}/login`;
-    console.log('Auth service - API URL:', this.apiUrl);
-    console.log('Auth service - Login URL:', url);
-    console.log('Auth service - Credentials:', credentials);
     
     return this.http.post<AuthResponse>(url, credentials).pipe(
       tap(response => {
-        console.log('Login successful:', response);
         localStorage.setItem('token', response.token);
         this.currentUserSubject.next(response.user);
         
@@ -123,7 +119,6 @@ export class AuthService {
         localStorage.setItem('token', response.token);
       }),
       catchError(error => {
-        console.error('Failed to refresh token:', error);
         this.logout();
         throw error;
       })
@@ -192,37 +187,25 @@ export class AuthService {
   // Initialize authentication state on app startup
   initializeAuth(): Observable<User | null> {
     const token = localStorage.getItem('token');
-    console.log('Initializing auth - token exists:', !!token);
     
     if (!token || !this.isAuthenticated()) {
-      console.log('No valid token found, setting user to null');
       this.currentUserSubject.next(null);
       return of(null);
     }
     
-    console.log('Valid token found, attempting to get current user');
 
     return this.getCurrentUser().pipe(
       tap(user => {
         this.currentUserSubject.next(user);
-        console.log('User authenticated successfully:', user);
         
         // Dispatch action to NgRx store
         this.store.dispatch(UserActions.loadCurrentUserSuccess({ user }));
       }),
       map(user => user),
       catchError(error => {
-        console.error('Failed to initialize auth:', error);
-        console.error('Error details:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          error: error.error
-        });
         
         // If it's a 401 or 403, the token is invalid
         if (error.status === 401 || error.status === 403) {
-          console.log('Token is invalid, logging out user');
           this.logout();
         }
         

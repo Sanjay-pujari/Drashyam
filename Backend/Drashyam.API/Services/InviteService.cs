@@ -301,7 +301,6 @@ public class InviteService : IInviteService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create invite for {Email}", createDto.InviteeEmail);
             }
         }
 

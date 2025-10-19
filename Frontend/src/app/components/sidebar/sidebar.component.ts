@@ -82,12 +82,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadSubscriptions(): void {
-    console.log('Loading real subscriptions...');
     this.subscriptionService.getSubscribedChannels({ page: 1, pageSize: 10 }).subscribe({
       next: (result) => {
-        console.log('Subscriptions API response:', result);
-        console.log('Total subscriptions found:', result.totalCount);
-        console.log('Items in response:', result.items?.length || 0);
         
         this.subscriptions = (result.items || []).map(channel => ({
           id: channel.id.toString(),
@@ -104,12 +100,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         // Load notification preferences for each subscription
         this.loadNotificationPreferences();
         
-        console.log('Processed subscriptions for sidebar:', this.subscriptions);
-        console.log('Number of subscriptions to display:', this.subscriptions.length);
       },
       error: (error) => {
-        console.error('Error loading subscriptions:', error);
-        console.error('Error details:', error);
         this.subscriptions = [];
       }
     });
@@ -120,10 +112,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.subscriptionService.getNotificationPreference(parseInt(subscription.channelId)).subscribe({
         next: (enabled) => {
           subscription.isActive = enabled;
-          console.log(`Notification preference for ${subscription.channel.name}:`, enabled);
         },
         error: (error) => {
-          console.error(`Error loading notification preference for ${subscription.channel.name}:`, error);
           subscription.isActive = true; // Default to enabled
         }
       });
@@ -144,7 +134,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.historyCount = count;
       },
       error: (error) => {
-        console.error('Error loading history count:', error);
         this.historyCount = 0;
       }
     });
@@ -156,14 +145,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.likedVideosCount = count;
       },
       error: (error) => {
-        console.error('Error loading liked videos count:', error);
         this.likedVideosCount = 0;
       }
     });
   }
 
   navigateToChannel(channelId: string): void {
-    console.log('Navigating to channel:', channelId);
     this.router.navigate(['/channels', channelId]);
   }
 
@@ -172,33 +159,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   navigateToHistory(): void {
-    console.log('Navigating to history page');
     this.router.navigate(['/history']);
   }
 
   private loadWatchLaterCount(): void {
-    console.log('Loading watch later count...');
     this.watchLaterService.getWatchLaterCount().subscribe({
       next: (count) => {
-        console.log('Watch later count loaded:', count);
         this.watchLaterCount = count;
       },
       error: (error) => {
-        console.error('Error loading watch later count:', error);
         this.watchLaterCount = 0;
       }
     });
   }
 
   private loadPlaylistsCount(): void {
-    console.log('Loading playlists count...');
     this.playlistService.getPlaylists(1, 1).subscribe({
       next: (result) => {
-        console.log('Playlists count loaded:', result.totalCount);
         this.playlistsCount = result.totalCount;
       },
       error: (error) => {
-        console.error('Error loading playlists count:', error);
         this.playlistsCount = 0;
       }
     });

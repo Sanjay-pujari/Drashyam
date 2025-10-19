@@ -32,9 +32,8 @@ export class ChannelService {
   }
 
   createChannel(channelData: ChannelCreate): Observable<Channel> {
-    // Wrap the data in createDto as expected by backend
-    const requestBody = { createDto: channelData };
-    return this.http.post<Channel>(this.apiUrl, requestBody);
+    // Send data directly as expected by backend
+    return this.http.post<Channel>(this.apiUrl, channelData);
   }
 
   updateChannel(id: number, channelData: ChannelUpdate): Observable<Channel> {
@@ -117,8 +116,6 @@ export class ChannelService {
   // Additional methods for channel detail component
   getChannel(id: number): Observable<Channel> {
     const url = `${this.apiUrl}/${id}`;
-    console.log('Channel service - API URL:', this.apiUrl);
-    console.log('Channel service - Full URL:', url);
     return this.http.get<Channel>(url);
   }
 

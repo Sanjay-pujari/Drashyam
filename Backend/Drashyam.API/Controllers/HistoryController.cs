@@ -37,7 +37,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting history for user {UserId}", userId);
             return StatusCode(500, "An error occurred while retrieving history");
         }
     }
@@ -59,12 +58,10 @@ public class HistoryController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Invalid request to add to history for user {UserId}", userId);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding to history for user {UserId}", userId);
             return StatusCode(500, "An error occurred while adding to history");
         }
     }
@@ -86,12 +83,10 @@ public class HistoryController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "History item {HistoryId} not found for user {UserId}", historyId, userId);
             return NotFound(ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating history item {HistoryId} for user {UserId}", historyId, userId);
             return StatusCode(500, "An error occurred while updating history");
         }
     }
@@ -117,7 +112,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error removing history item {HistoryId} for user {UserId}", historyId, userId);
             return StatusCode(500, "An error occurred while removing from history");
         }
     }
@@ -139,7 +133,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error clearing history for user {UserId}", userId);
             return StatusCode(500, "An error occurred while clearing history");
         }
     }
@@ -165,7 +158,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting history item {HistoryId} for user {UserId}", historyId, userId);
             return StatusCode(500, "An error occurred while retrieving history item");
         }
     }
@@ -187,7 +179,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if video {VideoId} is in history for user {UserId}", videoId, userId);
             return StatusCode(500, "An error occurred while checking history");
         }
     }
@@ -209,7 +200,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting history count for user {UserId}", userId);
             return StatusCode(500, "An error occurred while getting history count");
         }
     }

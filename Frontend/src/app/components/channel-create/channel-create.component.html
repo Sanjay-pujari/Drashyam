@@ -92,9 +92,10 @@
             <mat-form-field appearance="outline" class="half-width">
               <mat-label>Channel Type</mat-label>
               <mat-select formControlName="type">
-                <mat-option value="Personal">Personal</mat-option>
-                <mat-option value="Business">Business</mat-option>
-                <mat-option value="Brand">Brand</mat-option>
+                <mat-option [value]="0">Personal</mat-option>
+                <mat-option [value]="1">Business</mat-option>
+                <mat-option [value]="2">Creator</mat-option>
+                <mat-option [value]="3">Brand</mat-option>
               </mat-select>
             </mat-form-field>
 

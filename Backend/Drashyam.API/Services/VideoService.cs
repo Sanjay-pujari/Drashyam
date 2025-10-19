@@ -107,13 +107,11 @@ public class VideoService : IVideoService
                 await _notificationService.CreateVideoNotificationAsync(video.Id, uploadDto.ChannelId.Value);
             }
 
-            _logger.LogInformation("Video uploaded successfully: {VideoId}", video.Id);
 
             return await GetVideoByIdAsync(video.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error uploading video for user {UserId}", userId);
             throw;
         }
     }
@@ -372,11 +370,9 @@ public class VideoService : IVideoService
         var video = await _context.Videos.FindAsync(videoId);
         if (video == null) 
         {
-            _logger.LogWarning("Video {VideoId} not found when recording view", videoId);
             throw new ArgumentException("Video not found");
         }
 
-        _logger.LogInformation("Recording view for video {VideoId} by user {UserId}, duration: {Duration}", videoId, userId, watchDuration);
 
         // Determine device type from user agent
         var deviceType = DetermineDeviceType(userAgent);
@@ -397,7 +393,6 @@ public class VideoService : IVideoService
         video.ViewCount++;
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("View count updated for video {VideoId}: {OldCount} -> {NewCount}", videoId, oldViewCount, video.ViewCount);
 
         // Return updated video
         return await GetVideoByIdAsync(videoId);

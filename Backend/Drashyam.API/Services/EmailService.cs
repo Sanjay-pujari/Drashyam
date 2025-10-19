@@ -39,12 +39,10 @@ public class EmailService : IEmailService
             message.To.Add(to);
 
             await client.SendMailAsync(message);
-            _logger.LogInformation("Email sent successfully to {To}", to);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {To}", to);
             return false;
         }
     }

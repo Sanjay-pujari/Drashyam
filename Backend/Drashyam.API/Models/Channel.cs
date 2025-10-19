@@ -57,5 +57,6 @@ public enum ChannelType
 {
     Personal,
     Business,
+    Creator,
     Brand
 }

@@ -586,7 +586,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
             this.authService.getCurrentUser().subscribe();
           },
           error: (error) => {
-            console.error('Error updating profile:', error);
             this.snackBar.open('Failed to update profile. Please try again.', 'Close', { duration: 3000 });
             this.isUpdatingProfile = false;
           }
@@ -612,7 +611,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
             this.isUpdatingPrivacy = false;
           },
           error: (error) => {
-            console.error('Error updating privacy settings:', error);
             this.snackBar.open('Failed to update privacy settings. Please try again.', 'Close', { duration: 3000 });
             this.isUpdatingPrivacy = false;
           }
@@ -639,7 +637,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
             this.isUpdatingNotifications = false;
           },
           error: (error) => {
-            console.error('Error updating notification settings:', error);
             this.snackBar.open('Failed to update notification settings. Please try again.', 'Close', { duration: 3000 });
             this.isUpdatingNotifications = false;
           }
@@ -666,7 +663,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
             this.isChangingPassword = false;
           },
           error: (error) => {
-            console.error('Error changing password:', error);
             this.snackBar.open('Failed to change password. Please check your current password.', 'Close', { duration: 3000 });
             this.isChangingPassword = false;
           }

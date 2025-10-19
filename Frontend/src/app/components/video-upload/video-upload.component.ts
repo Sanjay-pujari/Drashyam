@@ -49,7 +49,7 @@ export class VideoUploadComponent implements OnInit {
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
       channelId: [null],
-      visibility: ['Public', Validators.required],
+      visibility: [0, Validators.required], // 0 = Public, 1 = Private, 2 = Unlisted
       category: [''],
       tags: ['']
     });
@@ -60,23 +60,13 @@ export class VideoUploadComponent implements OnInit {
   }
 
   loadUserChannels() {
-    console.log('Loading user channels...');
     this.isLoadingChannels = true;
     this.channelService.getUserChannels('me', { page: 1, pageSize: 100 }).subscribe({
       next: (result) => {
-        console.log('Channels loaded successfully:', result);
         this.userChannels = result.items;
         this.isLoadingChannels = false;
-        console.log('User channels:', this.userChannels);
       },
       error: (err) => {
-        console.error('Failed to load channels:', err);
-        console.error('Error details:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
         this.isLoadingChannels = false;
       }
     });
@@ -102,18 +92,12 @@ export class VideoUploadComponent implements OnInit {
 
   onThumbnailSelected(event: any) {
     const file = event.target.files[0];
-    console.log('Thumbnail file selected:', file);
     if (file) {
       this.selectedThumbnail = file;
-      console.log('Thumbnail set:', this.selectedThumbnail);
     }
   }
 
   onSubmit() {
-    console.log('Form valid:', this.uploadForm.valid);
-    console.log('Form errors:', this.uploadForm.errors);
-    console.log('Selected file:', this.selectedFile);
-    console.log('Form value:', this.uploadForm.value);
     
     if (this.uploadForm.valid && this.selectedFile) {
       this.isUploading = true;
@@ -135,16 +119,7 @@ export class VideoUploadComponent implements OnInit {
         formData.append('thumbnailFile', this.selectedThumbnail);
       }
 
-      console.log('FormData contents:');
       // Log FormData contents in a compatible way
-      console.log('Video file:', this.selectedFile?.name);
-      console.log('Title:', this.uploadForm.value.title);
-      console.log('Description:', this.uploadForm.value.description);
-      console.log('Visibility:', this.uploadForm.value.visibility);
-      console.log('Category:', this.uploadForm.value.category);
-      console.log('Tags:', this.uploadForm.value.tags);
-      console.log('Channel ID:', this.uploadForm.value.channelId);
-      console.log('Thumbnail file:', this.selectedThumbnail?.name);
 
       // Simulate progress (in real app, you'd track actual upload progress)
       const progressInterval = setInterval(() => {
@@ -158,7 +133,6 @@ export class VideoUploadComponent implements OnInit {
         next: (video) => {
           clearInterval(progressInterval);
           this.uploadProgress = 100;
-          console.log('Upload successful:', video);
           setTimeout(() => {
             this.router.navigate(['/videos', video.id]);
           }, 1000);
@@ -166,20 +140,11 @@ export class VideoUploadComponent implements OnInit {
         error: (err) => {
           clearInterval(progressInterval);
           this.isUploading = false;
-          console.error('Upload failed:', err);
-          console.error('Error details:', {
-            status: err.status,
-            statusText: err.statusText,
-            message: err.message,
-            error: err.error
-          });
           alert('Upload failed. Please try again.');
         }
       });
     } else {
-      console.log('Form is invalid or no file selected');
       if (!this.uploadForm.valid) {
-        console.log('Form validation errors:', this.getFormValidationErrors());
       }
     }
   }
@@ -228,7 +193,6 @@ export class VideoUploadComponent implements OnInit {
               lastModified: Date.now()
             });
             this.selectedThumbnail = thumbnailFile;
-            console.log('Thumbnail generated for recorded video');
           }
         }, 'image/jpeg', 0.8);
       }
@@ -238,7 +202,6 @@ export class VideoUploadComponent implements OnInit {
   }
 
   setRecordedVideo(file: File) {
-    console.log('Setting recorded video:', file);
     this.selectedFile = file;
     
     // Update the file input display

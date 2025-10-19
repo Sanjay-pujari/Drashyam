@@ -77,7 +77,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.isLoadingNotifications = false;
       },
       error: (error) => {
-        console.error('Error loading notifications:', error);
         this.isLoadingNotifications = false;
       }
     });
@@ -92,7 +91,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.notificationService.refreshUnreadCount();
         },
         error: (error) => {
-          console.error('Error marking notification as read:', error);
         }
       });
     }
@@ -108,7 +106,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.notificationService.refreshUnreadCount();
       },
       error: (error) => {
-        console.error('Error marking all notifications as read:', error);
       }
     });
   }
@@ -120,7 +117,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.notificationService.refreshUnreadCount();
       },
       error: (error) => {
-        console.error('Error deleting notification:', error);
       }
     });
   }

@@ -8,7 +8,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { HistoryService, HistoryItem } from '../../services/history.service';
 
-console.log('History component module loaded');
 
 @Component({
   selector: 'app-history',
@@ -210,7 +209,6 @@ export class HistoryComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('History component initialized');
     this.loadHistory();
   }
 
@@ -220,10 +218,8 @@ export class HistoryComponent implements OnInit {
       next: (history) => {
         this.historyItems = history;
         this.isLoading = false;
-        console.log('History loaded:', history);
       },
       error: (error) => {
-        console.error('Error loading history:', error);
         this.snackBar.open('Failed to load history', 'Close', { duration: 3000 });
         this.isLoading = false;
       }
@@ -238,7 +234,6 @@ export class HistoryComponent implements OnInit {
           this.snackBar.open('History cleared successfully', 'Close', { duration: 2000 });
         },
         error: (error) => {
-          console.error('Error clearing history:', error);
           this.snackBar.open('Failed to clear history', 'Close', { duration: 3000 });
         }
       });
@@ -252,7 +247,6 @@ export class HistoryComponent implements OnInit {
         this.snackBar.open('Removed from history', 'Close', { duration: 2000 });
       },
       error: (error) => {
-        console.error('Error removing from history:', error);
         this.snackBar.open('Failed to remove from history', 'Close', { duration: 3000 });
       }
     });

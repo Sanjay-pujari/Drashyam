@@ -23,8 +23,16 @@ public class ChannelController : ControllerBase
     [Authorize]
     public async Task<ActionResult<ChannelDto>> Create([FromBody] ChannelCreateDto createDto)
     {
+        
+        if (createDto == null)
+        {
+            return BadRequest("Channel data is required");
+        }
+        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
         var created = await _channelService.CreateChannelAsync(createDto, userId);
+        
         return CreatedAtAction(nameof(GetById), new { channelId = created.Id }, created);
     }
 

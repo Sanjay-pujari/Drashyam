@@ -239,7 +239,6 @@ export class MyChannelsComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading my channels:', error);
         this.channels = [];
         this.isLoading = false;
         this.snackBar.open('Error loading channels', 'Close', { duration: 3000 });
@@ -265,7 +264,6 @@ export class MyChannelsComponent implements OnInit, OnDestroy {
           this.snackBar.open('Channel deleted', 'Close', { duration: 3000 });
         },
         error: (error) => {
-          console.error('Error deleting channel:', error);
           this.snackBar.open('Error deleting channel', 'Close', { duration: 3000 });
         }
       });

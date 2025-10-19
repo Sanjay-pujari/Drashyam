@@ -39,7 +39,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating referral");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -58,7 +57,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting referral");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -77,7 +75,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting user referrals");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -92,7 +89,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting referrals by user");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -111,7 +107,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting referral stats");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -134,7 +129,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating referral code");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -153,7 +147,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting referral code");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -169,7 +162,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating referral code");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -196,7 +188,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error claiming reward");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -215,7 +206,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting user rewards");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -233,7 +223,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing referral reward");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -251,7 +240,6 @@ public class ReferralController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating referral status");
             return StatusCode(500, "Internal server error");
         }
     }

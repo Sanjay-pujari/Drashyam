@@ -58,12 +58,10 @@ public class FileStorageService : IFileStorageService
             var blobClient = containerClient.GetBlobClient(blobName);
 
             var response = await blobClient.DeleteIfExistsAsync();
-            _logger.LogInformation("Deleted file {FileUrl}, Success: {Success}", fileUrl, response.Value);
             return response.Value;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete file {FileUrl}", fileUrl);
             return false;
         }
     }
@@ -159,12 +157,10 @@ public class FileStorageService : IFileStorageService
                 }
             });
 
-            _logger.LogInformation("Successfully uploaded file {FileName} to container {ContainerName}", fileName, containerName);
             return blobClient.Uri.ToString();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to upload file {FileName} to container {ContainerName}", fileName, containerName);
             throw;
         }
     }

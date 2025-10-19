@@ -73,7 +73,6 @@ export class PlaylistService {
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
-    console.log('Calling playlists API:', this.apiUrl, 'with params:', params.toString());
     return this.http.get<PagedResult<Playlist>>(this.apiUrl, { params });
   }
 

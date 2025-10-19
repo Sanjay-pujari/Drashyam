@@ -70,22 +70,25 @@ export interface Channel {
 }
 
 export enum VideoStatus {
-  Processing = 'Processing',
-  Ready = 'Ready',
-  Failed = 'Failed',
-  Deleted = 'Deleted'
+  Draft = 0,
+  Processing = 1,
+  Published = 2,
+  Private = 3,
+  Unlisted = 4,
+  Deleted = 5
 }
 
 export enum VideoType {
-  Uploaded = 'Uploaded',
-  LiveStream = 'LiveStream',
-  Short = 'Short'
+  Regular = 0,
+  Short = 1,
+  Live = 2,
+  Premier = 3
 }
 
 export enum VideoVisibility {
-  Public = 'Public',
-  Unlisted = 'Unlisted',
-  Private = 'Private'
+  Public = 0,
+  Private = 1,
+  Unlisted = 2
 }
 
 export enum SubscriptionType {
@@ -97,7 +100,8 @@ export enum SubscriptionType {
 export enum ChannelType {
   Personal = 0,
   Business = 1,
-  Brand = 2
+  Creator = 2,
+  Brand = 3
 }
 
 export interface ChannelCreate {

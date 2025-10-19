@@ -165,7 +165,6 @@ export class AddToPlaylistDialogComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading playlists:', error);
         this.playlists = [];
         this.isLoading = false;
       }
@@ -191,7 +190,6 @@ export class AddToPlaylistDialogComponent implements OnInit {
         this.snackBar.open('Added to playlist!', 'Close', { duration: 2000 });
       },
       error: (error) => {
-        console.error('Error adding to playlist:', error);
         this.snackBar.open('Failed to add to playlist', 'Close', { duration: 3000 });
       }
     });
@@ -204,7 +202,6 @@ export class AddToPlaylistDialogComponent implements OnInit {
         this.snackBar.open('Removed from playlist!', 'Close', { duration: 2000 });
       },
       error: (error) => {
-        console.error('Error removing from playlist:', error);
         this.snackBar.open('Failed to remove from playlist', 'Close', { duration: 3000 });
       }
     });

@@ -369,7 +369,6 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
         this.subscribedChannels = result.items || [];
       },
       error: (error) => {
-        console.error('Error loading subscribed channels:', error);
         this.snackBar.open('Error loading subscriptions', 'Close', { duration: 3000 });
       }
     });
@@ -381,7 +380,6 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading latest videos:', error);
         this.latestVideos = [];
         this.isLoading = false;
       }
@@ -406,7 +404,6 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
           this.snackBar.open('Unsubscribed from channel', 'Close', { duration: 3000 });
         },
         error: (error) => {
-          console.error('Error unsubscribing from channel:', error);
           this.snackBar.open('Error unsubscribing from channel', 'Close', { duration: 3000 });
         }
       });

@@ -44,7 +44,6 @@ public class AnalyticsService : IAnalyticsService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error tracking invite event for user {UserId}", userId);
         }
     }
 
@@ -70,7 +69,6 @@ public class AnalyticsService : IAnalyticsService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error tracking referral event for user {UserId}", userId);
         }
     }
 
@@ -137,7 +135,6 @@ public class AnalyticsService : IAnalyticsService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating invite analytics for user {UserId}", userId);
         }
     }
 
@@ -209,7 +206,6 @@ public class AnalyticsService : IAnalyticsService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating referral analytics for user {UserId}", userId);
         }
     }
 

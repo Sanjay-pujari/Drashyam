@@ -47,8 +47,6 @@ public class RateLimitingMiddleware
         // Check if rate limit exceeded
         if (rateLimitInfo.Count > _maxRequestsPerWindow)
         {
-            _logger.LogWarning("Rate limit exceeded for {ClientId} on {Endpoint}. Count: {Count}", 
-                clientId, endpoint, rateLimitInfo.Count);
 
             context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
             context.Response.Headers.Add("Retry-After", _windowSize.TotalSeconds.ToString());

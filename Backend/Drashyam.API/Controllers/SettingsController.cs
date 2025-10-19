@@ -39,7 +39,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting user profile");
             return StatusCode(500, "An error occurred while retrieving profile");
         }
     }
@@ -60,7 +59,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating user profile");
             return StatusCode(500, "An error occurred while updating profile");
         }
     }
@@ -76,7 +74,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting privacy settings");
             return StatusCode(500, "An error occurred while retrieving privacy settings");
         }
     }
@@ -92,7 +89,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating privacy settings");
             return StatusCode(500, "An error occurred while updating privacy settings");
         }
     }
@@ -108,7 +104,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting notification settings");
             return StatusCode(500, "An error occurred while retrieving notification settings");
         }
     }
@@ -124,7 +119,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating notification settings");
             return StatusCode(500, "An error occurred while updating notification settings");
         }
     }
@@ -137,7 +131,6 @@ public class SettingsController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             
             // TODO: Implement password change
-            _logger.LogInformation("Password change requested for user {UserId}", userId);
             
             return Ok(new { message = "Password changed successfully" });
         }
@@ -147,7 +140,6 @@ public class SettingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error changing password");
             return StatusCode(500, "An error occurred while changing password");
         }
     }
@@ -160,13 +152,11 @@ public class SettingsController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             
             // TODO: Implement data export
-            _logger.LogInformation("Data export requested for user {UserId}", userId);
             
             return Ok(new { message = "Data export initiated. You will receive an email when ready." });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error exporting data");
             return StatusCode(500, "An error occurred while exporting data");
         }
     }
@@ -179,13 +169,11 @@ public class SettingsController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             
             // TODO: Implement account deletion
-            _logger.LogInformation("Account deletion requested for user {UserId}", userId);
             
             return Ok(new { message = "Account deletion initiated. You will receive a confirmation email." });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting account");
             return StatusCode(500, "An error occurred while deleting account");
         }
     }
