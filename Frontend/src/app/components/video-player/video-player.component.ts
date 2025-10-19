@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, Input, Output, EventEmitte
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommentsComponent } from '../comments/comments.component';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, interval } from 'rxjs';
 import { Video } from '../../models/video.model';
@@ -18,7 +19,7 @@ declare var videojs: any;
 @Component({
     selector: 'app-video-player',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
+    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, CommentsComponent],
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })

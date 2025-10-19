@@ -1,0 +1,261 @@
+<div class="comments-container">
+  <!-- Debug Info (temporary) -->
+  <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 10px; font-size: 12px; border-radius: 4px;">
+    <strong>Debug Info:</strong><br>
+    Video ID: {{ videoId }}<br>
+    Comment Count: {{ commentCount }}<br>
+    Current User: {{ (currentUser$ | async)?.firstName || 'Not logged in' }}<br>
+    User ID: {{ (currentUser$ | async)?.id || 'No ID' }}<br>
+    Loading: {{ loading }}<br>
+    Comments Count: {{ comments.length }}
+  </div>
+
+  <!-- Comments Header -->
+  <div class="comments-header">
+    <h3 class="comments-title">
+      {{ commentCount | number }} Comments
+    </h3>
+  </div>
+
+  <!-- Add Comment Form -->
+  <div class="add-comment-section">
+    @if (currentUser$ | async; as currentUser) {
+      <div class="comment-form">
+        <div class="user-avatar">
+          <img [src]="currentUser.profilePictureUrl || '/assets/default-avatar.svg'" 
+               [alt]="currentUser.firstName + ' ' + currentUser.lastName">
+        </div>
+        <div class="comment-input-container">
+          <mat-form-field appearance="outline" class="comment-input">
+            <mat-label>Add a comment...</mat-label>
+            <textarea 
+              matInput 
+              [(ngModel)]="newCommentContent"
+              placeholder="Share your thoughts..."
+              rows="3"
+              maxlength="1000"
+              #commentTextarea>
+            </textarea>
+            <mat-hint align="end">{{ newCommentContent.length }}/1000</mat-hint>
+          </mat-form-field>
+          <div class="comment-actions">
+            <button 
+              mat-button 
+              (click)="newCommentContent = ''"
+              [disabled]="!newCommentContent.trim()">
+              Cancel
+            </button>
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="addComment()"
+              [disabled]="!newCommentContent.trim() || submitting">
+              @if (submitting) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Comment
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="login-prompt">
+        <div class="login-message">
+          <mat-icon>account_circle</mat-icon>
+          <p>Please <a routerLink="/login">login</a> to add comments and replies.</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Comments List -->
+  <div class="comments-list">
+    @if (loading) {
+      <div class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Loading comments...</p>
+      </div>
+    } @else if (error) {
+      <div class="error-container">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-raised-button color="primary" (click)="loadComments()">
+          Try Again
+        </button>
+      </div>
+    } @else if (comments.length === 0) {
+      <div class="no-comments">
+        <mat-icon>comment</mat-icon>
+        <h4>No comments yet</h4>
+        <p>Be the first to share your thoughts!</p>
+      </div>
+    } @else {
+      @for (comment of comments; track comment.id) {
+        <div class="comment-item">
+          <!-- Main Comment -->
+          <div class="comment-content">
+            <div class="comment-avatar">
+              <img [src]="comment.user?.profilePictureUrl || '/assets/default-avatar.svg'" 
+                   [alt]="comment.user?.firstName + ' ' + comment.user?.lastName">
+            </div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <div class="comment-author">
+                  <span class="author-name">
+                    {{ comment.user?.firstName }} {{ comment.user?.lastName }}
+                  </span>
+                  <span class="comment-time">
+                    {{ formatTime(comment.createdAt) }}
+                    @if (comment.isEdited) {
+                      <span class="edited-indicator">(edited)</span>
+                    }
+                  </span>
+                </div>
+                @if (canDeleteComment(comment, (currentUser$ | async)) && (currentUser$ | async); as currentUser) {
+                  <button 
+                    mat-icon-button 
+                    class="delete-btn"
+                    (click)="deleteComment(comment)"
+                    matTooltip="Delete comment">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+              
+              <div class="comment-text">
+                {{ comment.content }}
+              </div>
+              
+              <div class="comment-actions">
+                @if (canLikeComment(currentUser$ | async)) {
+                  <button 
+                    mat-button 
+                    class="like-btn"
+                    [class.liked]="comment.isLiked"
+                    (click)="comment.isLiked ? unlikeComment(comment) : likeComment(comment)">
+                    <mat-icon>{{ comment.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
+                    <span>{{ comment.likeCount }}</span>
+                  </button>
+                }
+                
+                <button 
+                  mat-button 
+                  class="reply-btn"
+                  (click)="toggleReplyForm(comment.id)">
+                  <mat-icon>reply</mat-icon>
+                  Reply
+                </button>
+                
+                @if (comment.replyCount > 0) {
+                  <button 
+                    mat-button 
+                    class="view-replies-btn"
+                    (click)="toggleReplies(comment.id)">
+                    <mat-icon>{{ expandedReplies[comment.id] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    View {{ comment.replyCount }} {{ comment.replyCount === 1 ? 'reply' : 'replies' }}
+                  </button>
+                }
+              </div>
+              
+              <!-- Reply Form -->
+              @if (showReplyForms[comment.id] && (currentUser$ | async); as currentUser) {
+                <div class="reply-form">
+                  <div class="user-avatar small">
+                    <img [src]="currentUser.profilePictureUrl || '/assets/default-avatar.svg'" 
+                         [alt]="currentUser.firstName + ' ' + currentUser.lastName">
+                  </div>
+                  <div class="reply-input-container">
+                    <mat-form-field appearance="outline" class="reply-input">
+                      <mat-label>Write a reply...</mat-label>
+                      <textarea 
+                        matInput 
+                        [(ngModel)]="replyContents[comment.id]"
+                        placeholder="Reply to {{ comment.user?.firstName }}..."
+                        rows="2"
+                        maxlength="1000">
+                      </textarea>
+                    </mat-form-field>
+                    <div class="reply-actions">
+                      <button 
+                        mat-button 
+                        (click)="toggleReplyForm(comment.id)">
+                        Cancel
+                      </button>
+                      <button 
+                        mat-raised-button 
+                        color="primary"
+                        (click)="addReply(comment.id)"
+                        [disabled]="!replyContents[comment.id]?.trim() || submitting">
+                        @if (submitting) {
+                          <mat-spinner diameter="20"></mat-spinner>
+                        } @else {
+                          Reply
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          
+          <!-- Replies Section -->
+          @if (expandedReplies[comment.id] && comment.replies) {
+            <div class="replies-section">
+              @for (reply of comment.replies; track reply.id) {
+                <div class="reply-item">
+                  <div class="comment-avatar">
+                    <img [src]="reply.user?.profilePictureUrl || '/assets/default-avatar.svg'" 
+                         [alt]="reply.user?.firstName + ' ' + reply.user?.lastName">
+                  </div>
+                  <div class="reply-body">
+                    <div class="reply-header">
+                      <div class="comment-author">
+                        <span class="author-name">
+                          {{ reply.user?.firstName }} {{ reply.user?.lastName }}
+                        </span>
+                        <span class="comment-time">
+                          {{ formatTime(reply.createdAt) }}
+                          @if (reply.isEdited) {
+                            <span class="edited-indicator">(edited)</span>
+                          }
+                        </span>
+                      </div>
+                      @if (canDeleteComment(reply, (currentUser$ | async)) && (currentUser$ | async); as currentUser) {
+                        <button 
+                          mat-icon-button 
+                          class="delete-btn"
+                          (click)="deleteComment(reply)"
+                          matTooltip="Delete reply">
+                          <mat-icon>delete_outline</mat-icon>
+                        </button>
+                      }
+                    </div>
+                    
+                    <div class="reply-text">
+                      {{ reply.content }}
+                    </div>
+                    
+                    <div class="reply-actions">
+                      @if (canLikeComment(currentUser$ | async)) {
+                        <button 
+                          mat-button 
+                          class="like-btn"
+                          [class.liked]="reply.isLiked"
+                          (click)="reply.isLiked ? unlikeComment(reply) : likeComment(reply)">
+                          <mat-icon>{{ reply.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
+                          <span>{{ reply.likeCount }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

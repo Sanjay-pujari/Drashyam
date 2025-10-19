@@ -9,7 +9,7 @@ import { PagedResult } from './video.service';
   providedIn: 'root'
 })
 export class CommentService {
-  private apiUrl = `${environment.apiUrl}/api/comments`;
+  private apiUrl = `${environment.apiUrl}/api/comment`;
 
   constructor(private http: HttpClient) {}
 
@@ -51,8 +51,8 @@ export class CommentService {
     return this.http.post<Comment>(`${this.apiUrl}/${commentId}/unlike`, {});
   }
 
-  isCommentLiked(commentId: number): Observable<{ isLiked: boolean }> {
-    return this.http.get<{ isLiked: boolean }>(`${this.apiUrl}/${commentId}/like-status`);
+  isCommentLiked(commentId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/${commentId}/is-liked`);
   }
 
   getUserComments(userId: string, filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<Comment>> {

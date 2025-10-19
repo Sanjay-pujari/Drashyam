@@ -2,8 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 import { environment } from '../../environments/environment';
 import { User, UserLogin, UserRegistration } from '../models/user.model';
+import { AppState } from '../store/app.state';
+import * as UserActions from '../store/user/user.actions';
 
 export interface AuthResponse {
   user: User;
@@ -18,7 +21,10 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private store: Store<AppState>
+  ) {
     // Don't automatically load user in constructor to avoid circular dependency
     // User will be loaded when initializeAuth() is called from app.component
   }
@@ -34,6 +40,12 @@ export class AuthService {
         console.log('Login successful:', response);
         localStorage.setItem('token', response.token);
         this.currentUserSubject.next(response.user);
+        
+        // Dispatch action to NgRx store
+        this.store.dispatch(UserActions.loginSuccess({ 
+          user: response.user, 
+          token: response.token 
+        }));
       })
     );
   }
@@ -65,6 +77,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     this.currentUserSubject.next(null);
+    
+    // Dispatch logout action to NgRx store
+    this.store.dispatch(UserActions.logout());
   }
 
   getCurrentUser(): Observable<User> {
@@ -186,6 +201,9 @@ export class AuthService {
       tap(user => {
         this.currentUserSubject.next(user);
         console.log('User authenticated successfully:', user);
+        
+        // Dispatch action to NgRx store
+        this.store.dispatch(UserActions.loadCurrentUserSuccess({ user }));
       }),
       map(user => user),
       catchError(error => {
@@ -202,6 +220,9 @@ export class AuthService {
           console.log('Token is invalid, logging out user');
           this.logout();
         }
+        
+        // Dispatch failure action to NgRx store
+        this.store.dispatch(UserActions.loadCurrentUserFailure({ error: error.message }));
         
         return of(null);
       })

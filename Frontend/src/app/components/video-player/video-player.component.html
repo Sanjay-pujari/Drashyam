@@ -102,51 +102,23 @@
         </div>
       }
       <!-- Comments Section -->
-      <div class="comments-section">
-        <h3 class="comments-title">
-          {{ video.commentCount | number }} Comments
-        </h3>
-        <!-- Add Comment -->
-        @if (currentUser$ | async) {
-          <div class="add-comment">
-            <div class="comment-avatar">
-              <img [src]="(currentUser$ | async)?.profilePictureUrl || '/assets/default-avatar.svg'"
-                [alt]="(currentUser$ | async)?.firstName">
-              </div>
-              <div class="comment-input">
-                <textarea
-                  placeholder="Add a comment..."
-                  rows="1"
-                  class="comment-textarea">
-                </textarea>
-                <div class="comment-actions">
-                  <button class="cancel-btn">Cancel</button>
-                  <button class="comment-btn">Comment</button>
-                </div>
-              </div>
-            </div>
-          }
-          <!-- Comments List -->
-          <div class="comments-list">
-            <!-- Comments will be loaded here -->
-          </div>
-        </div>
-      </div>
-    }
+      <app-comments [videoId]="video.id" [commentCount]="video.commentCount"></app-comments>
+    </div>
+  }
 
-    <!-- Loading State -->
-    @if (isLoading) {
-      <div class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Loading video...</p>
-      </div>
-    }
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading video...</p>
+    </div>
+  }
 
-    <!-- Error State -->
-    @if (!video && !isLoading) {
-      <div class="error-container">
-        <mat-icon class="error-icon">error_outline</mat-icon>
-        <h3>Video not found</h3>
-        <p>The video you're looking for doesn't exist or has been removed.</p>
-      </div>
-    }
+  <!-- Error State -->
+  @if (!video && !isLoading) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h3>Video not found</h3>
+      <p>The video you're looking for doesn't exist or has been removed.</p>
+    </div>
+  }
