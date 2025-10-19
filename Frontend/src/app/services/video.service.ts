@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Video } from '../models/video.model';
 
@@ -154,5 +155,23 @@ export class VideoService {
     if (filter.sortOrder) params = params.set('sortOrder', filter.sortOrder);
     
     return this.http.get<Video[]>(`${this.apiUrl}/channel/${channelId}`, { params });
+  }
+
+  getLikedVideosCount(): Observable<number> {
+    // Get count from the first page of favorites
+    return this.getLikedVideos({ page: 1, pageSize: 1 }).pipe(
+      map(result => result.totalCount)
+    );
+  }
+
+  getLikedVideos(filter: VideoFilter = {}): Observable<PagedResult<Video>> {
+    let params = new HttpParams();
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+    
+    const url = `${this.apiUrl}/favorites`;
+    console.log('Calling liked videos API:', url, 'with params:', params.toString());
+    
+    return this.http.get<PagedResult<Video>>(url, { params });
   }
 }

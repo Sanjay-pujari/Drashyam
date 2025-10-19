@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -7,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
 import { Inject } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import { Video } from '../../models/video.model';
 import { User } from '../../models/user.model';
@@ -20,7 +21,7 @@ import { ChannelService } from '../../services/channel.service';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
+    imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
@@ -47,6 +48,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
   
   selectedCategory = 'All';
+  
+  // Search properties
+  searchQuery = '';
+  searchResults: Video[] = [];
+  isSearchMode = false;
+  isSearching = false;
+  
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -137,6 +145,46 @@ export class HomeComponent implements OnInit, OnDestroy {
   loadMoreVideos() {
     // Load more videos for pagination
     console.log('Load more videos');
+  }
+
+  onSearchInput(event: any) {
+    const query = event.target.value.trim();
+    if (query.length === 0) {
+      this.clearSearch();
+    }
+  }
+
+  onSearch() {
+    const query = this.searchQuery.trim();
+    if (query.length === 0) {
+      this.clearSearch();
+      return;
+    }
+
+    this.isSearchMode = true;
+    this.isSearching = true;
+    this.searchResults = [];
+
+    const searchSub = this.videoService.searchVideos(query, { page: 1, pageSize: 20 }).subscribe({
+      next: (result) => {
+        this.searchResults = result.items || [];
+        this.isSearching = false;
+      },
+      error: (error) => {
+        console.error('Search error:', error);
+        this.searchResults = [];
+        this.isSearching = false;
+      }
+    });
+
+    this.subscriptions.push(searchSub);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.isSearchMode = false;
+    this.isSearching = false;
   }
 
   trackByVideoId(index: number, video: Video): number {

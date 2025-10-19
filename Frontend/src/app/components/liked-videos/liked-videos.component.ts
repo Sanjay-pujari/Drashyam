@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { VideoService } from '../../services/video.service';
+import { Video } from '../../models/video.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-liked-videos',
@@ -32,19 +35,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         </div>
         
         <div class="videos-grid" *ngIf="likedVideos.length > 0">
-          <mat-card class="video-card" *ngFor="let video of likedVideos">
+          <mat-card class="video-card" *ngFor="let video of likedVideos" (click)="onVideoClick(video)">
             <div class="video-thumbnail">
-              <img [src]="video.thumbnailUrl" [alt]="video.title">
-              <div class="duration">{{ video.duration }}</div>
-              <button mat-icon-button class="like-button liked" (click)="unlikeVideo(video.id)">
+              <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.title">
+              <div class="duration">{{ formatDuration(video.duration) }}</div>
+              <button mat-icon-button class="like-button liked" (click)="$event.stopPropagation(); unlikeVideo(video.id)">
                 <mat-icon>thumb_up</mat-icon>
               </button>
             </div>
             <div class="video-info">
               <h3 class="video-title">{{ video.title }}</h3>
-              <p class="channel-name">{{ video.channelName }}</p>
-              <p class="views">{{ video.views | number }} views</p>
-              <p class="liked-at">Liked {{ video.likedAt | date:'medium' }}</p>
+              <p class="channel-name" (click)="$event.stopPropagation(); onChannelClick(video.channelId!)">
+                {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+              </p>
+              <p class="views">{{ video.viewCount | number }} views</p>
+              <p class="liked-at">Liked {{ video.createdAt | date:'medium' }}</p>
             </div>
           </mat-card>
         </div>
@@ -192,30 +197,99 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     }
   `]
 })
-export class LikedVideosComponent implements OnInit {
+export class LikedVideosComponent implements OnInit, OnDestroy {
   isLoading = false;
-  likedVideos: any[] = [];
+  likedVideos: Video[] = [];
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private videoService: VideoService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadLikedVideos();
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
   loadLikedVideos() {
     this.isLoading = true;
-    // TODO: Implement actual liked videos loading from API
-    setTimeout(() => {
-      this.likedVideos = [];
-      this.isLoading = false;
-    }, 1000);
+    this.likedVideos = [];
+
+    console.log('Loading liked videos...');
+    const sub = this.videoService.getLikedVideos({ page: 1, pageSize: 50 }).subscribe({
+      next: (result) => {
+        console.log('Liked videos API response:', result);
+        this.likedVideos = result.items || [];
+        console.log('Liked videos loaded:', this.likedVideos.length, 'videos');
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading liked videos:', error);
+        this.likedVideos = [];
+        this.isLoading = false;
+      }
+    });
+
+    this.subscriptions.push(sub);
   }
 
   clearLikedVideos() {
-    // TODO: Implement clear liked videos functionality
+    // TODO: Implement clear all liked videos functionality
     console.log('Clear liked videos clicked');
+    // This would require a backend endpoint to clear all liked videos
   }
 
-  unlikeVideo(id: string) {
-    // TODO: Implement unlike video functionality
-    console.log('Unlike video:', id);
+  unlikeVideo(videoId: number) {
+    const sub = this.videoService.likeVideo(videoId, 'dislike').subscribe({
+      next: (video) => {
+        // Remove the video from the liked videos list
+        this.likedVideos = this.likedVideos.filter(v => v.id !== videoId);
+        console.log('Video unliked successfully');
+      },
+      error: (error) => {
+        console.error('Error unliking video:', error);
+      }
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  onVideoClick(video: Video) {
+    this.router.navigate(['/videos', video.id]);
+  }
+
+  onChannelClick(channelId: number) {
+    this.router.navigate(['/channels', channelId]);
+  }
+
+  formatDuration(duration: string | any): string {
+    // Handle both string and TimeSpan object from backend
+    let seconds: number;
+    
+    if (typeof duration === 'string') {
+      seconds = parseInt(duration);
+    } else if (duration && typeof duration === 'object') {
+      seconds = Math.floor(duration.ticks / 10000000);
+    } else {
+      seconds = 0;
+    }
+    
+    if (isNaN(seconds) || seconds === 0) {
+      return '0:00';
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    } else {
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
   }
 }

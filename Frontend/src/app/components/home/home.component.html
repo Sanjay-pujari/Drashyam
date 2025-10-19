@@ -6,8 +6,11 @@
         <input
           type="text"
           placeholder="Search videos, channels, and more..."
-          class="search-input">
-          <button class="search-btn">
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          (input)="onSearchInput($event)">
+          <button class="search-btn" (click)="onSearch()">
             <mat-icon>search</mat-icon>
           </button>
         </div>
@@ -30,6 +33,72 @@
 
     <!-- Main Content -->
     <div class="main-content">
+      <!-- Search Results Section -->
+      @if (isSearchMode && searchResults.length > 0) {
+        <section class="search-results-section">
+          <h2 class="section-title">
+            <mat-icon>search</mat-icon>
+            Search Results for "{{ searchQuery }}"
+          </h2>
+          <div class="video-grid search-grid">
+            @for (video of searchResults; track trackByVideoId($index, video)) {
+              <div
+                class="video-card search-card"
+                (click)="onVideoClick(video)">
+                <div class="video-thumbnail">
+                  <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                    [alt]="video.title">
+                    <div class="video-duration">{{ formatDuration(video.duration) }}</div>
+                  </div>
+                  <div class="video-info">
+                    <h3 class="video-title">{{ video.title }}</h3>
+                    <p class="video-channel" (click)="onChannelClick(video.channelId!)">
+                      {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+                    </p>
+                    <div class="video-stats">
+                      <span>{{ video.viewCount | number }} views</span>
+                      <span>{{ video.createdAt | date:'MMM d' }}</span>
+                    </div>
+                    @if (currentUser$ | async) {
+                      <div class="video-actions">
+                        <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
+                          <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                          {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+                        </button>
+                        <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
+                          <mat-icon>subscriptions</mat-icon>
+                          {{ video.channel?.isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- No Search Results -->
+        @if (isSearchMode && searchResults.length === 0 && !isSearching) {
+          <section class="no-results-section">
+            <div class="no-results-container">
+              <mat-icon class="no-results-icon">search_off</mat-icon>
+              <h3>No results found</h3>
+              <p>Try searching for something else or check your spelling.</p>
+            </div>
+          </section>
+        }
+
+        <!-- Search Loading -->
+        @if (isSearching) {
+          <section class="search-loading-section">
+            <div class="loading-container">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p>Searching...</p>
+            </div>
+          </section>
+        }
+
       <!-- Trending Section -->
       @if (trendingVideos.length > 0) {
         <section class="trending-section">

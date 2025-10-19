@@ -116,11 +116,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadVideoCounts(): void {
-    // Load actual history count from backend
+    // Load actual counts from backend
     this.loadHistoryCount();
+    this.loadLikedVideosCount();
     
-    // Mock data for other counts - these would come from services in real implementation
-    this.likedVideosCount = 45;
+    // Mock data for counts that don't have backend endpoints yet
     this.watchLaterCount = 12;
     this.playlistsCount = 8;
   }
@@ -133,6 +133,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error loading history count:', error);
         this.historyCount = 0;
+      }
+    });
+  }
+
+  private loadLikedVideosCount(): void {
+    this.videoService.getLikedVideosCount().subscribe({
+      next: (count) => {
+        this.likedVideosCount = count;
+      },
+      error: (error) => {
+        console.error('Error loading liked videos count:', error);
+        this.likedVideosCount = 0;
       }
     });
   }
