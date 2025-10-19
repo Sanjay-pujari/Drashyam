@@ -51,6 +51,11 @@ public class VideoUpdateDto
     public IFormFile? ThumbnailFile { get; set; }
 }
 
+public class UpdateVideoStatusDto
+{
+    public Models.VideoStatus Status { get; set; }
+}
+
 public enum LikeType
 {
     Like,

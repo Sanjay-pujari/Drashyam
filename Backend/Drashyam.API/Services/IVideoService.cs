@@ -15,11 +15,12 @@ public interface IVideoService
     Task DeleteVideoAsync(int id, string userId);
     Task<VideoDto> LikeVideoAsync(int videoId, string userId, Drashyam.API.DTOs.LikeType type);
     Task<VideoDto> UnlikeVideoAsync(int videoId, string userId);
-    Task RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration);
+    Task<VideoDto> RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration);
     Task<string> GenerateShareLinkAsync(int videoId, string userId);
     Task<PagedResult<VideoDto>> SearchVideosAsync(string query, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetTrendingVideosAsync(VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetRecommendedVideosAsync(string userId, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetUserFavoriteVideosAsync(string userId, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetSubscribedChannelsVideosAsync(string userId, VideoFilterDto filter);
+    Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, Models.VideoStatus status);
 }

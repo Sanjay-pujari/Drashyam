@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -6,9 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Store } from '@ngrx/store';
 import { VideoService } from '../../services/video.service';
 import { Video } from '../../models/video.model';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
+import { AppState } from '../../store/app.state';
+import { selectVideoById } from '../../store/video/video.selectors';
 
 @Component({
   selector: 'app-video-detail',
@@ -28,7 +31,8 @@ export class VideoDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private store: Store<AppState>
   ) {}
 
   ngOnInit() {
@@ -40,6 +44,15 @@ export class VideoDetailComponent implements OnInit {
         this.loadVideoByShareToken(params['token']);
       }
     });
+
+    // Subscribe to video updates from the store
+    if (this.videoId) {
+      this.store.select(selectVideoById, { id: this.videoId }).subscribe(updatedVideo => {
+        if (updatedVideo && this.video && updatedVideo.id === this.video.id) {
+          this.video = updatedVideo;
+        }
+      });
+    }
   }
 
   loadVideo() {
@@ -114,23 +127,4 @@ export class VideoDetailComponent implements OnInit {
     return count.toString();
   }
 
-  @ViewChild('videoPlayer') videoPlayer!: VideoPlayerComponent;
-
-  likeVideo() {
-    if (this.videoPlayer) {
-      this.videoPlayer.likeVideo();
-    }
-  }
-
-  dislikeVideo() {
-    if (this.videoPlayer) {
-      this.videoPlayer.dislikeVideo();
-    }
-  }
-
-  shareVideo() {
-    if (this.videoPlayer) {
-      this.videoPlayer.shareVideo();
-    }
-  }
 }

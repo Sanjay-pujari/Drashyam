@@ -33,6 +33,7 @@ import { authGuard } from './app/guards/auth.guard';
 
 const routes: Routes = [
   { path: '', loadComponent: () => import('./app/components/home/home.component').then(m => m.HomeComponent) },
+  { path: 'dashboard', redirectTo: '', pathMatch: 'full' },
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'videos/:id', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
   { path: 'watch/:token', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },

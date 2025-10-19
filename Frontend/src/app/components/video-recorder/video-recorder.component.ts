@@ -38,11 +38,16 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
   // Recording constraints
   private readonly constraints: MediaStreamConstraints = {
     video: {
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      facingMode: 'user'
+      width: { ideal: 1920, min: 1280 },
+      height: { ideal: 1080, min: 720 },
+      facingMode: 'user',
+      frameRate: { ideal: 30, min: 15 }
     },
-    audio: true
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    }
   };
 
   constructor(
@@ -155,9 +160,20 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
   }
 
   cancelRecording() {
-    this.stopRecording();
-    this.recordingCanceled.emit();
+    // Stop recording without processing the video
+    if (this.mediaRecorder && this.isRecording) {
+      this.mediaRecorder.stop();
+    }
+    
+    // Stop timer and reset state
+    this.stopTimer();
+    this.isRecording = false;
+    this.isPaused = false;
     this.recordingTime = 0;
+    this.recordedChunks = [];
+    
+    // Emit canceled event
+    this.recordingCanceled.emit();
   }
 
   private startTimer() {

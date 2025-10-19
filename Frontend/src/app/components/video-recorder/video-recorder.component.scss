@@ -55,16 +55,19 @@
 .camera-preview {
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 1000px;
   margin: 0 auto 20px auto;
   border-radius: 8px;
   overflow: hidden;
   background: #000;
+  min-height: 400px;
 
   .camera-video {
     width: 100%;
     height: auto;
+    min-height: 400px;
     display: block;
+    object-fit: cover;
   }
 }
 

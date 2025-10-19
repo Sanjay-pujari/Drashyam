@@ -365,6 +365,20 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     document.body.removeChild(textArea);
   }
 
+  saveVideo() {
+    if (!this.video) return;
+
+    // For now, we'll implement a simple save to watch later functionality
+    // In a full implementation, this would open a playlist selection dialog
+    this.snackBar.open('Video saved to Watch Later!', 'Close', { duration: 3000 });
+    
+    // TODO: Implement actual save to playlist/watch later functionality
+    // This would typically involve:
+    // 1. Opening a dialog to select playlist
+    // 2. Calling an API to add video to selected playlist
+    // 3. Updating the UI to reflect the save state
+  }
+
   private cleanup() {
     this.stopWatchTimer();
     if (this.player) {

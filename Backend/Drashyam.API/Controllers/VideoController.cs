@@ -189,6 +189,15 @@ public class VideoController : ControllerBase
 
         return Ok(feed);
     }
+
+    [HttpPatch("{id:int}/status")]
+    [Authorize]
+    public async Task<ActionResult<VideoDto>> UpdateVideoStatus([FromRoute] int id, [FromBody] UpdateVideoStatusDto statusDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var video = await _videoService.UpdateVideoStatusAsync(id, userId, statusDto.Status);
+        return Ok(video);
+    }
 }
 
 

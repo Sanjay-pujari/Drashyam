@@ -1,7 +1,7 @@
 <div class="video-detail" *ngIf="!isLoading && video">
   <!-- Video Player -->
   <div class="video-player-section">
-    <app-video-player #videoPlayer [video]="video" [autoplay]="false"></app-video-player>
+    <app-video-player [video]="video" [autoplay]="false"></app-video-player>
   </div>
 
   <!-- Video Information -->
@@ -29,22 +29,6 @@
       </div>
     </div>
 
-    <div class="video-actions">
-      <button mat-raised-button color="primary" (click)="video.isLiked ? null : likeVideo()">
-        <mat-icon>{{ video.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
-        {{ video.likeCount || 0 }}
-      </button>
-      
-      <button mat-raised-button (click)="video.isDisliked ? null : dislikeVideo()">
-        <mat-icon>{{ video.isDisliked ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
-        {{ video.dislikeCount || 0 }}
-      </button>
-      
-      <button mat-raised-button (click)="shareVideo()">
-        <mat-icon>share</mat-icon>
-        Share
-      </button>
-    </div>
 
     <div class="video-description">
       <h3>Description</h3>

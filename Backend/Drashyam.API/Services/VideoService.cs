@@ -531,4 +531,20 @@ public class VideoService : IVideoService
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
+
+    public async Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, Models.VideoStatus status)
+    {
+        var video = await _context.Videos
+            .Include(v => v.User)
+            .Include(v => v.Channel)
+            .FirstOrDefaultAsync(v => v.Id == videoId && v.UserId == userId);
+
+        if (video == null)
+            throw new ArgumentException("Video not found or access denied");
+
+        video.Status = status;
+        await _context.SaveChangesAsync();
+
+        return await GetVideoByIdAsync(videoId);
+    }
 }
