@@ -219,10 +219,21 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     console.log('Recording initial view for video:', this.video.id);
-    this.store.dispatch(recordVideoView({ 
-      videoId: this.video.id, 
-      watchDuration: 1 // Record initial view with minimal duration
-    }));
+    
+    // Record initial view with minimal duration
+    this.videoService.recordVideoView(this.video.id, 1).subscribe({
+      next: (updatedVideo) => {
+        console.log('Initial view recorded successfully:', updatedVideo);
+        // Update the video in the store
+        this.store.dispatch(recordVideoView({
+          videoId: this.video!.id,
+          watchDuration: 1
+        }));
+      },
+      error: (error) => {
+        console.error('Error recording initial view:', error);
+      }
+    });
   }
 
   private recordView() {
@@ -233,14 +244,28 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     const watchDuration = (Date.now() - this.watchStartTime) / 1000;
     if (watchDuration > 5) { // Only record if watched for more than 5 seconds
       console.log('Recording view for video:', this.video.id, 'Duration:', watchDuration);
-      this.store.dispatch(recordVideoView({ 
-        videoId: this.video.id, 
-        watchDuration 
-      }));
+      
+      // Record view using the video service endpoint (this also creates history entries)
+      this.videoService.recordVideoView(this.video.id, Math.round(watchDuration)).subscribe({
+        next: (updatedVideo) => {
+          console.log('View recorded successfully:', updatedVideo);
+          // Update the video in the store
+          this.store.dispatch(recordVideoView({ 
+            videoId: this.video!.id, 
+            watchDuration 
+          }));
+        },
+        error: (error) => {
+          console.error('Error recording view:', error);
+        }
+      });
+      
       // Reset the start time for potential future recordings
       this.watchStartTime = Date.now();
     }
   }
+
+
 
   play() {
     if (this.player) {

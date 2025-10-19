@@ -7,16 +7,22 @@ export const authGuard = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  console.log('Auth guard checking access to history page');
+  
   return authService.currentUser$.pipe(
     map(user => {
+      console.log('Auth guard - current user:', user);
       if (user) {
+        console.log('Auth guard - access granted');
         return true;
       } else {
+        console.log('Auth guard - redirecting to login');
         router.navigate(['/login']);
         return false;
       }
     }),
-    catchError(() => {
+    catchError((error) => {
+      console.error('Auth guard error:', error);
       router.navigate(['/login']);
       return of(false);
     })

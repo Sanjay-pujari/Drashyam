@@ -361,7 +361,7 @@ public class VideoService : IVideoService
         return await GetVideoByIdAsync(videoId);
     }
 
-    public async Task<VideoDto> RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration)
+    public async Task<VideoDto> RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration, string? userAgent = null, string? ipAddress = null)
     {
         var video = await _context.Videos.FindAsync(videoId);
         if (video == null) 
@@ -372,13 +372,19 @@ public class VideoService : IVideoService
 
         _logger.LogInformation("Recording view for video {VideoId} by user {UserId}, duration: {Duration}", videoId, userId, watchDuration);
 
+        // Determine device type from user agent
+        var deviceType = DetermineDeviceType(userAgent);
+
         // Record view
         _context.VideoViews.Add(new VideoView
         {
             UserId = userId,
             VideoId = videoId,
             WatchDuration = watchDuration,
-            ViewedAt = DateTime.UtcNow
+            ViewedAt = DateTime.UtcNow,
+            UserAgent = userAgent,
+            IpAddress = ipAddress,
+            DeviceType = deviceType
         });
 
         var oldViewCount = video.ViewCount;
@@ -575,5 +581,30 @@ public class VideoService : IVideoService
 
         await _context.SaveChangesAsync();
         return processingVideos.Count;
+    }
+
+    private static string? DetermineDeviceType(string? userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent))
+            return null;
+
+        if (userAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("iPod", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("BlackBerry", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("IEMobile", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("Opera Mini", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Mobile";
+        }
+        
+        if (userAgent.Contains("Tablet", StringComparison.OrdinalIgnoreCase) ||
+            userAgent.Contains("iPad", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Tablet";
+        }
+
+        return "Desktop";
     }
 }

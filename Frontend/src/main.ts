@@ -52,7 +52,13 @@ const routes: Routes = [
   { path: 'invite/:token', loadComponent: () => import('./app/components/invite-accept/invite-accept.component').then(m => m.InviteAcceptComponent) },
   // User content routes (protected)
   { path: 'liked-videos', loadComponent: () => import('./app/components/liked-videos/liked-videos.component').then(m => m.LikedVideosComponent), canActivate: [authGuard] },
-  { path: 'history', loadComponent: () => import('./app/components/history/history.component').then(m => m.HistoryComponent), canActivate: [authGuard] },
+  { path: 'history', loadComponent: () => {
+    console.log('Loading history component...');
+    return import('./app/components/history/history.component').then(m => {
+      console.log('History component loaded successfully');
+      return m.HistoryComponent;
+    });
+  }, canActivate: [authGuard] },
   { path: 'watch-later', loadComponent: () => import('./app/components/watch-later/watch-later.component').then(m => m.WatchLaterComponent), canActivate: [authGuard] },
   { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] }
 ];

@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { VideoService } from '../../services/video.service';
+import { HistoryService } from '../../services/history.service';
 import { User } from '../../models/user.model';
 
 interface ChannelSubscription {
@@ -41,6 +42,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private userService: UserService,
     private videoService: VideoService,
+    private historyService: HistoryService,
     private router: Router
   ) {}
 
@@ -111,11 +113,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadVideoCounts(): void {
-    // Mock data for now - in real implementation, these would come from services
+    // Load actual history count from backend
+    this.loadHistoryCount();
+    
+    // Mock data for other counts - these would come from services in real implementation
     this.likedVideosCount = 45;
-    this.historyCount = 128;
     this.watchLaterCount = 12;
     this.playlistsCount = 8;
+  }
+
+  private loadHistoryCount(): void {
+    this.historyService.getHistoryCount().subscribe({
+      next: (count) => {
+        this.historyCount = count;
+      },
+      error: (error) => {
+        console.error('Error loading history count:', error);
+        this.historyCount = 0;
+      }
+    });
   }
 
   navigateToChannel(channelId: string): void {
@@ -124,5 +140,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   navigateToChannels(): void {
     this.router.navigate(['/channels']);
+  }
+
+  navigateToHistory(): void {
+    console.log('Navigating to history page');
+    this.router.navigate(['/history']);
   }
 }

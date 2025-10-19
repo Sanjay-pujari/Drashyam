@@ -5,11 +5,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { HistoryService, HistoryItem } from '../../services/history.service';
+
+console.log('History component module loaded');
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule, MatCardModule, MatProgressSpinnerModule, MatSnackBarModule],
   template: `
     <div class="history-container">
       <div class="header">
@@ -32,18 +36,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         </div>
         
         <div class="history-list" *ngIf="historyItems.length > 0">
-          <mat-card class="history-item" *ngFor="let item of historyItems">
+          <mat-card class="history-item" *ngFor="let item of historyItems" (click)="navigateToVideo(item.videoId)">
             <div class="video-thumbnail">
-              <img [src]="item.thumbnailUrl" [alt]="item.title">
-              <div class="duration">{{ item.duration }}</div>
+              <img [src]="item.videoThumbnailUrl" [alt]="item.videoTitle">
+              <div class="duration">{{ formatDuration(item.duration) }}</div>
             </div>
             <div class="video-info">
-              <h3 class="video-title">{{ item.title }}</h3>
+              <h3 class="video-title">{{ item.videoTitle }}</h3>
               <p class="channel-name">{{ item.channelName }}</p>
-              <p class="views">{{ item.views | number }} views</p>
-              <p class="watched-at">Watched {{ item.watchedAt | date:'medium' }}</p>
+              <p class="views">{{ item.viewCount | number }} views</p>
+              <p class="watched-at">Watched {{ item.viewedAt | date:'medium' }}</p>
+              <p class="watch-duration">Watched for {{ formatWatchDuration(item.watchDuration) }}</p>
             </div>
-            <div class="actions">
+            <div class="actions" (click)="$event.stopPropagation()">
               <button mat-icon-button (click)="removeFromHistory(item.id)">
                 <mat-icon>close</mat-icon>
               </button>
@@ -165,8 +170,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     
     .watched-at {
       color: #999;
+      margin: 0 0 4px 0;
+      font-size: 12px;
+    }
+    
+    .watch-duration {
+      color: #666;
       margin: 0;
       font-size: 12px;
+      font-weight: 500;
     }
     
     .actions {
@@ -190,28 +202,96 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 })
 export class HistoryComponent implements OnInit {
   isLoading = false;
-  historyItems: any[] = [];
+  historyItems: HistoryItem[] = [];
+
+  constructor(
+    private historyService: HistoryService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit() {
+    console.log('History component initialized');
     this.loadHistory();
   }
 
   loadHistory() {
     this.isLoading = true;
-    // TODO: Implement actual history loading from API
-    setTimeout(() => {
-      this.historyItems = [];
-      this.isLoading = false;
-    }, 1000);
+    this.historyService.getUserHistory().subscribe({
+      next: (history) => {
+        this.historyItems = history;
+        this.isLoading = false;
+        console.log('History loaded:', history);
+      },
+      error: (error) => {
+        console.error('Error loading history:', error);
+        this.snackBar.open('Failed to load history', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
   }
 
   clearHistory() {
-    // TODO: Implement clear history functionality
-    console.log('Clear history clicked');
+    if (confirm('Are you sure you want to clear all your watch history?')) {
+      this.historyService.clearHistory().subscribe({
+        next: () => {
+          this.historyItems = [];
+          this.snackBar.open('History cleared successfully', 'Close', { duration: 2000 });
+        },
+        error: (error) => {
+          console.error('Error clearing history:', error);
+          this.snackBar.open('Failed to clear history', 'Close', { duration: 3000 });
+        }
+      });
+    }
   }
 
-  removeFromHistory(id: string) {
-    // TODO: Implement remove from history functionality
-    console.log('Remove from history:', id);
+  removeFromHistory(id: number) {
+    this.historyService.removeFromHistory(id).subscribe({
+      next: () => {
+        this.historyItems = this.historyItems.filter(item => item.id !== id);
+        this.snackBar.open('Removed from history', 'Close', { duration: 2000 });
+      },
+      error: (error) => {
+        console.error('Error removing from history:', error);
+        this.snackBar.open('Failed to remove from history', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  navigateToVideo(videoId: number) {
+    // Navigate to video detail page
+    window.location.href = `/videos/${videoId}`;
+  }
+
+  formatDuration(duration: string): string {
+    // Convert ISO 8601 duration to readable format
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return duration;
+    
+    const hours = parseInt(match[1] || '0');
+    const minutes = parseInt(match[2] || '0');
+    const seconds = parseInt(match[3] || '0');
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    } else {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+
+  formatWatchDuration(duration: string): string {
+    // Convert ISO 8601 duration to readable format
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return '0:00';
+    
+    const hours = parseInt(match[1] || '0');
+    const minutes = parseInt(match[2] || '0');
+    const seconds = parseInt(match[3] || '0');
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    } else {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
   }
 }
