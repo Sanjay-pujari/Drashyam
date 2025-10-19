@@ -100,6 +100,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
           isActive: true, // Assume active if returned from API
           subscribedAt: new Date(channel.createdAt || new Date())
         }));
+
+        // Load notification preferences for each subscription
+        this.loadNotificationPreferences();
         
         console.log('Processed subscriptions for sidebar:', this.subscriptions);
         console.log('Number of subscriptions to display:', this.subscriptions.length);
@@ -109,6 +112,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
         console.error('Error details:', error);
         this.subscriptions = [];
       }
+    });
+  }
+
+  private loadNotificationPreferences(): void {
+    this.subscriptions.forEach(subscription => {
+      this.subscriptionService.getNotificationPreference(parseInt(subscription.channelId)).subscribe({
+        next: (enabled) => {
+          subscription.isActive = enabled;
+          console.log(`Notification preference for ${subscription.channel.name}:`, enabled);
+        },
+        error: (error) => {
+          console.error(`Error loading notification preference for ${subscription.channel.name}:`, error);
+          subscription.isActive = true; // Default to enabled
+        }
+      });
     });
   }
 

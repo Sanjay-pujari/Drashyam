@@ -80,4 +80,14 @@ export class SubscriptionService {
   isSubscribedToChannel(channelId: number): Observable<boolean> {
     return this.http.get<boolean>(`${environment.apiUrl}/api/channel/${channelId}/is-subscribed`);
   }
+
+  updateNotificationPreference(channelId: number, notificationsEnabled: boolean): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/api/channel/${channelId}/notification-preference`, {
+      notificationsEnabled
+    });
+  }
+
+  getNotificationPreference(channelId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.apiUrl}/api/channel/${channelId}/notification-preference`);
+  }
 }

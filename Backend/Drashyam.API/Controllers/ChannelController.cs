@@ -127,6 +127,24 @@ public class ChannelController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{channelId:int}/notification-preference")]
+    [Authorize]
+    public async Task<ActionResult> UpdateNotificationPreference([FromRoute] int channelId, [FromBody] NotificationPreferenceDto preference)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        await _channelService.UpdateNotificationPreferenceAsync(channelId, userId, preference.NotificationsEnabled);
+        return Ok();
+    }
+
+    [HttpGet("{channelId:int}/notification-preference")]
+    [Authorize]
+    public async Task<ActionResult<bool>> GetNotificationPreference([FromRoute] int channelId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var isEnabled = await _channelService.GetNotificationPreferenceAsync(channelId, userId);
+        return Ok(isEnabled);
+    }
+
     [HttpPost("{channelId:int}/banner")]
     [Authorize]
     public async Task<ActionResult<ChannelDto>> UpdateBanner([FromRoute] int channelId, [FromForm] IFormFile bannerFile)

@@ -285,3 +285,49 @@
     justify-content: center;
   }
 }
+
+// Notification Controls Styling
+.notification-controls {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #333;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .notification-hint {
+    margin: 8px 0 0 0;
+    font-size: 0.875rem;
+    color: #666;
+    line-height: 1.4;
+  }
+
+  mat-slide-toggle {
+    margin-bottom: 8px;
+
+    ::ng-deep .mat-slide-toggle-thumb {
+      background-color: #fff;
+    }
+
+    ::ng-deep .mat-slide-toggle-bar {
+      background-color: #ccc;
+    }
+
+    &.mat-checked ::ng-deep .mat-slide-toggle-bar {
+      background-color: #1976d2;
+    }
+  }
+}

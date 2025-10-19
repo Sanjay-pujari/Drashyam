@@ -135,4 +135,14 @@ export class ChannelService {
   unsubscribe(channelId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/${channelId}/unsubscribe`, {});
   }
+
+  updateNotificationPreference(channelId: number, notificationsEnabled: boolean): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${channelId}/notification-preference`, {
+      notificationsEnabled
+    });
+  }
+
+  getNotificationPreference(channelId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/${channelId}/notification-preference`);
+  }
 }

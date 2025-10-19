@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChannelService } from '../../services/channel.service';
 import { VideoService } from '../../services/video.service';
 import { AuthService } from '../../services/auth.service';
@@ -18,7 +19,7 @@ import { Video } from '../../models/video.model';
   standalone: true,
   imports: [
     CommonModule, MatCardModule, MatButtonModule, MatIconModule, 
-    MatTabsModule, MatChipsModule, MatProgressSpinnerModule
+    MatTabsModule, MatChipsModule, MatProgressSpinnerModule, MatSlideToggleModule
   ],
   templateUrl: './channel-detail.component.html',
   styleUrls: ['./channel-detail.component.scss']
@@ -30,6 +31,8 @@ export class ChannelDetailComponent implements OnInit {
   isSubscribed = false;
   isOwner = false;
   channelId: number | null = null;
+  notificationsEnabled = true;
+  isUpdatingNotifications = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -147,6 +150,8 @@ export class ChannelDetailComponent implements OnInit {
           if (this.channel) {
             this.channel.subscriberCount++;
           }
+          // Load notification preference after subscribing
+          this.loadNotificationPreference();
         },
         error: (err) => {
           console.error('Failed to subscribe:', err);
@@ -204,5 +209,39 @@ export class ChannelDetailComponent implements OnInit {
       // Default video thumbnail
       event.target.src = '/assets/default-video-thumbnail.svg';
     }
+  }
+
+  toggleNotifications(enabled: boolean) {
+    if (!this.channelId) return;
+    
+    this.isUpdatingNotifications = true;
+    this.channelService.updateNotificationPreference(this.channelId, enabled).subscribe({
+      next: () => {
+        this.notificationsEnabled = enabled;
+        this.isUpdatingNotifications = false;
+        console.log('Notification preference updated:', enabled);
+      },
+      error: (error) => {
+        console.error('Error updating notification preference:', error);
+        this.isUpdatingNotifications = false;
+        // Revert the toggle state
+        this.notificationsEnabled = !enabled;
+      }
+    });
+  }
+
+  private loadNotificationPreference() {
+    if (!this.channelId || !this.isSubscribed) return;
+    
+    this.channelService.getNotificationPreference(this.channelId).subscribe({
+      next: (enabled) => {
+        this.notificationsEnabled = enabled;
+        console.log('Notification preference loaded:', enabled);
+      },
+      error: (error) => {
+        console.error('Error loading notification preference:', error);
+        this.notificationsEnabled = true; // Default to enabled
+      }
+    });
   }
 }

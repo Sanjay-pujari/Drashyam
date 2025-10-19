@@ -1,5 +1,10 @@
 namespace Drashyam.API.DTOs;
 
+public class NotificationPreferenceDto
+{
+    public bool NotificationsEnabled { get; set; }
+}
+
 public class ChannelDto
 {
     public int Id { get; set; }

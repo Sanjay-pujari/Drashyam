@@ -36,6 +36,22 @@
             {{ isSubscribed ? 'Unsubscribe' : 'Subscribe' }}
           </button>
           
+          <!-- Notification Toggle (only show if subscribed) -->
+          <div class="notification-controls" *ngIf="isSubscribed && !isOwner">
+            <mat-slide-toggle 
+              [checked]="notificationsEnabled"
+              (change)="toggleNotifications($event.checked)"
+              [disabled]="isUpdatingNotifications">
+              <span class="toggle-label">
+                <mat-icon>{{ notificationsEnabled ? 'notifications' : 'notifications_off' }}</mat-icon>
+                {{ notificationsEnabled ? 'Notifications On' : 'Notifications Off' }}
+              </span>
+            </mat-slide-toggle>
+            <p class="notification-hint">
+              {{ notificationsEnabled ? 'You\'ll be notified about new videos from this channel' : 'You won\'t receive notifications from this channel' }}
+            </p>
+          </div>
+          
           <button mat-raised-button 
                   color="accent"
                   (click)="editChannel()"

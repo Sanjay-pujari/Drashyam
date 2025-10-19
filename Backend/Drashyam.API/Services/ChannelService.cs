@@ -282,4 +282,27 @@ public class ChannelService : IChannelService
         return _mapper.Map<ChannelDto>(channel);
     }
 
+    public async Task UpdateNotificationPreferenceAsync(int channelId, string userId, bool notificationsEnabled)
+    {
+        var subscription = await _context.ChannelSubscriptions
+            .FirstOrDefaultAsync(cs => cs.ChannelId == channelId && cs.UserId == userId && cs.IsActive);
+
+        if (subscription == null)
+            throw new ArgumentException("Subscription not found");
+
+        subscription.NotificationsEnabled = notificationsEnabled;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> GetNotificationPreferenceAsync(int channelId, string userId)
+    {
+        var subscription = await _context.ChannelSubscriptions
+            .FirstOrDefaultAsync(cs => cs.ChannelId == channelId && cs.UserId == userId && cs.IsActive);
+
+        if (subscription == null)
+            throw new ArgumentException("Subscription not found");
+
+        return subscription.NotificationsEnabled;
+    }
+
 }

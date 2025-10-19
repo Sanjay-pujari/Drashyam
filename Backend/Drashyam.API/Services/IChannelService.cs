@@ -19,4 +19,6 @@ public interface IChannelService
     Task<PagedResult<UserDto>> GetChannelSubscribersAsync(int channelId, int page = 1, int pageSize = 20);
     Task<ChannelDto> UpdateChannelBannerAsync(int channelId, IFormFile bannerFile, string userId);
     Task<ChannelDto> UpdateChannelProfilePictureAsync(int channelId, IFormFile profilePicture, string userId);
+    Task UpdateNotificationPreferenceAsync(int channelId, string userId, bool notificationsEnabled);
+    Task<bool> GetNotificationPreferenceAsync(int channelId, string userId);
 }
