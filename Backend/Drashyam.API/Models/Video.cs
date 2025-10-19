@@ -24,7 +24,7 @@ public class Video
 
     public int? ChannelId { get; set; }
 
-    public VideoStatus Status { get; set; } = VideoStatus.Processing;
+    public VideoProcessingStatus Status { get; set; } = VideoProcessingStatus.Processing;
 
     public VideoType Type { get; set; } = VideoType.Uploaded;
 
@@ -68,7 +68,7 @@ public class Video
     public virtual ICollection<VideoView> Views { get; set; } = new List<VideoView>();
 }
 
-public enum VideoStatus
+public enum VideoProcessingStatus
 {
     Processing,
     Ready,

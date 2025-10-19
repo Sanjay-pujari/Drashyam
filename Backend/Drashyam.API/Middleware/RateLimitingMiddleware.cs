@@ -23,6 +23,13 @@ public class RateLimitingMiddleware
         var clientId = GetClientIdentifier(context);
         var endpoint = GetEndpointIdentifier(context);
 
+        // Skip rate limiting for Swagger and health endpoints
+        if (endpoint == "swagger:skip")
+        {
+            await _next(context);
+            return;
+        }
+
         var key = $"{clientId}:{endpoint}";
         var now = DateTime.UtcNow;
 
@@ -79,6 +86,10 @@ public class RateLimitingMiddleware
     {
         var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
         var method = context.Request.Method.ToUpperInvariant();
+
+        // Skip rate limiting for Swagger endpoints
+        if (path.StartsWith("/swagger") || path.StartsWith("/health"))
+            return "swagger:skip";
 
         // Group similar endpoints for rate limiting
         if (path.StartsWith("/api/invite") && method == "POST")

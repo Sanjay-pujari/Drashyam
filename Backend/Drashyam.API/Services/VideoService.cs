@@ -82,7 +82,7 @@ public class VideoService : IVideoService
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
                 FileSize = uploadDto.VideoFile.Length,
-                Status = Models.VideoStatus.Ready, // Set to Ready immediately since we're not doing processing
+                Status = VideoProcessingStatus.Ready, // Set to Ready immediately since we're not doing processing
                 PublishedAt = DateTime.UtcNow
             };
 
@@ -143,7 +143,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
 
         // Apply filters
         if (!string.IsNullOrEmpty(filter.Search))
@@ -192,7 +192,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.UserId == userId && v.Status != Models.VideoStatus.Deleted);
+            .Where(v => v.UserId == userId && v.Status != VideoProcessingStatus.Deleted);
 
         // Apply filters and sorting similar to GetVideosAsync
         var totalCount = await query.CountAsync();
@@ -215,7 +215,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.ChannelId == channelId && v.Status == Models.VideoStatus.Ready);
+            .Where(v => v.ChannelId == channelId && v.Status == VideoProcessingStatus.Ready);
 
         var totalCount = await query.CountAsync();
         var videos = await query
@@ -275,7 +275,7 @@ public class VideoService : IVideoService
         if (video == null)
             throw new ArgumentException("Video not found or access denied");
 
-        video.Status = (Models.VideoStatus)DTOs.VideoStatus.Deleted;
+        video.Status = VideoProcessingStatus.Deleted;
         await _context.SaveChangesAsync();
 
         // TODO: Delete files from storage
@@ -425,7 +425,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
             .OrderByDescending(v => v.ViewCount)
             .ThenByDescending(v => v.LikeCount);
 
@@ -460,7 +460,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
             .Where(v => userSubscriptions.Contains(v.ChannelId ?? 0) || 
                        v.Category != null && _context.Videos
                            .Where(v2 => userLikes.Contains(v2.Id))
@@ -493,7 +493,7 @@ public class VideoService : IVideoService
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => favoriteVideoIds.Contains(v.Id) && v.Status == Models.VideoStatus.Ready);
+            .Where(v => favoriteVideoIds.Contains(v.Id) && v.Status == VideoProcessingStatus.Ready);
 
         var totalCount = await query.CountAsync();
         var videos = await query
@@ -522,7 +522,7 @@ public class VideoService : IVideoService
             .Include(v => v.User)
             .Include(v => v.Channel)
             .Where(v => v.ChannelId != null && subscribedChannelIds.Contains(v.ChannelId.Value))
-            .Where(v => v.Status == Models.VideoStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
             .OrderByDescending(v => v.CreatedAt);
 
         var totalCount = await query.CountAsync();
@@ -548,7 +548,7 @@ public class VideoService : IVideoService
         return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
 
-    public async Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, Models.VideoStatus status)
+    public async Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, VideoProcessingStatus status)
     {
         var video = await _context.Videos
             .Include(v => v.User)
@@ -567,12 +567,12 @@ public class VideoService : IVideoService
     public async Task<int> UpdateProcessingVideosToReadyAsync()
     {
         var processingVideos = await _context.Videos
-            .Where(v => v.Status == Models.VideoStatus.Processing)
+            .Where(v => v.Status == VideoProcessingStatus.Processing)
             .ToListAsync();
 
         foreach (var video in processingVideos)
         {
-            video.Status = Models.VideoStatus.Ready;
+            video.Status = VideoProcessingStatus.Ready;
             if (video.PublishedAt == null)
             {
                 video.PublishedAt = DateTime.UtcNow;

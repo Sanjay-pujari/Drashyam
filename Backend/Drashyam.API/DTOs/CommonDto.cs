@@ -1,3 +1,5 @@
+using Drashyam.API.Models;
+
 namespace Drashyam.API.DTOs;
 
 public class PagedResult<T>
@@ -53,7 +55,7 @@ public class VideoUpdateDto
 
 public class UpdateVideoStatusDto
 {
-    public Models.VideoStatus Status { get; set; }
+    public VideoProcessingStatus Status { get; set; }
 }
 
 public enum LikeType

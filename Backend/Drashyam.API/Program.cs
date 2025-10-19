@@ -133,34 +133,41 @@ builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 var app = builder.Build();
 
-// Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Exception handling should be first
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Request logging
+app.UseMiddleware<RequestLoggingMiddleware>();
+
+// CORS
+app.UseCors("AllowFrontend");
 
 // Only redirect to HTTPS in production
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseCors("AllowFrontend");
 
-// Middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseMiddleware<RateLimitingMiddleware>();
-
+// Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Rate limiting (after auth to allow authenticated users)
+app.UseMiddleware<RateLimitingMiddleware>();
+
+// Swagger (should be after auth to avoid issues)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Endpoints
 app.MapControllers();
 app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
 
-// Seed
+// Seed database
 using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<DrashyamDbContext>();

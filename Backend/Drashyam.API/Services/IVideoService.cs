@@ -22,6 +22,6 @@ public interface IVideoService
     Task<PagedResult<VideoDto>> GetRecommendedVideosAsync(string userId, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetUserFavoriteVideosAsync(string userId, VideoFilterDto filter);
     Task<PagedResult<VideoDto>> GetSubscribedChannelsVideosAsync(string userId, VideoFilterDto filter);
-    Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, Models.VideoStatus status);
+    Task<VideoDto> UpdateVideoStatusAsync(int videoId, string userId, VideoProcessingStatus status);
     Task<int> UpdateProcessingVideosToReadyAsync();
 }
