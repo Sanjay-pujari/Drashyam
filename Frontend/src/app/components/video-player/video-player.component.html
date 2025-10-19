@@ -69,6 +69,10 @@
           <mat-icon>{{ isInWatchLater ? 'watch_later' : 'watch_later_outlined' }}</mat-icon>
           <span>{{ isInWatchLater ? 'Saved' : 'Watch Later' }}</span>
         </button>
+        <button class="action-btn playlist-btn" (click)="saveVideo()">
+          <mat-icon>playlist_add</mat-icon>
+          <span>Add to Playlist</span>
+        </button>
       </div>
     </div>
     <!-- Channel Info -->

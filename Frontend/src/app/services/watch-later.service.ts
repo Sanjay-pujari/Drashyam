@@ -52,6 +52,7 @@ export class WatchLaterService {
   }
 
   getWatchLaterCount(): Observable<number> {
+    console.log('Calling watch later count API:', `${this.apiUrl}/count`);
     return this.http.get<number>(`${this.apiUrl}/count`);
   }
 }

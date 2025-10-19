@@ -165,8 +165,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadWatchLaterCount(): void {
+    console.log('Loading watch later count...');
     this.watchLaterService.getWatchLaterCount().subscribe({
       next: (count) => {
+        console.log('Watch later count loaded:', count);
         this.watchLaterCount = count;
       },
       error: (error) => {
@@ -177,8 +179,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadPlaylistsCount(): void {
+    console.log('Loading playlists count...');
     this.playlistService.getPlaylists(1, 1).subscribe({
       next: (result) => {
+        console.log('Playlists count loaded:', result.totalCount);
         this.playlistsCount = result.totalCount;
       },
       error: (error) => {

@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PlaylistService, Playlist, PlaylistVisibility } from '../../services/playlist.service';
+import { CreatePlaylistDialogComponent } from '../create-playlist-dialog/create-playlist-dialog.component';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -35,8 +36,8 @@ import { Subscription } from 'rxjs';
           </button>
         </div>
         
-        <div class="playlists-grid" *ngIf="playlists.length > 0">
-          <mat-card class="playlist-card" *ngFor="let playlist of playlists" (click)="viewPlaylist(playlist.id)">
+            <div class="playlists-grid" *ngIf="playlists.length > 0">
+              <mat-card class="playlist-card" *ngFor="let playlist of playlists" (click)="viewPlaylist(playlist.id)" style="cursor: pointer;">
             <div class="playlist-thumbnail">
               <img [src]="playlist.thumbnailUrl" [alt]="playlist.name" *ngIf="playlist.thumbnailUrl">
               <div class="video-count" *ngIf="!playlist.thumbnailUrl">
@@ -247,9 +248,17 @@ export class PlaylistsComponent implements OnInit, OnDestroy {
   }
 
   createPlaylist() {
-    // TODO: Open create playlist dialog
-    console.log('Create playlist clicked');
-    this.snackBar.open('Create playlist functionality coming soon', 'Close', { duration: 3000 });
+    const dialogRef = this.dialog.open(CreatePlaylistDialogComponent, {
+      width: '500px',
+      data: {}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh the playlists list
+        this.loadPlaylists();
+      }
+    });
   }
 
   editPlaylist(id: number) {

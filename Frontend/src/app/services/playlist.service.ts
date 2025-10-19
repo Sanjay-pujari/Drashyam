@@ -73,6 +73,7 @@ export class PlaylistService {
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
+    console.log('Calling playlists API:', this.apiUrl, 'with params:', params.toString());
     return this.http.get<PagedResult<Playlist>>(this.apiUrl, { params });
   }
 
@@ -81,6 +82,10 @@ export class PlaylistService {
   }
 
   getPlaylist(id: number): Observable<Playlist> {
+    return this.http.get<Playlist>(`${this.apiUrl}/${id}`);
+  }
+
+  getPlaylistById(id: number): Observable<Playlist> {
     return this.http.get<Playlist>(`${this.apiUrl}/${id}`);
   }
 

@@ -60,7 +60,8 @@ const routes: Routes = [
     });
   }, canActivate: [authGuard] },
   { path: 'watch-later', loadComponent: () => import('./app/components/watch-later/watch-later.component').then(m => m.WatchLaterComponent), canActivate: [authGuard] },
-  { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] }
+  { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] },
+  { path: 'playlists/:id', loadComponent: () => import('./app/components/playlist-details/playlist-details.component').then(m => m.PlaylistDetailsComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {

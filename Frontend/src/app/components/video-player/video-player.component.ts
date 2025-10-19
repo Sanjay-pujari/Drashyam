@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef, Inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -15,6 +15,8 @@ import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
 import { User } from '../../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { AddToPlaylistDialogComponent } from '../add-to-playlist-dialog/add-to-playlist-dialog.component';
 // Declare global videojs
 declare var videojs: any;
 
@@ -25,7 +27,7 @@ declare var videojs: any;
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })
-export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
+export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input() video: Video | null = null;
   @Input() autoplay = false;
   @Output() videoEnded = new EventEmitter<void>();
@@ -50,13 +52,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUser$: Observable<User | null>;
   isInWatchLater = false;
   playlists: any[] = [];
+  videoPlaylistStatus: { [playlistId: number]: boolean } = {};
 
   constructor(
     @Inject(Store) private store: Store<AppState>,
     private videoService: VideoService,
     private watchLaterService: WatchLaterService,
     private playlistService: PlaylistService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
   }
@@ -67,6 +71,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.store.select(selectVideoById, { id: this.video.id }).subscribe(updatedVideo => {
         if (updatedVideo && this.video && updatedVideo.id === this.video!.id) {
           this.video = updatedVideo;
+          // Re-check watch later status when video updates
+          this.checkWatchLaterStatus();
         }
       });
     }
@@ -79,6 +85,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('beforeunload', () => {
       this.recordView();
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['video'] && this.video) {
+      // Video changed, re-check watch later status and playlist status
+      this.checkWatchLaterStatus();
+      this.loadPlaylists(); // This will also trigger checkVideoPlaylistStatus
+    }
   }
 
   ngAfterViewInit() {
@@ -417,9 +431,21 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   saveVideo() {
     if (!this.video) return;
 
-    // For now, we'll implement a simple save to watch later functionality
-    // In a full implementation, this would open a playlist selection dialog
-    this.addToWatchLater();
+    // Open the Add to Playlist dialog
+    const dialogRef = this.dialog.open(AddToPlaylistDialogComponent, {
+      width: '500px',
+      data: { 
+        videoId: this.video.id,
+        videoPlaylistStatus: this.videoPlaylistStatus
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh playlist status after changes
+        this.checkVideoPlaylistStatus();
+      }
+    });
   }
 
   addToWatchLater() {
@@ -478,6 +504,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.playlistService.getPlaylists(1, 20).subscribe({
       next: (result) => {
         this.playlists = result.items || [];
+        // Check which playlists contain this video
+        this.checkVideoPlaylistStatus();
       },
       error: (error) => {
         console.error('Error loading playlists:', error);
@@ -495,6 +523,27 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (error) => {
         console.error('Error checking watch later status:', error);
       }
+    });
+  }
+
+  checkVideoPlaylistStatus() {
+    if (!this.video || this.playlists.length === 0) return;
+
+    // Reset status
+    this.videoPlaylistStatus = {};
+
+    // Check each playlist
+    this.playlists.forEach(playlist => {
+      this.playlistService.getPlaylistVideos(playlist.id, 1, 1000).subscribe({
+        next: (result) => {
+          const isInPlaylist = result.items?.some(video => video.videoId === this.video?.id) || false;
+          this.videoPlaylistStatus[playlist.id] = isInPlaylist;
+        },
+        error: (error) => {
+          console.error(`Error checking playlist ${playlist.id} status:`, error);
+          this.videoPlaylistStatus[playlist.id] = false;
+        }
+      });
     });
   }
 
