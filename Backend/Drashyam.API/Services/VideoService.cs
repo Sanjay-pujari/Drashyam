@@ -82,7 +82,8 @@ public class VideoService : IVideoService
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
                 FileSize = uploadDto.VideoFile.Length,
-                Status = Models.VideoStatus.Processing
+                Status = Models.VideoStatus.Ready, // Set to Ready immediately since we're not doing processing
+                PublishedAt = DateTime.UtcNow
             };
 
             _context.Videos.Add(video);
@@ -546,5 +547,24 @@ public class VideoService : IVideoService
         await _context.SaveChangesAsync();
 
         return await GetVideoByIdAsync(videoId);
+    }
+
+    public async Task<int> UpdateProcessingVideosToReadyAsync()
+    {
+        var processingVideos = await _context.Videos
+            .Where(v => v.Status == Models.VideoStatus.Processing)
+            .ToListAsync();
+
+        foreach (var video in processingVideos)
+        {
+            video.Status = Models.VideoStatus.Ready;
+            if (video.PublishedAt == null)
+            {
+                video.PublishedAt = DateTime.UtcNow;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return processingVideos.Count;
     }
 }

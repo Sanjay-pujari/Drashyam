@@ -26,6 +26,33 @@ public class CommentService : ICommentService
         comment.CreatedAt = DateTime.UtcNow;
 
         _context.Comments.Add(comment);
+        
+        // Update video comment count if this is a top-level comment
+        if (comment.ParentCommentId == null)
+        {
+            var video = await _context.Videos.FindAsync(comment.VideoId);
+            if (video != null)
+            {
+                video.CommentCount++;
+            }
+        }
+        else
+        {
+            // Update parent comment reply count
+            var parentComment = await _context.Comments.FindAsync(comment.ParentCommentId);
+            if (parentComment != null)
+            {
+                parentComment.ReplyCount++;
+                
+                // Also update video comment count for replies
+                var video = await _context.Videos.FindAsync(comment.VideoId);
+                if (video != null)
+                {
+                    video.CommentCount++;
+                }
+            }
+        }
+        
         await _context.SaveChangesAsync();
 
         return _mapper.Map<CommentDto>(comment);

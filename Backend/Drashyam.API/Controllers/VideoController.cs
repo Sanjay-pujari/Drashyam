@@ -198,6 +198,14 @@ public class VideoController : ControllerBase
         var video = await _videoService.UpdateVideoStatusAsync(id, userId, statusDto.Status);
         return Ok(video);
     }
+
+    [HttpPost("update-processing-videos")]
+    [Authorize]
+    public async Task<ActionResult<int>> UpdateProcessingVideosToReady()
+    {
+        var updatedCount = await _videoService.UpdateProcessingVideosToReadyAsync();
+        return Ok(new { updatedCount, message = $"Updated {updatedCount} videos from Processing to Ready status" });
+    }
 }
 
 

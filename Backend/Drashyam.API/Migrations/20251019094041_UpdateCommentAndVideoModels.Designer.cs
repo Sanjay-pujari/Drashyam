@@ -3,6 +3,7 @@ using System;
 using Drashyam.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Drashyam.API.Migrations
 {
     [DbContext(typeof(DrashyamDbContext))]
-    partial class DrashyamDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251019094041_UpdateCommentAndVideoModels")]
+    partial class UpdateCommentAndVideoModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,7 +91,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("AdCampaigns", (string)null);
+                    b.ToTable("AdCampaigns");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.AdImpression", b =>
@@ -128,7 +131,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("AdImpressions", (string)null);
+                    b.ToTable("AdImpressions");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Analytics", b =>
@@ -200,7 +203,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("Analytics", (string)null);
+                    b.ToTable("Analytics");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.ApplicationUser", b =>
@@ -372,7 +375,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Channels", (string)null);
+                    b.ToTable("Channels");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.ChannelSubscription", b =>
@@ -406,7 +409,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("UserId", "ChannelId")
                         .IsUnique();
 
-                    b.ToTable("ChannelSubscriptions", (string)null);
+                    b.ToTable("ChannelSubscriptions");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Comment", b =>
@@ -464,7 +467,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.CommentLike", b =>
@@ -495,7 +498,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("UserId", "CommentId")
                         .IsUnique();
 
-                    b.ToTable("CommentLikes", (string)null);
+                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.InviteAnalytics", b =>
@@ -556,7 +559,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("UserId", "Date")
                         .IsUnique();
 
-                    b.ToTable("InviteAnalytics", (string)null);
+                    b.ToTable("InviteAnalytics");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.InviteEvent", b =>
@@ -607,7 +610,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("InviteEvents", (string)null);
+                    b.ToTable("InviteEvents");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.LiveStream", b =>
@@ -692,7 +695,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LiveStreams", (string)null);
+                    b.ToTable("LiveStreams");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Notification", b =>
@@ -743,7 +746,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Playlist", b =>
@@ -791,7 +794,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Playlists", (string)null);
+                    b.ToTable("Playlists");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.PlaylistVideo", b =>
@@ -823,7 +826,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("PlaylistId", "VideoId")
                         .IsUnique();
 
-                    b.ToTable("PlaylistVideos", (string)null);
+                    b.ToTable("PlaylistVideos");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Referral", b =>
@@ -877,7 +880,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("Referrals", (string)null);
+                    b.ToTable("Referrals");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.ReferralAnalytics", b =>
@@ -935,7 +938,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("UserId", "Date")
                         .IsUnique();
 
-                    b.ToTable("ReferralAnalytics", (string)null);
+                    b.ToTable("ReferralAnalytics");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.ReferralEvent", b =>
@@ -986,7 +989,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReferralEvents", (string)null);
+                    b.ToTable("ReferralEvents");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.ReferralReward", b =>
@@ -1037,7 +1040,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReferralRewards", (string)null);
+                    b.ToTable("ReferralRewards");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Subscription", b =>
@@ -1091,7 +1094,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Subscriptions", (string)null);
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.SubscriptionPlan", b =>
@@ -1149,7 +1152,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SubscriptionPlans", (string)null);
+                    b.ToTable("SubscriptionPlans");
 
                     b.HasData(
                         new
@@ -1272,7 +1275,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("UserInvites", (string)null);
+                    b.ToTable("UserInvites");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.Video", b =>
@@ -1363,7 +1366,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Videos", (string)null);
+                    b.ToTable("Videos");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.VideoLike", b =>
@@ -1394,7 +1397,7 @@ namespace Drashyam.API.Migrations
                     b.HasIndex("UserId", "VideoId")
                         .IsUnique();
 
-                    b.ToTable("VideoLikes", (string)null);
+                    b.ToTable("VideoLikes");
                 });
 
             modelBuilder.Entity("Drashyam.API.Models.VideoView", b =>
@@ -1436,7 +1439,7 @@ namespace Drashyam.API.Migrations
 
                     b.HasIndex("VideoId");
 
-                    b.ToTable("VideoViews", (string)null);
+                    b.ToTable("VideoViews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

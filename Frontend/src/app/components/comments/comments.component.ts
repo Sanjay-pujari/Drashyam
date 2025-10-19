@@ -197,12 +197,16 @@ export class CommentsComponent implements OnInit, OnDestroy {
 
   loadReplies(commentId: number) {
     const comment = this.comments.find(c => c.id === commentId);
-    if (!comment || comment.replies || comment.replyCount === 0) return;
+    if (!comment || comment.replyCount === 0) return;
+
+    // Don't reload if already loaded
+    if (comment.replies && comment.replies.length > 0) return;
 
     const sub = this.commentService.getCommentReplies(commentId, { page: 1, pageSize: 20 })
       .subscribe({
         next: (result: PagedResult<Comment>) => {
           comment.replies = result.items;
+          console.log(`Loaded ${result.items.length} replies for comment ${commentId}`);
         },
         error: (err) => {
           console.error('Error loading replies:', err);

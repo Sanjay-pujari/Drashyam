@@ -27,6 +27,8 @@ public class Comment
 
     public long DislikeCount { get; set; } = 0;
 
+    public long ReplyCount { get; set; } = 0;
+
     public bool IsPinned { get; set; } = false;
 
     public bool IsEdited { get; set; } = false;
