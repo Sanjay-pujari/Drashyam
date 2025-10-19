@@ -118,6 +118,15 @@ public class ChannelController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("subscribed")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<ChannelDto>>> GetSubscribedChannels([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var result = await _channelService.GetSubscribedChannelsAsync(userId, page, pageSize);
+        return Ok(result);
+    }
+
     [HttpPost("{channelId:int}/banner")]
     [Authorize]
     public async Task<ActionResult<ChannelDto>> UpdateBanner([FromRoute] int channelId, [FromForm] IFormFile bannerFile)

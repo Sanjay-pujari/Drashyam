@@ -156,33 +156,73 @@ public class ChannelService : IChannelService
         if (channel == null)
             throw new ArgumentException("Channel not found");
 
-        // Add subscription logic here
+        var existingSubscription = await _context.ChannelSubscriptions
+            .FirstOrDefaultAsync(cs => cs.ChannelId == channelId && cs.UserId == userId);
+
+        if (existingSubscription != null)
+        {
+            if (existingSubscription.IsActive)
+                throw new InvalidOperationException("Already subscribed to this channel");
+            
+            existingSubscription.IsActive = true;
+            existingSubscription.SubscribedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            var subscription = new ChannelSubscription
+            {
+                UserId = userId,
+                ChannelId = channelId,
+                IsActive = true,
+                SubscribedAt = DateTime.UtcNow
+            };
+            _context.ChannelSubscriptions.Add(subscription);
+        }
+
+        await _context.SaveChangesAsync();
         return _mapper.Map<ChannelDto>(channel);
     }
 
     public async Task<ChannelDto> UnsubscribeFromChannelAsync(int channelId, string userId)
     {
-        var channel = await _context.Channels.FindAsync(channelId);
-        if (channel == null)
-            throw new ArgumentException("Channel not found");
+        var subscription = await _context.ChannelSubscriptions
+            .FirstOrDefaultAsync(cs => cs.ChannelId == channelId && cs.UserId == userId);
 
-        // Remove subscription logic here
+        if (subscription == null)
+            throw new ArgumentException("Subscription not found");
+
+        subscription.IsActive = false;
+        await _context.SaveChangesAsync();
+
+        var channel = await _context.Channels.FindAsync(channelId);
         return _mapper.Map<ChannelDto>(channel);
     }
 
     public async Task<bool> IsSubscribedAsync(int channelId, string userId)
     {
-        // Check subscription logic here
-        return false;
+        return await _context.ChannelSubscriptions
+            .AnyAsync(cs => cs.ChannelId == channelId && cs.UserId == userId && cs.IsActive);
     }
 
     public async Task<PagedResult<ChannelDto>> GetSubscribedChannelsAsync(string userId, int page = 1, int pageSize = 20)
     {
-        // Get subscribed channels logic here
+        var query = _context.ChannelSubscriptions
+            .Where(cs => cs.UserId == userId && cs.IsActive)
+            .Include(cs => cs.Channel)
+            .Select(cs => cs.Channel);
+
+        var totalCount = await query.CountAsync();
+        var channels = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var channelDtos = _mapper.Map<List<ChannelDto>>(channels);
+
         return new PagedResult<ChannelDto>
         {
-            Items = new List<ChannelDto>(),
-            TotalCount = 0,
+            Items = channelDtos,
+            TotalCount = totalCount,
             Page = page,
             PageSize = pageSize
         };
@@ -190,11 +230,23 @@ public class ChannelService : IChannelService
 
     public async Task<PagedResult<UserDto>> GetChannelSubscribersAsync(int channelId, int page = 1, int pageSize = 20)
     {
-        // Get channel subscribers logic here
+        var query = _context.ChannelSubscriptions
+            .Where(cs => cs.ChannelId == channelId && cs.IsActive)
+            .Include(cs => cs.User)
+            .Select(cs => cs.User);
+
+        var totalCount = await query.CountAsync();
+        var users = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var userDtos = _mapper.Map<List<UserDto>>(users);
+
         return new PagedResult<UserDto>
         {
-            Items = new List<UserDto>(),
-            TotalCount = 0,
+            Items = userDtos,
+            TotalCount = totalCount,
             Page = page,
             PageSize = pageSize
         };
@@ -229,4 +281,5 @@ public class ChannelService : IChannelService
 
         return _mapper.Map<ChannelDto>(channel);
     }
+
 }

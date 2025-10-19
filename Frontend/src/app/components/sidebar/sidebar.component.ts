@@ -10,6 +10,7 @@ import { VideoService } from '../../services/video.service';
 import { HistoryService } from '../../services/history.service';
 import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
+import { SubscriptionService } from '../../services/subscription.service';
 import { User } from '../../models/user.model';
 
 interface ChannelSubscription {
@@ -50,6 +51,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private historyService: HistoryService,
     private watchLaterService: WatchLaterService,
     private playlistService: PlaylistService,
+    private subscriptionService: SubscriptionService,
     private router: Router
   ) {}
 
@@ -80,43 +82,34 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private loadSubscriptions(): void {
-    // This would typically call a service to get user's channel subscriptions
-    // For now, we'll use mock data
-    this.subscriptions = [
-      {
-        id: '1',
-        channelId: 'channel1',
-        channel: {
-          name: 'Tech Channel',
-          profilePictureUrl: '/assets/default-avatar.svg',
-          subscriberCount: 150000
-        },
-        isActive: true,
-        subscribedAt: new Date('2024-01-15')
+    console.log('Loading real subscriptions...');
+    this.subscriptionService.getSubscribedChannels({ page: 1, pageSize: 10 }).subscribe({
+      next: (result) => {
+        console.log('Subscriptions API response:', result);
+        console.log('Total subscriptions found:', result.totalCount);
+        console.log('Items in response:', result.items?.length || 0);
+        
+        this.subscriptions = (result.items || []).map(channel => ({
+          id: channel.id.toString(),
+          channelId: channel.id.toString(),
+          channel: {
+            name: channel.name,
+            profilePictureUrl: channel.profilePictureUrl || '/assets/default-avatar.svg',
+            subscriberCount: channel.subscriberCount || 0
+          },
+          isActive: true, // Assume active if returned from API
+          subscribedAt: new Date(channel.createdAt || new Date())
+        }));
+        
+        console.log('Processed subscriptions for sidebar:', this.subscriptions);
+        console.log('Number of subscriptions to display:', this.subscriptions.length);
       },
-      {
-        id: '2',
-        channelId: 'channel2',
-        channel: {
-          name: 'Gaming Hub',
-          profilePictureUrl: '/assets/default-avatar.svg',
-          subscriberCount: 250000
-        },
-        isActive: true,
-        subscribedAt: new Date('2024-02-20')
-      },
-      {
-        id: '3',
-        channelId: 'channel3',
-        channel: {
-          name: 'Music World',
-          profilePictureUrl: '/assets/default-avatar.svg',
-          subscriberCount: 500000
-        },
-        isActive: false,
-        subscribedAt: new Date('2024-03-10')
+      error: (error) => {
+        console.error('Error loading subscriptions:', error);
+        console.error('Error details:', error);
+        this.subscriptions = [];
       }
-    ];
+    });
   }
 
   private loadVideoCounts(): void {
@@ -152,6 +145,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   navigateToChannel(channelId: string): void {
+    console.log('Navigating to channel:', channelId);
     this.router.navigate(['/channels', channelId]);
   }
 

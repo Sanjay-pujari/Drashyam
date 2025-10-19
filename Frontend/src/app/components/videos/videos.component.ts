@@ -5,7 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { AppState } from '../../store/app.state';
@@ -55,7 +55,8 @@ export class VideosComponent implements OnInit, OnDestroy {
 
 	constructor(
 		@Inject(Store) private store: Store<AppState>,
-		private videoService: VideoService
+		private videoService: VideoService,
+		private router: Router
 	) {
 		this.videos$ = this.store.select(selectVideos);
 		this.loading$ = this.store.select(selectVideoLoading);
@@ -114,6 +115,10 @@ export class VideosComponent implements OnInit, OnDestroy {
 
 	onImageError(event: any) {
 		event.target.src = '/assets/default-video-thumbnail.svg';
+	}
+
+	navigateToChannel(channelId: number) {
+		this.router.navigate(['/channels', channelId]);
 	}
 }
 

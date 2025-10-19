@@ -65,18 +65,19 @@ export class SubscriptionService {
     if (filter.page) params = params.set('page', filter.page.toString());
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
 
-    return this.http.get<PagedResult<Channel>>(`${this.apiUrl}/channels`, { params });
+    // Use the channel service endpoint for subscribed channels
+    return this.http.get<PagedResult<Channel>>(`${environment.apiUrl}/api/channel/subscribed`, { params });
   }
 
   subscribeToChannel(channelId: number): Observable<Channel> {
-    return this.http.post<Channel>(`${this.apiUrl}/channels/${channelId}/subscribe`, {});
+    return this.http.post<Channel>(`${environment.apiUrl}/api/channel/${channelId}/subscribe`, {});
   }
 
   unsubscribeFromChannel(channelId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/channels/${channelId}/unsubscribe`);
+    return this.http.post<void>(`${environment.apiUrl}/api/channel/${channelId}/unsubscribe`, {});
   }
 
   isSubscribedToChannel(channelId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/channels/${channelId}/is-subscribed`);
+    return this.http.get<boolean>(`${environment.apiUrl}/api/channel/${channelId}/is-subscribed`);
   }
 }

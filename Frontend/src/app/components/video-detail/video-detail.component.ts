@@ -127,4 +127,40 @@ export class VideoDetailComponent implements OnInit {
     return count.toString();
   }
 
+  getChannelName(): string {
+    if (this.video?.channel) {
+      return this.video.channel.name;
+    } else if (this.video?.user) {
+      return `${this.video.user.firstName} ${this.video.user.lastName}`;
+    }
+    return 'Unknown Channel';
+  }
+
+  getChannelAvatar(): string {
+    if (this.video?.channel?.profilePictureUrl) {
+      return this.video.channel.profilePictureUrl;
+    } else if (this.video?.user?.profilePictureUrl) {
+      return this.video.user.profilePictureUrl;
+    }
+    return '/assets/default-avatar.svg';
+  }
+
+  navigateToChannel() {
+    if (this.video?.channel) {
+      this.router.navigate(['/channels', this.video.channel.id]);
+    } else if (this.video?.user) {
+      // For users without channels, you might want to create a user profile page
+      console.log('User profile navigation not implemented yet');
+    }
+  }
+
+  formatSubscriberCount(count: number): string {
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1) + 'M';
+    } else if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+  }
+
 }

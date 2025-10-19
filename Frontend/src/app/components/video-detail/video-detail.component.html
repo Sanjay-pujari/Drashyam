@@ -30,6 +30,32 @@
     </div>
 
 
+    <!-- Channel Information -->
+    <div class="channel-section" *ngIf="video.channel || video.user">
+      <div class="channel-info">
+        <div class="channel-avatar">
+          <img [src]="getChannelAvatar()" [alt]="getChannelName()">
+        </div>
+        <div class="channel-details">
+          <h3 class="channel-name" (click)="navigateToChannel()" style="cursor: pointer;">
+            {{ getChannelName() }}
+          </h3>
+          <p class="channel-subscribers" *ngIf="video.channel">
+            {{ formatSubscriberCount(video.channel.subscriberCount) }} subscribers
+          </p>
+        </div>
+        <div class="channel-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="navigateToChannel()"
+                  *ngIf="video.channel">
+            <mat-icon>account_circle</mat-icon>
+            View Channel
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="video-description">
       <h3>Description</h3>
       <p>{{ video.description || 'No description available.' }}</p>

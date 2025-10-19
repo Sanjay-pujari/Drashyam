@@ -68,7 +68,9 @@
 								<h3 class="video-title">{{ video.title }}</h3>
 								<div class="video-meta">
 									@if (video.channel) {
-										<p class="channel-name">{{ video.channel.name }}</p>
+										<p class="channel-name" (click)="navigateToChannel(video.channel.id)" style="cursor: pointer;">
+											{{ video.channel.name }}
+										</p>
 									} @else {
 										<p class="channel-name">{{ video.user?.firstName }} {{ video.user?.lastName }}</p>
 									}
