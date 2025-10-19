@@ -223,7 +223,9 @@ export class CommentsComponent implements OnInit, OnDestroy {
         next: (updatedComment: Comment) => {
           // Update the comment with new like count
           comment.likeCount = updatedComment.likeCount;
+          comment.dislikeCount = updatedComment.dislikeCount;
           comment.isLiked = updatedComment.isLiked;
+          comment.isDisliked = updatedComment.isDisliked;
           this.snackBar.open('Comment liked!', 'Close', { duration: 2000 });
         },
         error: (err) => {
@@ -241,12 +243,34 @@ export class CommentsComponent implements OnInit, OnDestroy {
         next: (updatedComment: Comment) => {
           // Update the comment with new like count
           comment.likeCount = updatedComment.likeCount;
+          comment.dislikeCount = updatedComment.dislikeCount;
           comment.isLiked = updatedComment.isLiked;
+          comment.isDisliked = updatedComment.isDisliked;
           this.snackBar.open('Comment unliked!', 'Close', { duration: 2000 });
         },
         error: (err) => {
           console.error('Error unliking comment:', err);
           this.snackBar.open('Failed to unlike comment', 'Close', { duration: 3000 });
+        }
+      });
+    
+    this.subscriptions.push(sub);
+  }
+
+  dislikeComment(comment: Comment) {
+    const sub = this.commentService.dislikeComment(comment.id)
+      .subscribe({
+        next: (updatedComment: Comment) => {
+          // Update the comment with new dislike count
+          comment.likeCount = updatedComment.likeCount;
+          comment.dislikeCount = updatedComment.dislikeCount;
+          comment.isLiked = updatedComment.isLiked;
+          comment.isDisliked = updatedComment.isDisliked;
+          this.snackBar.open('Comment disliked!', 'Close', { duration: 2000 });
+        },
+        error: (err) => {
+          console.error('Error disliking comment:', err);
+          this.snackBar.open('Failed to dislike comment', 'Close', { duration: 3000 });
         }
       });
     

@@ -137,6 +137,15 @@
                     <mat-icon>{{ comment.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
                     <span>{{ comment.likeCount }}</span>
                   </button>
+                  
+                  <button 
+                    mat-button 
+                    class="dislike-btn"
+                    [class.disliked]="comment.isDisliked"
+                    (click)="comment.isDisliked ? unlikeComment(comment) : dislikeComment(comment)">
+                    <mat-icon>{{ comment.isDisliked ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
+                    <span>{{ comment.dislikeCount }}</span>
+                  </button>
                 }
                 
                 <button 
@@ -246,6 +255,15 @@
                           (click)="reply.isLiked ? unlikeComment(reply) : likeComment(reply)">
                           <mat-icon>{{ reply.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
                           <span>{{ reply.likeCount }}</span>
+                        </button>
+                        
+                        <button 
+                          mat-button 
+                          class="dislike-btn"
+                          [class.disliked]="reply.isDisliked"
+                          (click)="reply.isDisliked ? unlikeComment(reply) : dislikeComment(reply)">
+                          <mat-icon>{{ reply.isDisliked ? 'thumb_down' : 'thumb_down_off_alt' }}</mat-icon>
+                          <span>{{ reply.dislikeCount }}</span>
                         </button>
                       }
                     </div>

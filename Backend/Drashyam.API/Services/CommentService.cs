@@ -139,8 +139,56 @@ public class CommentService : ICommentService
         if (comment == null)
             throw new ArgumentException("Comment not found");
 
-        // Add like logic here
-        return _mapper.Map<CommentDto>(comment);
+        // Check if user already liked/disliked this comment
+        var existingLike = await _context.CommentLikes
+            .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+        if (existingLike != null)
+        {
+            if (existingLike.Type == Models.LikeType.Like)
+            {
+                // User already liked, remove the like
+                _context.CommentLikes.Remove(existingLike);
+                comment.LikeCount--;
+            }
+            else
+            {
+                // User disliked, change to like
+                existingLike.Type = Models.LikeType.Like;
+                comment.DislikeCount--;
+                comment.LikeCount++;
+            }
+        }
+        else
+        {
+            // Add new like
+            _context.CommentLikes.Add(new CommentLike
+            {
+                UserId = userId,
+                CommentId = commentId,
+                Type = Models.LikeType.Like
+            });
+            comment.LikeCount++;
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Return updated comment with like status
+        var updatedComment = await _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Likes)
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+
+        var commentDto = _mapper.Map<CommentDto>(updatedComment);
+        
+        // Check current like status
+        var currentLike = await _context.CommentLikes
+            .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+        
+        commentDto.IsLiked = currentLike?.Type == Models.LikeType.Like;
+        commentDto.IsDisliked = currentLike?.Type == Models.LikeType.Dislike;
+
+        return commentDto;
     }
 
     public async Task<CommentDto> UnlikeCommentAsync(int commentId, string userId)
@@ -149,14 +197,106 @@ public class CommentService : ICommentService
         if (comment == null)
             throw new ArgumentException("Comment not found");
 
-        // Remove like logic here
-        return _mapper.Map<CommentDto>(comment);
+        // Find existing like
+        var existingLike = await _context.CommentLikes
+            .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+        if (existingLike != null)
+        {
+            if (existingLike.Type == Models.LikeType.Like)
+            {
+                comment.LikeCount--;
+            }
+            else
+            {
+                comment.DislikeCount--;
+            }
+            
+            _context.CommentLikes.Remove(existingLike);
+            await _context.SaveChangesAsync();
+        }
+
+        // Return updated comment
+        var updatedComment = await _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Likes)
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+
+        var commentDto = _mapper.Map<CommentDto>(updatedComment);
+        commentDto.IsLiked = false;
+        commentDto.IsDisliked = false;
+
+        return commentDto;
+    }
+
+    public async Task<CommentDto> DislikeCommentAsync(int commentId, string userId)
+    {
+        var comment = await _context.Comments.FindAsync(commentId);
+        if (comment == null)
+            throw new ArgumentException("Comment not found");
+
+        // Check if user already liked/disliked this comment
+        var existingLike = await _context.CommentLikes
+            .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+        if (existingLike != null)
+        {
+            if (existingLike.Type == Models.LikeType.Dislike)
+            {
+                // User already disliked, remove the dislike
+                _context.CommentLikes.Remove(existingLike);
+                comment.DislikeCount--;
+            }
+            else
+            {
+                // User liked, change to dislike
+                existingLike.Type = Models.LikeType.Dislike;
+                comment.LikeCount--;
+                comment.DislikeCount++;
+            }
+        }
+        else
+        {
+            // Add new dislike
+            _context.CommentLikes.Add(new CommentLike
+            {
+                UserId = userId,
+                CommentId = commentId,
+                Type = Models.LikeType.Dislike
+            });
+            comment.DislikeCount++;
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Return updated comment with dislike status
+        var updatedComment = await _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Likes)
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+
+        var commentDto = _mapper.Map<CommentDto>(updatedComment);
+        
+        // Check current like status
+        var currentLike = await _context.CommentLikes
+            .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+        
+        commentDto.IsLiked = currentLike?.Type == Models.LikeType.Like;
+        commentDto.IsDisliked = currentLike?.Type == Models.LikeType.Dislike;
+
+        return commentDto;
     }
 
     public async Task<bool> IsCommentLikedAsync(int commentId, string userId)
     {
-        // Check if comment is liked logic here
-        return false;
+        return await _context.CommentLikes
+            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == Models.LikeType.Like);
+    }
+
+    public async Task<bool> IsCommentDislikedAsync(int commentId, string userId)
+    {
+        return await _context.CommentLikes
+            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == Models.LikeType.Dislike);
     }
 
     public async Task<PagedResult<CommentDto>> GetUserCommentsAsync(string userId, int page = 1, int pageSize = 20)

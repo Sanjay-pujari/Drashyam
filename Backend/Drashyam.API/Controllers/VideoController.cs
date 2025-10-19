@@ -107,7 +107,9 @@ public class VideoController : ControllerBase
     public async Task<ActionResult<VideoDto>> RecordView([FromRoute] int id, [FromQuery] int secondsWatched)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        _logger.LogInformation("Recording view for video {VideoId} by user {UserId}, duration: {Duration} seconds", id, userId, secondsWatched);
         var updatedVideo = await _videoService.RecordVideoViewAsync(id, userId, TimeSpan.FromSeconds(secondsWatched));
+        _logger.LogInformation("View recorded successfully. New view count: {ViewCount}", updatedVideo.ViewCount);
         return Ok(updatedVideo);
     }
 

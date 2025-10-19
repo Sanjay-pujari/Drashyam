@@ -79,6 +79,15 @@ public class CommentController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{commentId:int}/dislike")]
+    [Authorize]
+    public async Task<ActionResult<CommentDto>> Dislike([FromRoute] int commentId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var result = await _commentService.DislikeCommentAsync(commentId, userId);
+        return Ok(result);
+    }
+
     [HttpGet("{commentId:int}/is-liked")]
     [Authorize]
     public async Task<ActionResult<bool>> IsLiked([FromRoute] int commentId)

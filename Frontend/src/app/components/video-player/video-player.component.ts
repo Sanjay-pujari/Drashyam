@@ -44,7 +44,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   errorMessage = '';
   watchStartTime = 0;
   private watchTimer?: Subscription;
-  private viewRecorded = false;
 
   currentUser$: Observable<User | null>;
 
@@ -161,6 +160,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isPlaying = true;
       this.videoPlaying.emit();
       this.startWatchTimer();
+      // Record initial view when video starts playing
+      this.recordInitialView();
     });
 
     this.player.on('pause', () => {
@@ -197,9 +198,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private startWatchTimer() {
-    this.watchTimer = interval(1000).subscribe(() => {
-      // Record view every 30 seconds
-      if (this.currentTime > 0 && this.currentTime % 30 === 0) {
+    this.watchTimer = interval(10000).subscribe(() => {
+      // Record view every 10 seconds of watching
+      if (this.isPlaying && this.currentTime > 0) {
         this.recordView();
       }
     });
@@ -212,19 +213,32 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private recordInitialView() {
+    if (!this.video) {
+      return;
+    }
+
+    console.log('Recording initial view for video:', this.video.id);
+    this.store.dispatch(recordVideoView({ 
+      videoId: this.video.id, 
+      watchDuration: 1 // Record initial view with minimal duration
+    }));
+  }
+
   private recordView() {
-    if (!this.video || this.viewRecorded) {
+    if (!this.video) {
       return;
     }
 
     const watchDuration = (Date.now() - this.watchStartTime) / 1000;
-    if (watchDuration > 10) { // Only record if watched for more than 10 seconds
+    if (watchDuration > 5) { // Only record if watched for more than 5 seconds
+      console.log('Recording view for video:', this.video.id, 'Duration:', watchDuration);
       this.store.dispatch(recordVideoView({ 
         videoId: this.video.id, 
         watchDuration 
       }));
-      this.viewRecorded = true;
-      // Don't update local count - let the store handle it
+      // Reset the start time for potential future recordings
+      this.watchStartTime = Date.now();
     }
   }
 

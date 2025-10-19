@@ -364,7 +364,13 @@ public class VideoService : IVideoService
     public async Task<VideoDto> RecordVideoViewAsync(int videoId, string userId, TimeSpan watchDuration)
     {
         var video = await _context.Videos.FindAsync(videoId);
-        if (video == null) throw new ArgumentException("Video not found");
+        if (video == null) 
+        {
+            _logger.LogWarning("Video {VideoId} not found when recording view", videoId);
+            throw new ArgumentException("Video not found");
+        }
+
+        _logger.LogInformation("Recording view for video {VideoId} by user {UserId}, duration: {Duration}", videoId, userId, watchDuration);
 
         // Record view
         _context.VideoViews.Add(new VideoView
@@ -375,8 +381,11 @@ public class VideoService : IVideoService
             ViewedAt = DateTime.UtcNow
         });
 
+        var oldViewCount = video.ViewCount;
         video.ViewCount++;
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("View count updated for video {VideoId}: {OldCount} -> {NewCount}", videoId, oldViewCount, video.ViewCount);
 
         // Return updated video
         return await GetVideoByIdAsync(videoId);

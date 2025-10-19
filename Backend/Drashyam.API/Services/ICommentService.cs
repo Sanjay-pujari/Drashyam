@@ -11,7 +11,9 @@ public interface ICommentService
     Task<PagedResult<CommentDto>> GetCommentRepliesAsync(int parentCommentId, int page = 1, int pageSize = 20);
     Task<CommentDto> LikeCommentAsync(int commentId, string userId);
     Task<CommentDto> UnlikeCommentAsync(int commentId, string userId);
+    Task<CommentDto> DislikeCommentAsync(int commentId, string userId);
     Task<bool> IsCommentLikedAsync(int commentId, string userId);
+    Task<bool> IsCommentDislikedAsync(int commentId, string userId);
     Task<PagedResult<CommentDto>> GetUserCommentsAsync(string userId, int page = 1, int pageSize = 20);
     Task<bool> ReportCommentAsync(int commentId, string userId, string reason);
 }

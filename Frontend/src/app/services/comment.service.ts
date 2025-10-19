@@ -51,6 +51,10 @@ export class CommentService {
     return this.http.post<Comment>(`${this.apiUrl}/${commentId}/unlike`, {});
   }
 
+  dislikeComment(commentId: number): Observable<Comment> {
+    return this.http.post<Comment>(`${this.apiUrl}/${commentId}/dislike`, {});
+  }
+
   isCommentLiked(commentId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/${commentId}/is-liked`);
   }

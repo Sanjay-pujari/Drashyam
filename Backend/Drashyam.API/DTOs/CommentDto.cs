@@ -16,6 +16,8 @@ public class CommentDto
     public CommentDto? ParentComment { get; set; }
     public List<CommentDto>? Replies { get; set; }
     public bool IsLiked { get; set; }
+    public bool IsDisliked { get; set; }
+    public long DislikeCount { get; set; }
 }
 
 public class CommentCreateDto

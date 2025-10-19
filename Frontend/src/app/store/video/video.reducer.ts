@@ -98,6 +98,7 @@ export const videoReducer = createReducer(
   
   on(VideoActions.recordVideoViewSuccess, (state, { video }) => ({
     ...state,
+    currentVideo: video,
     videos: state.videos.map(v => v.id === video.id ? video : v),
     loading: false,
     error: null

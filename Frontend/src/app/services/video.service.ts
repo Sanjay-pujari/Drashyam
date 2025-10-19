@@ -67,6 +67,7 @@ export class VideoService {
   }
 
   recordVideoView(id: number, watchDuration: number): Observable<Video> {
+    console.log('Recording view for video:', id, 'Duration:', watchDuration);
     return this.http.post<Video>(`${this.apiUrl}/${id}/view?secondsWatched=${watchDuration}`, {});
   }
 

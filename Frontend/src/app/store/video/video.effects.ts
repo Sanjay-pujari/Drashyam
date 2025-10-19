@@ -73,8 +73,14 @@ export class VideoEffects {
       ofType(VideoActions.recordVideoView),
       switchMap(({ videoId, watchDuration }) =>
         this.videoService.recordVideoView(videoId, watchDuration).pipe(
-          map(video => VideoActions.recordVideoViewSuccess({ video })),
-          catchError(error => of(VideoActions.recordVideoViewFailure({ error: error.message })))
+          map(video => {
+            console.log('View recorded successfully:', video);
+            return VideoActions.recordVideoViewSuccess({ video });
+          }),
+          catchError(error => {
+            console.error('Error recording view:', error);
+            return of(VideoActions.recordVideoViewFailure({ error: error.message }));
+          })
         )
       )
     )
