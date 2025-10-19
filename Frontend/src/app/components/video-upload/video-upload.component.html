@@ -81,9 +81,9 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Channel</mat-label>
+            <mat-label>Channel (Optional)</mat-label>
             <mat-select formControlName="channelId" [disabled]="isLoadingChannels">
-              <mat-option [value]="null">No Channel</mat-option>
+              <mat-option [value]="null">No Channel (Upload without channel)</mat-option>
               @for (channel of userChannels; track channel.id) {
                 <mat-option [value]="channel.id">{{ channel.name }}</mat-option>
               }
@@ -95,9 +95,9 @@
               @if (isLoadingChannels) {
                 Loading channels...
               } @else {
-                Available channels: {{ userChannels.length }}
+                Optional: Select a channel to organize your video, or leave as "No Channel"
                 @if (userChannels.length === 0) {
-                  <a href="/channel/create" target="_blank">Create a channel</a>
+                  <br><a href="/channel/create" target="_blank">Create a channel</a>
                 }
               }
             </mat-hint>
