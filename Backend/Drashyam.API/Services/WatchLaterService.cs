@@ -55,10 +55,7 @@ public class WatchLaterService : IWatchLaterService
             Items = items,
             TotalCount = totalCount,
             Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-            HasNextPage = page * pageSize < totalCount,
-            HasPreviousPage = page > 1
+            PageSize = pageSize
         };
     }
 

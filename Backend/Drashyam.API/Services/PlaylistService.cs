@@ -43,7 +43,7 @@ public class PlaylistService : IPlaylistService
                 UserName = p.User.FirstName + " " + p.User.LastName,
                 ChannelId = p.ChannelId,
                 ChannelName = p.Channel != null ? p.Channel.Name : null,
-                Visibility = (DTOs.PlaylistVisibility)p.Visibility,
+                Visibility = (Models.PlaylistVisibility)p.Visibility,
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
                 VideoCount = p.VideoCount,
@@ -56,10 +56,7 @@ public class PlaylistService : IPlaylistService
             Items = items,
             TotalCount = totalCount,
             Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-            HasNextPage = page * pageSize < totalCount,
-            HasPreviousPage = page > 1
+            PageSize = pageSize
         };
     }
 
@@ -181,10 +178,7 @@ public class PlaylistService : IPlaylistService
             Items = items,
             TotalCount = totalCount,
             Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-            HasNextPage = page * pageSize < totalCount,
-            HasPreviousPage = page > 1
+            PageSize = pageSize
         };
     }
 

@@ -1,3 +1,5 @@
+using Drashyam.API.Models;
+
 namespace Drashyam.API.DTOs;
 
 public class PlaylistDto
@@ -55,5 +57,6 @@ public class PlaylistVideoCreateDto
 
 public class PlaylistVideoUpdateDto
 {
+    public int VideoId { get; set; }
     public int Order { get; set; }
 }
