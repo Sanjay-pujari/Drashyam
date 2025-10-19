@@ -192,10 +192,15 @@ export class AuthService {
   // Initialize authentication state on app startup
   initializeAuth(): Observable<User | null> {
     const token = localStorage.getItem('token');
+    console.log('Initializing auth - token exists:', !!token);
+    
     if (!token || !this.isAuthenticated()) {
+      console.log('No valid token found, setting user to null');
       this.currentUserSubject.next(null);
       return of(null);
     }
+    
+    console.log('Valid token found, attempting to get current user');
 
     return this.getCurrentUser().pipe(
       tap(user => {

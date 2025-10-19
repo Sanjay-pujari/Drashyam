@@ -176,7 +176,6 @@ public class VideoController : ControllerBase
     }
 
     [HttpGet("home-feed")]
-    [Authorize]
     public async Task<ActionResult<HomeFeedDto>> HomeFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -185,8 +184,8 @@ public class VideoController : ControllerBase
         var feed = new HomeFeedDto
         {
             Trending = await _videoService.GetTrendingVideosAsync(filter),
-            Recommended = await _videoService.GetRecommendedVideosAsync(userId, filter),
-            Subscribed = await _videoService.GetSubscribedChannelsVideosAsync(userId, filter)
+            Recommended = string.IsNullOrEmpty(userId) ? new PagedResult<VideoDto>() : await _videoService.GetRecommendedVideosAsync(userId, filter),
+            Subscribed = string.IsNullOrEmpty(userId) ? new PagedResult<VideoDto>() : await _videoService.GetSubscribedChannelsVideosAsync(userId, filter)
         };
 
         return Ok(feed);

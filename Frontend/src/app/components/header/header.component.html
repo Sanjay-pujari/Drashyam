@@ -4,8 +4,11 @@
   
   <!-- Navigation Links -->
   <button mat-button routerLink="/">Home</button>
-  <button mat-button routerLink="/videos">Videos</button>
-  <button mat-button routerLink="/channels">Channels</button>
+  
+  @if (isAuthenticated$ | async) {
+    <button mat-button routerLink="/videos">Videos</button>
+    <button mat-button routerLink="/channels">Channels</button>
+  }
   
   <!-- Authenticated User Menu -->
   @if (isAuthenticated$ | async) {

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +10,9 @@ import { Inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import { Video } from '../../models/video.model';
+import { User } from '../../models/user.model';
 import { selectVideos, selectVideoLoading, selectVideoError } from '../../store/video/video.selectors';
+import { selectCurrentUser } from '../../store/user/user.selectors';
 import { loadVideos, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
@@ -25,6 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   videos$: Observable<Video[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
+  currentUser$: Observable<User | null>;
   
   trendingVideos: Video[] = [];
   recommendedVideos: Video[] = [];
@@ -45,10 +49,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedCategory = 'All';
   private subscriptions: Subscription[] = [];
 
-  constructor(@Inject(Store) private store: Store<AppState>, private videoService: VideoService, private channelService: ChannelService) {
+  constructor(
+    @Inject(Store) private store: Store<AppState>, 
+    private videoService: VideoService, 
+    private channelService: ChannelService,
+    private router: Router
+  ) {
     this.videos$ = this.store.select(selectVideos);
     this.loading$ = this.store.select(selectVideoLoading);
     this.error$ = this.store.select(selectVideoError);
+    this.currentUser$ = this.store.select(selectCurrentUser);
   }
 
   ngOnInit() {
@@ -66,10 +76,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadHomeFeed() {
-    const sub = this.videoService.getHomeFeed({ page: 1, pageSize: 10 }).subscribe(feed => {
-      this.trendingVideos = feed.trending.items;
-      this.recommendedVideos = feed.recommended.items;
-      this.subscribedVideos = feed.subscribed.items;
+    const sub = this.videoService.getHomeFeed({ page: 1, pageSize: 10 }).subscribe({
+      next: (feed) => {
+        this.trendingVideos = feed.trending.items || [];
+        this.recommendedVideos = feed.recommended.items || [];
+        this.subscribedVideos = feed.subscribed.items || [];
+      },
+      error: (error) => {
+        console.error('Error loading home feed:', error);
+        // If home feed fails, we still have the main videos from loadInitialVideos()
+        this.trendingVideos = [];
+        this.recommendedVideos = [];
+        this.subscribedVideos = [];
+      }
     });
     this.subscriptions.push(sub);
   }
@@ -90,11 +109,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   onVideoClick(video: Video) {
     // Navigate to video detail page
     console.log('Navigate to video:', video.id);
+    this.router.navigate(['/videos', video.id]);
   }
 
   onChannelClick(channelId: number) {
     // Navigate to channel page
     console.log('Navigate to channel:', channelId);
+    this.router.navigate(['/channels', channelId]);
   }
 
   toggleFavorite(video: Video) {
@@ -122,9 +143,26 @@ export class HomeComponent implements OnInit, OnDestroy {
     return video.id;
   }
 
-  formatDuration(duration: string): string {
-    // Convert duration string to readable format
-    const seconds = parseInt(duration);
+  formatDuration(duration: string | any): string {
+    // Handle both string and TimeSpan object from backend
+    let seconds: number;
+    
+    if (typeof duration === 'string') {
+      // If it's a string, try to parse it
+      seconds = parseInt(duration);
+    } else if (duration && typeof duration === 'object') {
+      // If it's a TimeSpan object from backend
+      seconds = Math.floor(duration.ticks / 10000000); // Convert ticks to seconds
+    } else {
+      // Fallback to 0 if duration is invalid
+      seconds = 0;
+    }
+    
+    // If seconds is NaN or 0, return 0:00
+    if (isNaN(seconds) || seconds === 0) {
+      return '0:00';
+    }
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
