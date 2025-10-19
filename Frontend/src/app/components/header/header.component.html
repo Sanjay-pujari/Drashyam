@@ -1,4 +1,11 @@
 <mat-toolbar color="primary">
+  <!-- Sidebar Toggle Button (only show when authenticated) -->
+  @if (isAuthenticated$ | async) {
+    <button mat-icon-button (click)="toggleSidebar()" class="sidebar-toggle">
+      <mat-icon>{{ (isSidebarCollapsed$ | async) ? 'menu' : 'menu_open' }}</mat-icon>
+    </button>
+  }
+  
   <span>{{ title }}</span>
   <span class="spacer"></span>
   

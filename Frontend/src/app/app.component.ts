@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { AuthService } from './services/auth.service';
+import { SidebarService } from './services/sidebar.service';
 import { Subscription } from 'rxjs';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
@@ -20,7 +21,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private authSubscription?: Subscription;
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    public sidebarService: SidebarService
   ) {}
 
   ngOnInit() {

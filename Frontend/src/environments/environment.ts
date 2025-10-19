@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:56380', // .NET API URL (using HTTP for development)
-  signalRUrl: 'http://localhost:56380/hubs',
+  apiUrl: 'https://localhost:56379', // .NET API URL (using HTTPS for development)
+  signalRUrl: 'https://localhost:56379/hubs',
   stripePublishableKey: 'pk_test_your_stripe_publishable_key_here',
   googleClientId: 'your_google_client_id_here',
   facebookAppId: 'your_facebook_app_id_here',

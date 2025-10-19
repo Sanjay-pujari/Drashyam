@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
+import { SidebarService } from '../../services/sidebar.service';
 import { User } from '../../models/video.model';
 import { Observable, Subscription } from 'rxjs';
 
@@ -21,14 +22,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   title = 'Drashyam';
   currentUser$: Observable<User | null>;
   isAuthenticated$: Observable<boolean>;
+  isSidebarCollapsed$: Observable<boolean>;
   private subscription?: Subscription;
 
   constructor(
     private authService: AuthService,
+    private sidebarService: SidebarService,
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
     this.isAuthenticated$ = this.authService.isAuthenticated$;
+    this.isSidebarCollapsed$ = this.sidebarService.isCollapsed$;
   }
 
   ngOnInit() {
@@ -43,6 +47,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription?.unsubscribe();
+  }
+
+  toggleSidebar(): void {
+    this.sidebarService.toggle();
   }
 
   logout() {

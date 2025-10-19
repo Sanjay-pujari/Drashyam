@@ -4,6 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { SidebarService } from '../../services/sidebar.service';
 import { UserService } from '../../services/user.service';
 import { VideoService } from '../../services/video.service';
 import { HistoryService } from '../../services/history.service';
@@ -35,11 +36,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   watchLaterCount = 0;
   playlistsCount = 0;
   currentUser: User | null = null;
+  isCollapsed$ = this.sidebarService.isCollapsed$;
   
   private subscriptions$ = new Subscription();
 
   constructor(
     private authService: AuthService,
+    private sidebarService: SidebarService,
     private userService: UserService,
     private videoService: VideoService,
     private historyService: HistoryService,

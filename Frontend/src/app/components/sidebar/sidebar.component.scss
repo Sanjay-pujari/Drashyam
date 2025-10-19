@@ -9,6 +9,7 @@
   border-right: 1px solid #e1e5e9;
   overflow-y: auto;
   z-index: 50; // Lower than header
+  transition: width 0.3s ease;
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -26,6 +27,55 @@
 
   &::-webkit-scrollbar-thumb:hover {
     background: #a8b2ba;
+  }
+
+  // Collapsed state
+  &.collapsed {
+    width: 72px;
+
+    .sidebar-nav {
+      .nav-section {
+        .section-header {
+          justify-content: center;
+          padding: 12px 0 8px 0;
+          span {
+            display: none;
+          }
+        }
+
+        .nav-list {
+          .nav-item {
+            .nav-link {
+              justify-content: center;
+              padding: 12px 16px;
+              min-width: 40px;
+              display: flex;
+              align-items: center;
+
+              mat-icon {
+                font-size: 24px;
+                width: 24px;
+                height: 24px;
+                margin: 0;
+                flex-shrink: 0;
+              }
+
+              span {
+                display: none;
+              }
+
+              .nav-count {
+                display: none;
+              }
+            }
+          }
+        }
+      }
+
+      .subscriptions-container {
+        display: none;
+      }
+    }
   }
 }
 

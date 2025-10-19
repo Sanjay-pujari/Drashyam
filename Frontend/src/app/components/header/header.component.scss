@@ -2,6 +2,14 @@
   flex: 1 1 auto;
 }
 
+.sidebar-toggle {
+  margin-right: 8px;
+  
+  mat-icon {
+    transition: transform 0.3s ease;
+  }
+}
+
 .user-info {
   padding: 16px;
   min-width: 200px;

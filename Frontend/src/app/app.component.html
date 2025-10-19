@@ -10,7 +10,9 @@
     }
 
     <!-- Router Outlet -->
-    <div class="content-area" [class.with-sidebar]="isAuthenticated">
+    <div class="content-area" 
+         [class.with-sidebar]="isAuthenticated"
+         [class.sidebar-collapsed]="(sidebarService.isCollapsed$ | async) && isAuthenticated">
       <router-outlet></router-outlet>
     </div>
   </div>
