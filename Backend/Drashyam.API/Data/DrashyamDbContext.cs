@@ -35,6 +35,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ReferralAnalytics> ReferralAnalytics { get; set; }
     public DbSet<InviteEvent> InviteEvents { get; set; }
     public DbSet<ReferralEvent> ReferralEvents { get; set; }
+    public DbSet<UserSettings> UserSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -308,5 +309,19 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
                 CreatedAt = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc)
             }
         );
+
+        // Configure UserSettings entity
+        builder.Entity<UserSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.Property(e => e.ProfilePublic).HasDefaultValue(true);
+            entity.Property(e => e.ShowEmail).HasDefaultValue(false);
+            entity.Property(e => e.AllowDataSharing).HasDefaultValue(true);
+            entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
+            entity.Property(e => e.PushNotifications).HasDefaultValue(true);
+            entity.Property(e => e.NewVideoNotifications).HasDefaultValue(true);
+            entity.Property(e => e.CommentNotifications).HasDefaultValue(true);
+        });
     }
 }
