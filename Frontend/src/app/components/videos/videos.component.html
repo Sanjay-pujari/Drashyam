@@ -1,6 +1,126 @@
-<div class="page">
-	<h2>Videos</h2>
-	<p>Videos listing goes here.</p>
+<div class="videos-page">
+	<!-- Page Header -->
+	<div class="page-header">
+		<h1>All Videos</h1>
+		<p>Discover and explore videos from our community</p>
+	</div>
+
+	<!-- Category Filter -->
+	<div class="category-filter">
+		<div class="category-chips">
+			<mat-chip-set>
+				@for (category of categories; track category) {
+					<mat-chip 
+						[class.selected]="selectedCategory === category"
+						(click)="onCategoryChange(category)">
+						{{ category }}
+					</mat-chip>
+				}
+			</mat-chip-set>
+		</div>
+	</div>
+
+	<!-- Videos Grid -->
+	<div class="videos-container">
+		@if (loading$ | async) {
+			<div class="loading-container">
+				<mat-spinner></mat-spinner>
+				<p>Loading videos...</p>
+			</div>
+		} @else if (error$ | async; as error) {
+			<div class="error-container">
+				<mat-icon>error_outline</mat-icon>
+				<h3>Error Loading Videos</h3>
+				<p>{{ error }}</p>
+				<button mat-raised-button color="primary" (click)="loadVideos()">
+					Try Again
+				</button>
+			</div>
+		} @else if (videos$ | async; as videos) {
+			@if (videos.length === 0) {
+				<div class="no-videos">
+					<mat-icon>video_library</mat-icon>
+					<h3>No videos found</h3>
+					<p>There are no videos in this category yet.</p>
+					<button mat-raised-button color="primary" routerLink="/upload">
+						<mat-icon>cloud_upload</mat-icon>
+						Upload Your First Video
+					</button>
+				</div>
+			} @else {
+				<div class="videos-grid">
+					@for (video of videos; track video.id) {
+						<mat-card class="video-card" routerLink="/videos/{{ video.id }}">
+							<div class="video-thumbnail">
+								<img 
+									[src]="getSafeImageUrl(video.thumbnailUrl)" 
+									[alt]="video.title"
+									(error)="onImageError($event)">
+								<div class="video-duration">{{ video.duration }}</div>
+								@if (video.status === 'Processing') {
+									<div class="processing-overlay">
+										<mat-icon>hourglass_empty</mat-icon>
+										<span>Processing</span>
+									</div>
+								}
+							</div>
+							<mat-card-content>
+								<h3 class="video-title">{{ video.title }}</h3>
+								<div class="video-meta">
+									@if (video.channel) {
+										<p class="channel-name">{{ video.channel.name }}</p>
+									} @else {
+										<p class="channel-name">{{ video.user?.firstName }} {{ video.user?.lastName }}</p>
+									}
+									<div class="video-stats">
+										<span class="views">{{ formatViewCount(video.viewCount) }} views</span>
+										<span class="date">{{ video.createdAt | date:'MMM d, y' }}</span>
+									</div>
+								</div>
+								@if (video.description) {
+									<p class="video-description">{{ video.description | slice:0:100 }}{{ video.description.length > 100 ? '...' : '' }}</p>
+								}
+							</mat-card-content>
+							<mat-card-actions>
+								<button 
+									mat-icon-button 
+									class="like-btn"
+									[class.liked]="video.isLiked"
+									(click)="likeVideo(video); $event.stopPropagation()">
+									<mat-icon>{{ video.isLiked ? 'thumb_up' : 'thumb_up_off_alt' }}</mat-icon>
+								</button>
+								<span class="like-count">{{ formatViewCount(video.likeCount) }}</span>
+								<button 
+									mat-icon-button 
+									class="save-btn"
+									(click)="$event.stopPropagation()">
+									<mat-icon>playlist_add</mat-icon>
+								</button>
+								<button 
+									mat-icon-button 
+									class="share-btn"
+									(click)="$event.stopPropagation()">
+									<mat-icon>share</mat-icon>
+								</button>
+							</mat-card-actions>
+						</mat-card>
+					}
+				</div>
+
+				<!-- Load More Button -->
+				@if ((totalCount$ | async)! > videos.length) {
+					<div class="load-more-container">
+						<button 
+							mat-raised-button 
+							(click)="loadMoreVideos()"
+							[disabled]="loading$ | async">
+							Load More Videos
+						</button>
+					</div>
+				}
+			}
+		}
+	</div>
 </div>
 
 
