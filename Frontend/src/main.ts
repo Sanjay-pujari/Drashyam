@@ -43,7 +43,6 @@ const routes: Routes = [
   { path: 'login', loadComponent: () => import('./app/components/login/login.component').then(m => m.LoginComponent) },
   // Protected routes
   { path: 'favorites', loadComponent: () => import('./app/components/favorites/favorites.component').then(m => m.FavoritesComponent), canActivate: [authGuard] },
-  { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },
   { path: 'upload', loadComponent: () => import('./app/components/video-upload/video-upload.component').then(m => m.VideoUploadComponent), canActivate: [authGuard] },
   { path: 'record', loadComponent: () => import('./app/components/video-record-upload/video-record-upload.component').then(m => m.VideoRecordUploadComponent), canActivate: [authGuard] },
   { path: 'channel/create', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent), canActivate: [authGuard] },
@@ -61,7 +60,9 @@ const routes: Routes = [
   }, canActivate: [authGuard] },
   { path: 'watch-later', loadComponent: () => import('./app/components/watch-later/watch-later.component').then(m => m.WatchLaterComponent), canActivate: [authGuard] },
   { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] },
-  { path: 'playlists/:id', loadComponent: () => import('./app/components/playlist-details/playlist-details.component').then(m => m.PlaylistDetailsComponent), canActivate: [authGuard] }
+  { path: 'playlists/:id', loadComponent: () => import('./app/components/playlist-details/playlist-details.component').then(m => m.PlaylistDetailsComponent), canActivate: [authGuard] },
+  { path: 'my-channels', loadComponent: () => import('./app/components/my-channels/my-channels.component').then(m => m.MyChannelsComponent), canActivate: [authGuard] },
+  { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {

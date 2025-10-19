@@ -15,12 +15,12 @@
   @if (isAuthenticated$ | async) {
     <button mat-button routerLink="/videos">Videos</button>
     <button mat-button routerLink="/channels">Channels</button>
+    <button mat-button routerLink="/my-channels">My Channels</button>
   }
   
   <!-- Authenticated User Menu -->
   @if (isAuthenticated$ | async) {
     <button mat-button routerLink="/favorites">Favorites</button>
-    <button mat-button routerLink="/subscriptions">Subscriptions</button>
     <button mat-button routerLink="/upload">Upload</button>
     
     <button mat-icon-button [matMenuTriggerFor]="userMenu">

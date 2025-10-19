@@ -16,6 +16,12 @@
           </a>
         </li>
         <li class="nav-item">
+          <a routerLink="/subscriptions" routerLinkActive="active" class="nav-link">
+            <mat-icon>subscriptions</mat-icon>
+            <span>Subscriptions</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a routerLink="/upload" routerLinkActive="active" class="nav-link">
             <mat-icon>cloud_upload</mat-icon>
             <span>Upload</span>
@@ -69,6 +75,12 @@
             <mat-icon>playlist_play</mat-icon>
             <span>Playlists</span>
             <span class="nav-count" *ngIf="playlistsCount > 0">{{ playlistsCount }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/my-channels" routerLinkActive="active" class="nav-link">
+            <mat-icon>account_circle</mat-icon>
+            <span>My Channels</span>
           </a>
         </li>
       </ul>

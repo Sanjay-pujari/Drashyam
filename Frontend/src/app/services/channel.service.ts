@@ -57,6 +57,10 @@ export class ChannelService {
     return this.http.get<PagedResult<Channel>>(`${this.apiUrl}/user/${userId}`, { params });
   }
 
+  getMyChannels(filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<Channel>> {
+    return this.getUserChannels('me', filter);
+  }
+
   searchChannels(query: string, filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<Channel>> {
     let params = new HttpParams().set('query', query);
     

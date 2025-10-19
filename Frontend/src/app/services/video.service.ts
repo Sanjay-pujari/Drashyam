@@ -99,6 +99,15 @@ export class VideoService {
     return this.http.get<PagedResult<Video>>(`${this.apiUrl}/recommended`, { params });
   }
 
+  getLatestFromSubscriptions(filter: VideoFilter = {}): Observable<PagedResult<Video>> {
+    let params = new HttpParams();
+    
+    if (filter.page) params = params.set('page', filter.page.toString());
+    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
+
+    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/subscriptions`, { params });
+  }
+
   getUserVideos(userId: string, filter: VideoFilter = {}): Observable<PagedResult<Video>> {
     let params = new HttpParams();
     
