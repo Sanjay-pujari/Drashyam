@@ -11,6 +11,8 @@ import { selectCurrentUser } from '../../store/user/user.selectors';
 import { selectVideoById } from '../../store/video/video.selectors';
 import { recordVideoView, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
+import { WatchLaterService } from '../../services/watch-later.service';
+import { PlaylistService } from '../../services/playlist.service';
 import { User } from '../../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 // Declare global videojs
@@ -46,10 +48,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private watchTimer?: Subscription;
 
   currentUser$: Observable<User | null>;
+  isInWatchLater = false;
+  playlists: any[] = [];
 
   constructor(
     @Inject(Store) private store: Store<AppState>,
     private videoService: VideoService,
+    private watchLaterService: WatchLaterService,
+    private playlistService: PlaylistService,
     private snackBar: MatSnackBar
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -64,6 +70,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+
+    // Load playlists and check watch later status
+    this.loadPlaylists();
+    this.checkWatchLaterStatus();
 
     // Record view when user navigates away
     window.addEventListener('beforeunload', () => {
@@ -409,13 +419,83 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // For now, we'll implement a simple save to watch later functionality
     // In a full implementation, this would open a playlist selection dialog
-    this.snackBar.open('Video saved to Watch Later!', 'Close', { duration: 3000 });
-    
-    // TODO: Implement actual save to playlist/watch later functionality
-    // This would typically involve:
-    // 1. Opening a dialog to select playlist
-    // 2. Calling an API to add video to selected playlist
-    // 3. Updating the UI to reflect the save state
+    this.addToWatchLater();
+  }
+
+  addToWatchLater() {
+    if (!this.video) return;
+
+    this.watchLaterService.addToWatchLater(this.video.id).subscribe({
+      next: () => {
+        this.isInWatchLater = true;
+        this.snackBar.open('Added to watch later', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error adding to watch later:', error);
+        this.snackBar.open('Failed to add to watch later', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  removeFromWatchLater() {
+    if (!this.video) return;
+
+    this.watchLaterService.removeFromWatchLater(this.video.id).subscribe({
+      next: () => {
+        this.isInWatchLater = false;
+        this.snackBar.open('Removed from watch later', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error removing from watch later:', error);
+        this.snackBar.open('Failed to remove from watch later', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  toggleWatchLater() {
+    if (this.isInWatchLater) {
+      this.removeFromWatchLater();
+    } else {
+      this.addToWatchLater();
+    }
+  }
+
+  addToPlaylist(playlistId: number) {
+    if (!this.video) return;
+
+    this.playlistService.addVideoToPlaylist(playlistId, { videoId: this.video.id }).subscribe({
+      next: () => {
+        this.snackBar.open('Added to playlist', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error adding to playlist:', error);
+        this.snackBar.open('Failed to add to playlist', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  loadPlaylists() {
+    this.playlistService.getPlaylists(1, 20).subscribe({
+      next: (result) => {
+        this.playlists = result.items || [];
+      },
+      error: (error) => {
+        console.error('Error loading playlists:', error);
+      }
+    });
+  }
+
+  checkWatchLaterStatus() {
+    if (!this.video) return;
+
+    this.watchLaterService.isVideoInWatchLater(this.video.id).subscribe({
+      next: (isInWatchLater) => {
+        this.isInWatchLater = isInWatchLater;
+      },
+      error: (error) => {
+        console.error('Error checking watch later status:', error);
+      }
+    });
   }
 
   private cleanup() {

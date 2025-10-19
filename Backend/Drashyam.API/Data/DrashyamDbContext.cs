@@ -17,6 +17,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<VideoLike> VideoLikes { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<VideoView> VideoViews { get; set; }
+    public DbSet<WatchLater> WatchLater { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
     public DbSet<ChannelSubscription> ChannelSubscriptions { get; set; }
@@ -91,6 +92,13 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.WatchDuration).HasConversion(
                 v => v.Ticks,
                 v => TimeSpan.FromTicks(v));
+        });
+
+        // Configure WatchLater entity
+        builder.Entity<WatchLater>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.UserId, e.VideoId }).IsUnique();
         });
 
         // Configure Subscription entity

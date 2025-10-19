@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { WatchLaterService, WatchLaterItem } from '../../services/watch-later.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-watch-later',
@@ -34,20 +37,20 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         <div class="watch-later-list" *ngIf="watchLaterItems.length > 0">
           <mat-card class="watch-later-item" *ngFor="let item of watchLaterItems">
             <div class="video-thumbnail">
-              <img [src]="item.thumbnailUrl" [alt]="item.title">
-              <div class="duration">{{ item.duration }}</div>
-              <button mat-icon-button class="remove-button" (click)="removeFromWatchLater(item.id)">
+              <img [src]="item.videoThumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="item.videoTitle">
+              <div class="duration">{{ formatDuration(item.videoDuration) }}</div>
+              <button mat-icon-button class="remove-button" (click)="removeFromWatchLater(item.videoId)">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
             <div class="video-info">
-              <h3 class="video-title">{{ item.title }}</h3>
+              <h3 class="video-title">{{ item.videoTitle }}</h3>
               <p class="channel-name">{{ item.channelName }}</p>
-              <p class="views">{{ item.views | number }} views</p>
+              <p class="views">{{ item.videoViewCount | number }} views</p>
               <p class="added-at">Added {{ item.addedAt | date:'medium' }}</p>
             </div>
             <div class="actions">
-              <button mat-raised-button color="primary" (click)="watchVideo(item.id)">
+              <button mat-raised-button color="primary" (click)="watchVideo(item.videoId)">
                 <mat-icon>play_arrow</mat-icon>
                 Watch Now
               </button>
@@ -200,35 +203,81 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     }
   `]
 })
-export class WatchLaterComponent implements OnInit {
+export class WatchLaterComponent implements OnInit, OnDestroy {
   isLoading = false;
-  watchLaterItems: any[] = [];
+  watchLaterItems: WatchLaterItem[] = [];
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private watchLaterService: WatchLaterService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit() {
     this.loadWatchLater();
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
   loadWatchLater() {
     this.isLoading = true;
-    // TODO: Implement actual watch later loading from API
-    setTimeout(() => {
-      this.watchLaterItems = [];
-      this.isLoading = false;
-    }, 1000);
+    this.watchLaterItems = [];
+
+    const sub = this.watchLaterService.getWatchLaterItems(1, 50).subscribe({
+      next: (result) => {
+        this.watchLaterItems = result.items || [];
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading watch later:', error);
+        this.watchLaterItems = [];
+        this.isLoading = false;
+        this.snackBar.open('Error loading watch later', 'Close', { duration: 3000 });
+      }
+    });
+
+    this.subscriptions.push(sub);
   }
 
   clearWatchLater() {
-    // TODO: Implement clear watch later functionality
-    console.log('Clear watch later clicked');
+    const sub = this.watchLaterService.clearWatchLater().subscribe({
+      next: () => {
+        this.watchLaterItems = [];
+        this.snackBar.open('Watch later cleared', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error clearing watch later:', error);
+        this.snackBar.open('Error clearing watch later', 'Close', { duration: 3000 });
+      }
+    });
+
+    this.subscriptions.push(sub);
   }
 
-  removeFromWatchLater(id: string) {
-    // TODO: Implement remove from watch later functionality
-    console.log('Remove from watch later:', id);
+  removeFromWatchLater(videoId: number) {
+    const sub = this.watchLaterService.removeFromWatchLater(videoId).subscribe({
+      next: () => {
+        this.watchLaterItems = this.watchLaterItems.filter(item => item.videoId !== videoId);
+        this.snackBar.open('Removed from watch later', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error removing from watch later:', error);
+        this.snackBar.open('Error removing from watch later', 'Close', { duration: 3000 });
+      }
+    });
+
+    this.subscriptions.push(sub);
   }
 
-  watchVideo(id: string) {
-    // TODO: Implement watch video functionality
-    console.log('Watch video:', id);
+  watchVideo(videoId: number) {
+    this.router.navigate(['/videos', videoId]);
+  }
+
+  formatDuration(duration: string): string {
+    // Handle duration formatting if needed
+    return duration;
   }
 }

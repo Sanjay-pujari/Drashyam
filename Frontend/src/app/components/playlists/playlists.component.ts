@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PlaylistService, Playlist, PlaylistVisibility } from '../../services/playlist.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-playlists',
@@ -33,7 +36,7 @@ import { MatDialogModule } from '@angular/material/dialog';
         </div>
         
         <div class="playlists-grid" *ngIf="playlists.length > 0">
-          <mat-card class="playlist-card" *ngFor="let playlist of playlists">
+          <mat-card class="playlist-card" *ngFor="let playlist of playlists" (click)="viewPlaylist(playlist.id)">
             <div class="playlist-thumbnail">
               <img [src]="playlist.thumbnailUrl" [alt]="playlist.name" *ngIf="playlist.thumbnailUrl">
               <div class="video-count" *ngIf="!playlist.thumbnailUrl">
@@ -47,7 +50,7 @@ import { MatDialogModule } from '@angular/material/dialog';
               <p class="video-count">{{ playlist.videoCount }} videos</p>
               <p class="created-at">Created {{ playlist.createdAt | date:'medium' }}</p>
             </div>
-            <div class="actions">
+            <div class="actions" (click)="$event.stopPropagation()">
               <button mat-icon-button (click)="editPlaylist(playlist.id)">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -203,35 +206,76 @@ import { MatDialogModule } from '@angular/material/dialog';
     }
   `]
 })
-export class PlaylistsComponent implements OnInit {
+export class PlaylistsComponent implements OnInit, OnDestroy {
   isLoading = false;
-  playlists: any[] = [];
+  playlists: Playlist[] = [];
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private playlistService: PlaylistService,
+    private router: Router,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit() {
     this.loadPlaylists();
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
   loadPlaylists() {
     this.isLoading = true;
-    // TODO: Implement actual playlists loading from API
-    setTimeout(() => {
-      this.playlists = [];
-      this.isLoading = false;
-    }, 1000);
+    this.playlists = [];
+
+    const sub = this.playlistService.getPlaylists(1, 50).subscribe({
+      next: (result) => {
+        this.playlists = result.items || [];
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading playlists:', error);
+        this.playlists = [];
+        this.isLoading = false;
+        this.snackBar.open('Error loading playlists', 'Close', { duration: 3000 });
+      }
+    });
+
+    this.subscriptions.push(sub);
   }
 
   createPlaylist() {
-    // TODO: Implement create playlist functionality
+    // TODO: Open create playlist dialog
     console.log('Create playlist clicked');
+    this.snackBar.open('Create playlist functionality coming soon', 'Close', { duration: 3000 });
   }
 
-  editPlaylist(id: string) {
-    // TODO: Implement edit playlist functionality
+  editPlaylist(id: number) {
+    // TODO: Open edit playlist dialog
     console.log('Edit playlist:', id);
+    this.snackBar.open('Edit playlist functionality coming soon', 'Close', { duration: 3000 });
   }
 
-  deletePlaylist(id: string) {
-    // TODO: Implement delete playlist functionality
-    console.log('Delete playlist:', id);
+  deletePlaylist(id: number) {
+    if (confirm('Are you sure you want to delete this playlist?')) {
+      const sub = this.playlistService.deletePlaylist(id).subscribe({
+        next: () => {
+          this.playlists = this.playlists.filter(playlist => playlist.id !== id);
+          this.snackBar.open('Playlist deleted', 'Close', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Error deleting playlist:', error);
+          this.snackBar.open('Error deleting playlist', 'Close', { duration: 3000 });
+        }
+      });
+
+      this.subscriptions.push(sub);
+    }
+  }
+
+  viewPlaylist(id: number) {
+    this.router.navigate(['/playlists', id]);
   }
 }

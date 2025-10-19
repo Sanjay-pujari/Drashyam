@@ -57,5 +57,18 @@ public class MappingProfile : Profile
         // ReferralReward mappings
         CreateMap<ReferralReward, ReferralRewardDto>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+
+        // WatchLater mappings
+        CreateMap<WatchLater, WatchLaterDto>();
+        CreateMap<WatchLaterCreateDto, WatchLater>();
+
+        // Playlist mappings
+        CreateMap<Playlist, PlaylistDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.ChannelName, opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : null));
+        CreateMap<PlaylistCreateDto, Playlist>();
+        CreateMap<PlaylistUpdateDto, Playlist>();
+        CreateMap<PlaylistVideo, PlaylistVideoDto>();
+        CreateMap<PlaylistVideoCreateDto, PlaylistVideo>();
     }
 }

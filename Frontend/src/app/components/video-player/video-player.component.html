@@ -65,9 +65,9 @@
           <mat-icon>share</mat-icon>
           <span>Share</span>
         </button>
-        <button class="action-btn save-btn">
-          <mat-icon>playlist_add</mat-icon>
-          <span>Save</span>
+        <button class="action-btn save-btn" (click)="toggleWatchLater()" [class.active]="isInWatchLater">
+          <mat-icon>{{ isInWatchLater ? 'watch_later' : 'watch_later_outlined' }}</mat-icon>
+          <span>{{ isInWatchLater ? 'Saved' : 'Watch Later' }}</span>
         </button>
       </div>
     </div>

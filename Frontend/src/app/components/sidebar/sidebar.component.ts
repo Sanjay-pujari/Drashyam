@@ -8,6 +8,8 @@ import { SidebarService } from '../../services/sidebar.service';
 import { UserService } from '../../services/user.service';
 import { VideoService } from '../../services/video.service';
 import { HistoryService } from '../../services/history.service';
+import { WatchLaterService } from '../../services/watch-later.service';
+import { PlaylistService } from '../../services/playlist.service';
 import { User } from '../../models/user.model';
 
 interface ChannelSubscription {
@@ -46,6 +48,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private videoService: VideoService,
     private historyService: HistoryService,
+    private watchLaterService: WatchLaterService,
+    private playlistService: PlaylistService,
     private router: Router
   ) {}
 
@@ -119,10 +123,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     // Load actual counts from backend
     this.loadHistoryCount();
     this.loadLikedVideosCount();
-    
-    // Mock data for counts that don't have backend endpoints yet
-    this.watchLaterCount = 12;
-    this.playlistsCount = 8;
+    this.loadWatchLaterCount();
+    this.loadPlaylistsCount();
   }
 
   private loadHistoryCount(): void {
@@ -160,5 +162,29 @@ export class SidebarComponent implements OnInit, OnDestroy {
   navigateToHistory(): void {
     console.log('Navigating to history page');
     this.router.navigate(['/history']);
+  }
+
+  private loadWatchLaterCount(): void {
+    this.watchLaterService.getWatchLaterCount().subscribe({
+      next: (count) => {
+        this.watchLaterCount = count;
+      },
+      error: (error) => {
+        console.error('Error loading watch later count:', error);
+        this.watchLaterCount = 0;
+      }
+    });
+  }
+
+  private loadPlaylistsCount(): void {
+    this.playlistService.getPlaylists(1, 1).subscribe({
+      next: (result) => {
+        this.playlistsCount = result.totalCount;
+      },
+      error: (error) => {
+        console.error('Error loading playlists count:', error);
+        this.playlistsCount = 0;
+      }
+    });
   }
 }
