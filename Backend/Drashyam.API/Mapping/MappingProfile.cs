@@ -13,7 +13,10 @@ public class MappingProfile : Profile
         CreateMap<UserUpdateDto, ApplicationUser>();
 
         // Video mappings
-        CreateMap<Video, VideoDto>();
+        CreateMap<Video, VideoDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePictureUrl))
+            .ForMember(dest => dest.ChannelName, opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : null));
         CreateMap<VideoUploadDto, Video>();
         CreateMap<VideoUpdateDto, Video>();
 
