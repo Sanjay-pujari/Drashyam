@@ -170,6 +170,8 @@ builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IWatchLaterService, WatchLaterService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+builder.Services.AddScoped<IAdService, AdService>();
+builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
 
 var app = builder.Build();
 

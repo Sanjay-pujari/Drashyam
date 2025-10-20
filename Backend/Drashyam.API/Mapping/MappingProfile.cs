@@ -71,6 +71,24 @@ public class MappingProfile : Profile
         CreateMap<PlaylistUpdateDto, Playlist>();
         CreateMap<PlaylistVideo, PlaylistVideoDto>();
         CreateMap<PlaylistVideoCreateDto, PlaylistVideo>();
+
+        // Ad Campaign mappings
+        CreateMap<AdCampaign, AdCampaignDto>()
+            .ForMember(dest => dest.AdvertiserName, opt => opt.MapFrom(src => $"{src.Advertiser.FirstName} {src.Advertiser.LastName}"));
+        CreateMap<AdCampaignCreateDto, AdCampaign>();
+        CreateMap<AdCampaignUpdateDto, AdCampaign>();
+        CreateMap<AdImpression, AdImpressionDto>();
+
+        // Premium Content mappings
+        CreateMap<PremiumVideo, PremiumVideoDto>()
+            .ForMember(dest => dest.VideoTitle, opt => opt.MapFrom(src => src.Video.Title))
+            .ForMember(dest => dest.VideoThumbnailUrl, opt => opt.MapFrom(src => src.Video.ThumbnailUrl))
+            .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => $"{src.Video.User.FirstName} {src.Video.User.LastName}"));
+        CreateMap<PremiumVideoCreateDto, PremiumVideo>();
+        CreateMap<PremiumVideoUpdateDto, PremiumVideo>();
+        CreateMap<PremiumPurchase, PremiumPurchaseDto>()
+            .ForMember(dest => dest.VideoTitle, opt => opt.MapFrom(src => src.PremiumVideo.Video.Title));
+        CreateMap<PremiumPurchaseCreateDto, PremiumPurchase>();
     }
 
     private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)

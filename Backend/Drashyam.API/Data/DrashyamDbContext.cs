@@ -36,6 +36,8 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<InviteEvent> InviteEvents { get; set; }
     public DbSet<ReferralEvent> ReferralEvents { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
+    public DbSet<PremiumVideo> PremiumVideos { get; set; }
+    public DbSet<PremiumPurchase> PremiumPurchases { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -322,6 +324,27 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.PushNotifications).HasDefaultValue(true);
             entity.Property(e => e.NewVideoNotifications).HasDefaultValue(true);
             entity.Property(e => e.CommentNotifications).HasDefaultValue(true);
+        });
+
+        // Configure PremiumVideo entity
+        builder.Entity<PremiumVideo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.VideoId).IsUnique();
+            entity.Property(e => e.Price).HasPrecision(10, 2);
+            entity.Property(e => e.Currency).HasMaxLength(3);
+        });
+
+        // Configure PremiumPurchase entity
+        builder.Entity<PremiumPurchase>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.PremiumVideoId);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.PaymentIntentId);
+            entity.HasIndex(e => e.Status);
+            entity.Property(e => e.Amount).HasPrecision(10, 2);
+            entity.Property(e => e.Currency).HasMaxLength(3);
         });
     }
 }
