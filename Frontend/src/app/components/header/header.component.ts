@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { NotificationService, VideoNotification } from '../../services/notification.service';
-import { User } from '../../models/video.model';
+import { User } from '../../models/user.model';
 import { Observable, Subscription } from 'rxjs';
 
 @Component({

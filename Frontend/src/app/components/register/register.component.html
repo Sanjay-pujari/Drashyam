@@ -1,0 +1,53 @@
+<div class="register-container">
+	<h2>Create your account</h2>
+
+	<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+		<div class="row">
+			<label>First name</label>
+			<input type="text" formControlName="firstName" placeholder="First name" />
+			@if (form.get('firstName')?.touched && form.get('firstName')?.invalid) {
+				<div class="error">First name is required</div>
+			}
+		</div>
+
+		<div class="row">
+			<label>Last name</label>
+			<input type="text" formControlName="lastName" placeholder="Last name" />
+			@if (form.get('lastName')?.touched && form.get('lastName')?.invalid) {
+				<div class="error">Last name is required</div>
+			}
+		</div>
+
+		<div class="row">
+			<label>Email</label>
+			<input type="email" formControlName="email" placeholder="you@example.com" />
+			@if (form.get('email')?.touched && form.get('email')?.invalid) {
+				<div class="error">Valid email is required</div>
+			}
+		</div>
+
+		<div class="row">
+			<label>Password</label>
+			<input type="password" formControlName="password" placeholder="Password" />
+			@if (form.get('password')?.touched && form.get('password')?.invalid) {
+				<div class="error">Password must be at least 6 characters</div>
+			}
+		</div>
+
+		<div class="row">
+			<label>Confirm password</label>
+			<input type="password" formControlName="confirmPassword" placeholder="Confirm password" />
+			@if (form.errors?.['passwordsMismatch'] && (form.get('confirmPassword')?.touched || form.get('password')?.touched)) {
+				<div class="error">Passwords do not match</div>
+			}
+		</div>
+
+		<button type="submit" [disabled]="isSubmitting">Register</button>
+	</form>
+
+	<div class="footer">
+		Already have an account? <a routerLink="/login">Log in</a>
+	</div>
+</div>
+
+

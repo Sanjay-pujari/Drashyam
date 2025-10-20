@@ -35,11 +35,12 @@ export class AuthService {
     return this.http.post<AuthResponse>(url, credentials).pipe(
       tap(response => {
         localStorage.setItem('token', response.token);
-        this.currentUserSubject.next(response.user);
+        const mappedUser = this.mapUserFromApi(response.user);
+        this.currentUserSubject.next(mappedUser);
         
         // Dispatch action to NgRx store
         this.store.dispatch(UserActions.loginSuccess({ 
-          user: response.user, 
+          user: mappedUser, 
           token: response.token 
         }));
       })
@@ -54,7 +55,8 @@ export class AuthService {
           localStorage.setItem('token', response.token);
         }
         if (response.user) {
-          this.currentUserSubject.next(response.user);
+          const mappedUser = this.mapUserFromApi(response.user);
+          this.currentUserSubject.next(mappedUser);
         }
       })
     );
@@ -79,7 +81,8 @@ export class AuthService {
   }
 
   getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/api/user/me`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/user/me`).pipe(
+      map(apiUser => this.mapUserFromApi(apiUser)),
       tap(user => this.currentUserSubject.next(user))
     );
   }
@@ -170,7 +173,8 @@ export class AuthService {
   }
 
   updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${environment.apiUrl}/api/user/me`, userData).pipe(
+    return this.http.put<any>(`${environment.apiUrl}/api/user/me`, userData).pipe(
+      map(apiUser => this.mapUserFromApi(apiUser)),
       tap(user => this.currentUserSubject.next(user))
     );
   }
@@ -179,7 +183,8 @@ export class AuthService {
     const formData = new FormData();
     formData.append('profilePicture', file);
     
-    return this.http.post<User>(`${environment.apiUrl}/api/user/me/profile-picture`, formData).pipe(
+    return this.http.post<any>(`${environment.apiUrl}/api/user/me/profile-picture`, formData).pipe(
+      map(apiUser => this.mapUserFromApi(apiUser)),
       tap(user => this.currentUserSubject.next(user))
     );
   }
@@ -215,5 +220,26 @@ export class AuthService {
         return of(null);
       })
     );
+  }
+
+  private mapUserFromApi(apiUser: any): User {
+    if (!apiUser) return apiUser;
+    return {
+      id: apiUser.Id ?? apiUser.id,
+      firstName: apiUser.FirstName ?? apiUser.firstName,
+      lastName: apiUser.LastName ?? apiUser.lastName,
+      email: apiUser.Email ?? apiUser.email,
+      bio: apiUser.Bio ?? apiUser.bio,
+      profilePictureUrl: apiUser.ProfilePictureUrl ?? apiUser.profilePictureUrl,
+      createdAt: apiUser.CreatedAt ?? apiUser.createdAt,
+      lastLoginAt: apiUser.LastLoginAt ?? apiUser.lastLoginAt,
+      isActive: apiUser.IsActive ?? apiUser.isActive,
+      subscriptionType: apiUser.SubscriptionType ?? apiUser.subscriptionType,
+      subscriptionExpiresAt: apiUser.SubscriptionExpiresAt ?? apiUser.subscriptionExpiresAt,
+      channelCount: apiUser.ChannelCount ?? apiUser.channelCount ?? 0,
+      videoCount: apiUser.VideoCount ?? apiUser.videoCount ?? 0,
+      subscriberCount: apiUser.SubscriberCount ?? apiUser.subscriberCount ?? 0,
+      followingCount: apiUser.FollowingCount ?? apiUser.followingCount ?? 0
+    };
   }
 }

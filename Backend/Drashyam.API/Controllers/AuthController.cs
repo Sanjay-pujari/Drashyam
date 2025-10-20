@@ -59,10 +59,26 @@ public class AuthController : ControllerBase
             {
                 await _userManager.AddToRoleAsync(user, "User");
                 
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                await _emailService.SendEmailVerificationAsync(user.Email, token);
+                var autoConfirm = _configuration.GetValue<bool>("Auth:AutoConfirmOnRegister");
+                if (autoConfirm)
+                {
+                    // Auto-confirm email in development or when explicitly enabled
+                    var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var confirmResult = await _userManager.ConfirmEmailAsync(user, confirmToken);
+                    if (!confirmResult.Succeeded)
+                    {
+                        return BadRequest(confirmResult.Errors);
+                    }
 
-                return Ok(new { message = "Registration successful. Please check your email to confirm your account." });
+                    var jwt = await GenerateJwtTokenAsync(user);
+                    return Ok(new { token = jwt, user = MapToUserDto(user) });
+                }
+                else
+                {
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _emailService.SendEmailVerificationAsync(user.Email, token);
+                    return Ok(new { message = "Registration successful. Please check your email to confirm your account." });
+                }
             }
 
             return BadRequest(result.Errors);
