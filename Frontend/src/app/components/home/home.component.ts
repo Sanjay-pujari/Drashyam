@@ -17,11 +17,12 @@ import { selectCurrentUser } from '../../store/user/user.selectors';
 import { loadVideos, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
+import { AdBannerComponent } from '../ad-banner/ad-banner.component';
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule],
+    imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, MatChipsModule, AdBannerComponent],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })

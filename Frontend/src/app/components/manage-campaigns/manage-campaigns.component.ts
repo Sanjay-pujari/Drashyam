@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AdService, AdCampaign, AdCampaignCreate, AdCampaignUpdate } from '../../services/ad.service';
+import { AdService, AdCampaign, AdCampaignCreate, AdCampaignUpdate, AdAnalytics } from '../../services/ad.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -163,6 +163,47 @@ import { Subscription } from 'rxjs';
         </mat-card-content>
       </mat-card>
 
+      <mat-card class="campaign-card" *ngIf="analyticsCampaign">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>insights</mat-icon>
+            Analytics — {{ analyticsCampaign.name }}
+          </mat-card-title>
+          <span class="spacer"></span>
+          <button mat-button (click)="closeAnalytics()">
+            <mat-icon>close</mat-icon>
+            Close
+          </button>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <div *ngIf="analyticsLoading" class="loading">
+            <mat-spinner diameter="32"></mat-spinner>
+            <span>Loading analytics...</span>
+          </div>
+          <div *ngIf="!analyticsLoading && analytics">
+            <div class="analytics-grid">
+              <div class="metric">
+                <div class="label">Impressions</div>
+                <div class="value">{{ analytics.totalImpressions | number }}</div>
+              </div>
+              <div class="metric">
+                <div class="label">Clicks</div>
+                <div class="value">{{ analytics.totalClicks | number }}</div>
+              </div>
+              <div class="metric">
+                <div class="label">CTR</div>
+                <div class="value">{{ analytics.clickThroughRate | percent:'1.2-2' }}</div>
+              </div>
+              <div class="metric">
+                <div class="label">Revenue</div>
+                <div class="value">{{ analytics.totalRevenue | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
       <mat-card class="campaign-card" *ngIf="editing">
         <mat-card-header>
           <mat-card-title>
@@ -230,6 +271,11 @@ import { Subscription } from 'rxjs';
     .empty { padding: 12px 0; color: #666; }
     .status.active { color: #2e7d32; }
     .status.paused { color: #ef6c00; }
+    .spacer { flex: 1 1 auto; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .metric { background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 12px; }
+    .metric .label { color: #666; font-size: 12px; }
+    .metric .value { font-size: 18px; font-weight: 600; }
     @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr 1fr; } .table-header, .table-row { grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 2fr; } }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .table-header, .table-row { grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 2fr; } }
   `]
@@ -240,6 +286,9 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
   creating = false;
   updating = false;
   editing: AdCampaign | null = null;
+  analyticsCampaign: AdCampaign | null = null;
+  analytics: AdAnalytics | null = null;
+  analyticsLoading = false;
 
   createForm!: FormGroup;
   editForm!: FormGroup;
@@ -351,8 +400,21 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
   }
 
   openAnalytics(c: AdCampaign): void {
-    // For now, simple navigation to analytics in future; placeholder
-    alert(`Impressions, Clicks, CTR and Revenue are available via Analytics API for campaign #${c.id}.`);
+    this.analyticsCampaign = c;
+    this.analytics = null;
+    this.analyticsLoading = true;
+    this.subs.add(
+      this.adService.getCampaignAnalytics(c.id).subscribe({
+        next: a => { this.analytics = a; this.analyticsLoading = false; },
+        error: _ => { this.analyticsLoading = false; }
+      })
+    );
+  }
+
+  closeAnalytics(): void {
+    this.analyticsCampaign = null;
+    this.analytics = null;
+    this.analyticsLoading = false;
   }
 
   private today(): string {
