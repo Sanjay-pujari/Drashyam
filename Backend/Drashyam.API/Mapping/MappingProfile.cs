@@ -16,7 +16,8 @@ public class MappingProfile : Profile
         CreateMap<Video, VideoDto>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
             .ForMember(dest => dest.UserProfilePicture, opt => opt.MapFrom(src => src.User.ProfilePictureUrl))
-            .ForMember(dest => dest.ChannelName, opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : null));
+            .ForMember(dest => dest.ChannelName, opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : null))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => MapVideoProcessingStatusToVideoStatus(src.Status)));
         CreateMap<VideoUploadDto, Video>();
         CreateMap<VideoUpdateDto, Video>();
 
@@ -70,5 +71,17 @@ public class MappingProfile : Profile
         CreateMap<PlaylistUpdateDto, Playlist>();
         CreateMap<PlaylistVideo, PlaylistVideoDto>();
         CreateMap<PlaylistVideoCreateDto, PlaylistVideo>();
+    }
+
+    private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)
+    {
+        return status switch
+        {
+            VideoProcessingStatus.Processing => VideoStatus.Processing,
+            VideoProcessingStatus.Ready => VideoStatus.Published,
+            VideoProcessingStatus.Failed => VideoStatus.Processing, // Treat failed as processing for now
+            VideoProcessingStatus.Deleted => VideoStatus.Deleted,
+            _ => VideoStatus.Processing
+        };
     }
 }

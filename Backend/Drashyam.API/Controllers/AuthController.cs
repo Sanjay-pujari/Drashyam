@@ -78,20 +78,46 @@ public class AuthController : ControllerBase
     {
         try
         {
+            Console.WriteLine($"Login attempt for email: {model.Email}");
+            
             if (!ModelState.IsValid)
+            {
+                Console.WriteLine("Model state is invalid");
                 return BadRequest(ModelState);
+            }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
+            Console.WriteLine($"User found: {user != null}, IsActive: {user?.IsActive}, EmailConfirmed: {user?.EmailConfirmed}");
+            
             if (user == null || !user.IsActive)
+            {
+                Console.WriteLine("User not found or not active");
                 return Unauthorized("Invalid credentials");
+            }
 
+            Console.WriteLine($"Attempting password verification for user: {user.Email}");
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            Console.WriteLine($"Password verification result: {result.Succeeded}");
+            
             if (!result.Succeeded)
+            {
+                Console.WriteLine("Password verification failed");
+                if (result.IsLockedOut)
+                    Console.WriteLine("User is locked out");
+                if (result.IsNotAllowed)
+                    Console.WriteLine("User is not allowed to sign in");
+                if (result.RequiresTwoFactor)
+                    Console.WriteLine("Two factor authentication required");
                 return Unauthorized("Invalid credentials");
+            }
 
             if (!user.EmailConfirmed)
+            {
+                Console.WriteLine("Email not confirmed");
                 return BadRequest("Please confirm your email before logging in");
+            }
 
+            Console.WriteLine("Login successful, generating token");
             var token = await GenerateJwtTokenAsync(user);
             user.LastLoginAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
@@ -100,7 +126,60 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Login error: {ex.Message}");
             return StatusCode(500, "An error occurred during login");
+        }
+    }
+
+    [HttpPost("reset-admin-password")]
+    public async Task<IActionResult> ResetAdminPassword()
+    {
+        try
+        {
+            Console.WriteLine("Resetting admin password...");
+            
+            var adminEmail = "admin@drashyam.local";
+            var user = await _userManager.FindByEmailAsync(adminEmail);
+            
+            if (user == null)
+            {
+                Console.WriteLine("Admin user not found, creating new one...");
+                user = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FirstName = "Admin",
+                    LastName = "User",
+                    EmailConfirmed = true,
+                    IsActive = true
+                };
+                var createResult = await _userManager.CreateAsync(user, "Admin@12345");
+                if (!createResult.Succeeded)
+                {
+                    Console.WriteLine($"Failed to create admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+                    return BadRequest("Failed to create admin user");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Admin user found, resetting password...");
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetResult = await _userManager.ResetPasswordAsync(user, token, "Admin@12345");
+                
+                if (!resetResult.Succeeded)
+                {
+                    Console.WriteLine($"Failed to reset password: {string.Join(", ", resetResult.Errors.Select(e => e.Description))}");
+                    return BadRequest("Failed to reset password");
+                }
+            }
+            
+            Console.WriteLine("Admin password reset successfully");
+            return Ok(new { message = "Admin password reset to: Admin@12345" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Reset password error: {ex.Message}");
+            return StatusCode(500, "An error occurred while resetting password");
         }
     }
 

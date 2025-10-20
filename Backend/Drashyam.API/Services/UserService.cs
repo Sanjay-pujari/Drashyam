@@ -3,6 +3,7 @@ using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Drashyam.API.Services;
 
@@ -12,17 +13,20 @@ public class UserService : IUserService
     private readonly IMapper _mapper;
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<UserService> _logger;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public UserService(
         DrashyamDbContext context,
         IMapper mapper,
         IFileStorageService fileStorage,
-        ILogger<UserService> logger)
+        ILogger<UserService> logger,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _mapper = mapper;
         _fileStorage = fileStorage;
         _logger = logger;
+        _userManager = userManager;
     }
 
     public async Task<UserDto> GetUserByIdAsync(string userId)
@@ -148,5 +152,22 @@ public class UserService : IUserService
     {
         // Implementation for checking if following
         return false;
+    }
+
+    public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            throw new ArgumentException("User not found");
+
+        // Use ASP.NET Core Identity's UserManager for password change
+        // This ensures consistency with the login authentication system
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new ArgumentException($"Password change failed: {errors}");
+        }
     }
 }

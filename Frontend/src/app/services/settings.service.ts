@@ -5,22 +5,22 @@ import { environment } from '../../environments/environment';
 import { User } from '../models/user.model';
 
 export interface PrivacySettings {
-  profilePublic: boolean;
-  showEmail: boolean;
-  allowDataSharing: boolean;
+  ProfilePublic: boolean;
+  ShowEmail: boolean;
+  AllowDataSharing: boolean;
 }
 
 export interface NotificationSettings {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  newVideoNotifications: boolean;
-  commentNotifications: boolean;
+  EmailNotifications: boolean;
+  PushNotifications: boolean;
+  NewVideoNotifications: boolean;
+  CommentNotifications: boolean;
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+  CurrentPassword: string;
+  NewPassword: string;
+  ConfirmPassword: string;
 }
 
 export interface DeleteAccountRequest {
@@ -51,6 +51,7 @@ export class SettingsService {
   }
 
   updatePrivacySettings(settings: PrivacySettings): Observable<PrivacySettings> {
+    console.log('SettingsService - Sending privacy settings:', settings);
     return this.http.put<PrivacySettings>(`${this.apiUrl}/privacy`, settings);
   }
 

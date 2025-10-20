@@ -84,11 +84,16 @@ public class SettingsController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            _logger.LogInformation("Updating privacy settings for user {UserId} with settings: {@Settings}", userId, settings);
+            
             var updatedSettings = await _userSettingsService.UpdatePrivacySettingsAsync(userId, settings);
+            
+            _logger.LogInformation("Privacy settings updated successfully for user {UserId}", userId);
             return Ok(updatedSettings);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error updating privacy settings for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
             return StatusCode(500, "An error occurred while updating privacy settings");
         }
     }
@@ -114,11 +119,16 @@ public class SettingsController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            _logger.LogInformation("Updating notification settings for user {UserId} with settings: {@Settings}", userId, settings);
+            
             var updatedSettings = await _userSettingsService.UpdateNotificationSettingsAsync(userId, settings);
+            
+            _logger.LogInformation("Notification settings updated successfully for user {UserId}", userId);
             return Ok(updatedSettings);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error updating notification settings for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
             return StatusCode(500, "An error occurred while updating notification settings");
         }
     }
@@ -129,17 +139,43 @@ public class SettingsController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            _logger.LogInformation("Changing password for user {UserId}", userId);
             
-            // TODO: Implement password change
+            // Validate the request
+            if (string.IsNullOrEmpty(changePasswordDto.CurrentPassword) || 
+                string.IsNullOrEmpty(changePasswordDto.NewPassword) || 
+                string.IsNullOrEmpty(changePasswordDto.ConfirmPassword))
+            {
+                _logger.LogWarning("Password change failed: missing required fields for user {UserId}", userId);
+                return BadRequest("All password fields are required");
+            }
+
+            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmPassword)
+            {
+                _logger.LogWarning("Password change failed: passwords do not match for user {UserId}", userId);
+                return BadRequest("New password and confirmation password do not match");
+            }
+
+            if (changePasswordDto.NewPassword.Length < 6)
+            {
+                _logger.LogWarning("Password change failed: password too short for user {UserId}", userId);
+                return BadRequest("New password must be at least 6 characters long");
+            }
+
+            // Change password using UserService
+            await _userService.ChangePasswordAsync(userId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
             
+            _logger.LogInformation("Password changed successfully for user {UserId}", userId);
             return Ok(new { message = "Password changed successfully" });
         }
         catch (ArgumentException ex)
         {
+            _logger.LogError(ex, "Password change failed with argument exception for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error changing password for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
             return StatusCode(500, "An error occurred while changing password");
         }
     }

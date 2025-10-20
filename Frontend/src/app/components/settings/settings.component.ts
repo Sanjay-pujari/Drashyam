@@ -130,8 +130,8 @@ import { User } from '../../models/user.model';
                       <h3>Profile Visibility</h3>
                       <p>Control who can see your profile information</p>
                     </div>
-                    <mat-slide-toggle formControlName="profilePublic">
-                      {{ privacyForm.get('profilePublic')?.value ? 'Public' : 'Private' }}
+                    <mat-slide-toggle formControlName="ProfilePublic">
+                      {{ privacyForm.get('ProfilePublic')?.value ? 'Public' : 'Private' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -142,8 +142,8 @@ import { User } from '../../models/user.model';
                       <h3>Show Email</h3>
                       <p>Allow other users to see your email address</p>
                     </div>
-                    <mat-slide-toggle formControlName="showEmail">
-                      {{ privacyForm.get('showEmail')?.value ? 'Visible' : 'Hidden' }}
+                    <mat-slide-toggle formControlName="ShowEmail">
+                      {{ privacyForm.get('ShowEmail')?.value ? 'Visible' : 'Hidden' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -154,8 +154,8 @@ import { User } from '../../models/user.model';
                       <h3>Data Sharing</h3>
                       <p>Allow analytics and usage data to improve the platform</p>
                     </div>
-                    <mat-slide-toggle formControlName="allowDataSharing">
-                      {{ privacyForm.get('allowDataSharing')?.value ? 'Enabled' : 'Disabled' }}
+                    <mat-slide-toggle formControlName="AllowDataSharing">
+                      {{ privacyForm.get('AllowDataSharing')?.value ? 'Enabled' : 'Disabled' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -190,8 +190,8 @@ import { User } from '../../models/user.model';
                       <h3>Email Notifications</h3>
                       <p>Receive notifications via email</p>
                     </div>
-                    <mat-slide-toggle formControlName="emailNotifications">
-                      {{ notificationForm.get('emailNotifications')?.value ? 'Enabled' : 'Disabled' }}
+                    <mat-slide-toggle formControlName="EmailNotifications">
+                      {{ notificationForm.get('EmailNotifications')?.value ? 'Enabled' : 'Disabled' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -202,8 +202,8 @@ import { User } from '../../models/user.model';
                       <h3>Push Notifications</h3>
                       <p>Receive push notifications in your browser</p>
                     </div>
-                    <mat-slide-toggle formControlName="pushNotifications">
-                      {{ notificationForm.get('pushNotifications')?.value ? 'Enabled' : 'Disabled' }}
+                    <mat-slide-toggle formControlName="PushNotifications">
+                      {{ notificationForm.get('PushNotifications')?.value ? 'Enabled' : 'Disabled' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -214,8 +214,8 @@ import { User } from '../../models/user.model';
                       <h3>New Video Notifications</h3>
                       <p>Get notified when channels you subscribe to upload new videos</p>
                     </div>
-                    <mat-slide-toggle formControlName="newVideoNotifications">
-                      {{ notificationForm.get('newVideoNotifications')?.value ? 'Enabled' : 'Disabled' }}
+                    <mat-slide-toggle formControlName="NewVideoNotifications">
+                      {{ notificationForm.get('NewVideoNotifications')?.value ? 'Enabled' : 'Disabled' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -226,8 +226,8 @@ import { User } from '../../models/user.model';
                       <h3>Comment Notifications</h3>
                       <p>Get notified when someone comments on your videos</p>
                     </div>
-                    <mat-slide-toggle formControlName="commentNotifications">
-                      {{ notificationForm.get('commentNotifications')?.value ? 'Enabled' : 'Disabled' }}
+                    <mat-slide-toggle formControlName="CommentNotifications">
+                      {{ notificationForm.get('CommentNotifications')?.value ? 'Enabled' : 'Disabled' }}
                     </mat-slide-toggle>
                   </div>
 
@@ -262,30 +262,30 @@ import { User } from '../../models/user.model';
                   <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
                     <mat-form-field appearance="outline" class="form-field full-width">
                       <mat-label>Current Password</mat-label>
-                      <input matInput formControlName="currentPassword" type="password" placeholder="Enter current password">
-                      <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                      <input matInput formControlName="CurrentPassword" type="password" placeholder="Enter current password">
+                      <mat-error *ngIf="passwordForm.get('CurrentPassword')?.hasError('required')">
                         Current password is required
                       </mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="form-field full-width">
                       <mat-label>New Password</mat-label>
-                      <input matInput formControlName="newPassword" type="password" placeholder="Enter new password">
-                      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                      <input matInput formControlName="NewPassword" type="password" placeholder="Enter new password">
+                      <mat-error *ngIf="passwordForm.get('NewPassword')?.hasError('required')">
                         New password is required
                       </mat-error>
-                      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                      <mat-error *ngIf="passwordForm.get('NewPassword')?.hasError('minlength')">
                         Password must be at least 6 characters
                       </mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="form-field full-width">
                       <mat-label>Confirm New Password</mat-label>
-                      <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm new password">
-                      <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                      <input matInput formControlName="ConfirmPassword" type="password" placeholder="Confirm new password">
+                      <mat-error *ngIf="passwordForm.get('ConfirmPassword')?.hasError('required')">
                         Password confirmation is required
                       </mat-error>
-                      <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('mismatch')">
+                      <mat-error *ngIf="passwordForm.get('ConfirmPassword')?.hasError('mismatch')">
                         Passwords do not match
                       </mat-error>
                     </mat-form-field>
@@ -497,30 +497,30 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     // Privacy form
     this.privacyForm = this.fb.group({
-      profilePublic: [true],
-      showEmail: [false],
-      allowDataSharing: [true]
+      ProfilePublic: [true],
+      ShowEmail: [false],
+      AllowDataSharing: [true]
     });
 
     // Notification form
     this.notificationForm = this.fb.group({
-      emailNotifications: [true],
-      pushNotifications: [true],
-      newVideoNotifications: [true],
-      commentNotifications: [true]
+      EmailNotifications: [true],
+      PushNotifications: [true],
+      NewVideoNotifications: [true],
+      CommentNotifications: [true]
     });
 
     // Password form
     this.passwordForm = this.fb.group({
-      currentPassword: ['', [Validators.required]],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      CurrentPassword: ['', [Validators.required]],
+      NewPassword: ['', [Validators.required, Validators.minLength(6)]],
+      ConfirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
   }
 
   private passwordMatchValidator(form: FormGroup) {
-    const newPassword = form.get('newPassword');
-    const confirmPassword = form.get('confirmPassword');
+    const newPassword = form.get('NewPassword');
+    const confirmPassword = form.get('ConfirmPassword');
     
     if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
       confirmPassword.setErrors({ mismatch: true });
@@ -536,6 +536,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.currentUser = user;
         if (user) {
           this.populateForms(user);
+          this.loadUserSettings();
         }
       })
     );
@@ -549,21 +550,58 @@ export class SettingsComponent implements OnInit, OnDestroy {
       email: user.email,
       bio: user.bio || ''
     });
+  }
 
-    // Populate privacy form (using default values for now)
-    this.privacyForm.patchValue({
-      profilePublic: true,
-      showEmail: false,
-      allowDataSharing: true
-    });
+  private loadUserSettings(): void {
+    console.log('Loading user settings from API...');
+    
+    // Load privacy settings
+    this.subscriptions.push(
+      this.settingsService.getPrivacySettings().subscribe({
+        next: (privacySettings) => {
+          console.log('Loaded privacy settings:', privacySettings);
+          this.privacyForm.patchValue({
+            ProfilePublic: privacySettings.ProfilePublic,
+            ShowEmail: privacySettings.ShowEmail,
+            AllowDataSharing: privacySettings.AllowDataSharing
+          });
+        },
+        error: (error) => {
+          console.error('Failed to load privacy settings:', error);
+          // Use default values if loading fails
+          this.privacyForm.patchValue({
+            ProfilePublic: true,
+            ShowEmail: false,
+            AllowDataSharing: true
+          });
+        }
+      })
+    );
 
-    // Populate notification form (using default values for now)
-    this.notificationForm.patchValue({
-      emailNotifications: true,
-      pushNotifications: true,
-      newVideoNotifications: true,
-      commentNotifications: true
-    });
+    // Load notification settings
+    this.subscriptions.push(
+      this.settingsService.getNotificationSettings().subscribe({
+        next: (notificationSettings) => {
+          console.log('Loaded notification settings:', notificationSettings);
+          this.notificationForm.patchValue({
+            EmailNotifications: notificationSettings.EmailNotifications,
+            PushNotifications: notificationSettings.PushNotifications,
+            NewVideoNotifications: notificationSettings.NewVideoNotifications,
+            CommentNotifications: notificationSettings.CommentNotifications
+          });
+        },
+        error: (error) => {
+          console.error('Failed to load notification settings:', error);
+          // Use default values if loading fails
+          this.notificationForm.patchValue({
+            EmailNotifications: true,
+            PushNotifications: true,
+            NewVideoNotifications: true,
+            CommentNotifications: true
+          });
+        }
+      })
+    );
   }
 
   updateProfile(): void {
@@ -595,79 +633,114 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   updatePrivacySettings(): void {
+    console.log('Privacy form valid:', this.privacyForm.valid);
+    console.log('Privacy form value:', this.privacyForm.value);
+    
     if (this.privacyForm.valid) {
       this.isUpdatingPrivacy = true;
       
       const privacySettings: PrivacySettings = {
-        profilePublic: this.privacyForm.value.profilePublic,
-        showEmail: this.privacyForm.value.showEmail,
-        allowDataSharing: this.privacyForm.value.allowDataSharing
+        ProfilePublic: this.privacyForm.value.ProfilePublic,
+        ShowEmail: this.privacyForm.value.ShowEmail,
+        AllowDataSharing: this.privacyForm.value.AllowDataSharing
       };
+
+      console.log('Sending privacy settings:', privacySettings);
 
       this.subscriptions.push(
         this.settingsService.updatePrivacySettings(privacySettings).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Privacy settings updated successfully:', response);
             this.snackBar.open('Privacy settings updated successfully!', 'Close', { duration: 3000 });
             this.isUpdatingPrivacy = false;
+            // Reload the settings to ensure UI is updated
+            this.loadUserSettings();
           },
           error: (error) => {
+            console.error('Failed to update privacy settings:', error);
             this.snackBar.open('Failed to update privacy settings. Please try again.', 'Close', { duration: 3000 });
             this.isUpdatingPrivacy = false;
           }
         })
       );
+    } else {
+      console.log('Privacy form is invalid');
+      this.snackBar.open('Please check your privacy settings form.', 'Close', { duration: 3000 });
     }
   }
 
   updateNotificationSettings(): void {
+    console.log('Notification form valid:', this.notificationForm.valid);
+    console.log('Notification form value:', this.notificationForm.value);
+    
     if (this.notificationForm.valid) {
       this.isUpdatingNotifications = true;
       
       const notificationSettings: NotificationSettings = {
-        emailNotifications: this.notificationForm.value.emailNotifications,
-        pushNotifications: this.notificationForm.value.pushNotifications,
-        newVideoNotifications: this.notificationForm.value.newVideoNotifications,
-        commentNotifications: this.notificationForm.value.commentNotifications
+        EmailNotifications: this.notificationForm.value.EmailNotifications,
+        PushNotifications: this.notificationForm.value.PushNotifications,
+        NewVideoNotifications: this.notificationForm.value.NewVideoNotifications,
+        CommentNotifications: this.notificationForm.value.CommentNotifications
       };
+
+      console.log('Sending notification settings:', notificationSettings);
 
       this.subscriptions.push(
         this.settingsService.updateNotificationSettings(notificationSettings).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Notification settings updated successfully:', response);
             this.snackBar.open('Notification settings updated successfully!', 'Close', { duration: 3000 });
             this.isUpdatingNotifications = false;
+            // Reload the settings to ensure UI is updated
+            this.loadUserSettings();
           },
           error: (error) => {
+            console.error('Failed to update notification settings:', error);
             this.snackBar.open('Failed to update notification settings. Please try again.', 'Close', { duration: 3000 });
             this.isUpdatingNotifications = false;
           }
         })
       );
+    } else {
+      console.log('Notification form is invalid');
+      this.snackBar.open('Please check your notification settings form.', 'Close', { duration: 3000 });
     }
   }
 
   changePassword(): void {
+    console.log('Password form valid:', this.passwordForm.valid);
+    console.log('Password form value:', this.passwordForm.value);
+    console.log('Current user:', this.currentUser);
+    
     if (this.passwordForm.valid && this.currentUser) {
       this.isChangingPassword = true;
       
       const passwordData: ChangePasswordRequest = {
-        currentPassword: this.passwordForm.value.currentPassword,
-        newPassword: this.passwordForm.value.newPassword,
-        confirmPassword: this.passwordForm.value.confirmPassword
+        CurrentPassword: this.passwordForm.value.CurrentPassword,
+        NewPassword: this.passwordForm.value.NewPassword,
+        ConfirmPassword: this.passwordForm.value.ConfirmPassword
       };
+
+      console.log('Sending password change request:', passwordData);
 
       this.subscriptions.push(
         this.settingsService.changePassword(passwordData).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Password changed successfully:', response);
             this.snackBar.open('Password changed successfully!', 'Close', { duration: 3000 });
             this.passwordForm.reset();
             this.isChangingPassword = false;
           },
           error: (error) => {
+            console.error('Failed to change password:', error);
             this.snackBar.open('Failed to change password. Please check your current password.', 'Close', { duration: 3000 });
             this.isChangingPassword = false;
           }
         })
       );
+    } else {
+      console.log('Password form is invalid or user not found');
+      this.snackBar.open('Please check your password form.', 'Close', { duration: 3000 });
     }
   }
 

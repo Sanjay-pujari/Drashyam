@@ -162,7 +162,8 @@ export class VideoService {
     if (filter.sortBy) params = params.set('sortBy', filter.sortBy);
     if (filter.sortOrder) params = params.set('sortOrder', filter.sortOrder);
     
-    return this.http.get<Video[]>(`${this.apiUrl}/channel/${channelId}`, { params });
+    return this.http.get<PagedResult<Video>>(`${this.apiUrl}/channel/${channelId}`, { params })
+      .pipe(map(result => result.items));
   }
 
   getLikedVideosCount(): Observable<number> {

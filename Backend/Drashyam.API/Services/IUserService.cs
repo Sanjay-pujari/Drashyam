@@ -15,4 +15,5 @@ public interface IUserService
     Task<PagedResult<UserDto>> GetFollowersAsync(string userId, int page = 1, int pageSize = 20);
     Task<PagedResult<UserDto>> GetFollowingAsync(string userId, int page = 1, int pageSize = 20);
     Task<bool> IsFollowingAsync(string userId, string targetUserId);
+    Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 }
