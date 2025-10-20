@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -45,9 +45,14 @@ import { User } from '../../models/user.model';
       <div class="settings-header">
         <h1>Settings</h1>
         <p>Manage your account settings and preferences</p>
+        <!-- Debug info (remove in production) -->
+        <div class="debug-info" style="font-size: 12px; color: #666; margin-top: 10px;">
+          Current Tab: {{ getCurrentTabName() }} (Index: {{ selectedTabIndex }})
+          <button mat-button (click)="testTabNavigation()" style="margin-left: 10px;">Debug Tabs</button>
+        </div>
       </div>
 
-      <mat-tab-group class="settings-tabs" animationDuration="300ms">
+      <mat-tab-group class="settings-tabs" animationDuration="300ms" [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
         <!-- Profile Settings Tab -->
         <mat-tab label="Profile">
           <div class="tab-content">
@@ -349,6 +354,23 @@ import { User } from '../../models/user.model';
       margin-top: 2rem;
     }
 
+    .settings-tabs ::ng-deep .mat-tab-group {
+      width: 100%;
+    }
+
+    .settings-tabs ::ng-deep .mat-tab-header {
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .settings-tabs ::ng-deep .mat-tab-label {
+      min-width: 120px;
+      padding: 0 16px;
+    }
+
+    .settings-tabs ::ng-deep .mat-tab-label-active {
+      color: #1976d2;
+    }
+
     .tab-content {
       padding: 1rem 0;
     }
@@ -466,6 +488,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   private subscriptions: Subscription[] = [];
 
+  // Tab navigation
+  selectedTabIndex = 0;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -480,6 +505,63 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCurrentUser();
+    this.initializeTabFromUrl();
+    this.setupFragmentListener();
+    console.log('Settings component initialized with selectedTabIndex:', this.selectedTabIndex);
+  }
+
+  onTabChange(index: number): void {
+    this.selectedTabIndex = index;
+    console.log('Tab changed to index:', index);
+    this.updateUrlForTab(index);
+  }
+
+  // Method to get current tab name for debugging
+  getCurrentTabName(): string {
+    const tabNames = ['profile', 'privacy', 'notifications', 'account'];
+    return tabNames[this.selectedTabIndex] || 'profile';
+  }
+
+  private initializeTabFromUrl(): void {
+    const url = this.router.url;
+    if (url.includes('#privacy')) {
+      this.selectedTabIndex = 1;
+    } else if (url.includes('#notifications')) {
+      this.selectedTabIndex = 2;
+    } else if (url.includes('#account')) {
+      this.selectedTabIndex = 3;
+    } else {
+      this.selectedTabIndex = 0; // Default to Profile tab
+    }
+  }
+
+  private setupFragmentListener(): void {
+    this.subscriptions.push(
+      this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          const url = this.router.url;
+          if (url.includes('#privacy')) {
+            this.selectedTabIndex = 1;
+          } else if (url.includes('#notifications')) {
+            this.selectedTabIndex = 2;
+          } else if (url.includes('#account')) {
+            this.selectedTabIndex = 3;
+          } else if (url.includes('#profile')) {
+            this.selectedTabIndex = 0;
+          }
+        }
+      })
+    );
+  }
+
+  private updateUrlForTab(index: number): void {
+    const tabNames = ['profile', 'privacy', 'notifications', 'account'];
+    const tabName = tabNames[index] || 'profile';
+    this.router.navigate([], { 
+      relativeTo: this.router.routerState.root,
+      fragment: tabName,
+      replaceUrl: true 
+    });
   }
 
   ngOnDestroy(): void {
@@ -758,5 +840,26 @@ export class SettingsComponent implements OnInit, OnDestroy {
   exportData(): void {
     // TODO: Implement data export functionality
     this.snackBar.open('Data export functionality coming soon!', 'Close', { duration: 3000 });
+  }
+
+  // Method to programmatically switch tabs (useful for debugging)
+  switchToTab(tabName: string): void {
+    const tabIndex = this.getTabIndexByName(tabName);
+    if (tabIndex !== -1) {
+      this.selectedTabIndex = tabIndex;
+      this.updateUrlForTab(tabIndex);
+    }
+  }
+
+  private getTabIndexByName(tabName: string): number {
+    const tabNames = ['profile', 'privacy', 'notifications', 'account'];
+    return tabNames.indexOf(tabName.toLowerCase());
+  }
+
+  // Debug method to test tab functionality
+  testTabNavigation(): void {
+    console.log('Current tab index:', this.selectedTabIndex);
+    console.log('Current tab name:', this.getCurrentTabName());
+    console.log('All tab names:', ['profile', 'privacy', 'notifications', 'account']);
   }
 }
