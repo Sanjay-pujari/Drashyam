@@ -13,17 +13,20 @@ import { recordVideoView, recordVideoViewSuccess, likeVideo } from '../../store/
 import { VideoService } from '../../services/video.service';
 import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
+import { PremiumContentService } from '../../services/premium-content.service';
 import { User } from '../../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { AddToPlaylistDialogComponent } from '../add-to-playlist-dialog/add-to-playlist-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 // Declare global videojs
 declare var videojs: any;
 
 @Component({
     selector: 'app-video-player',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, CommentsComponent],
+    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, CommentsComponent],
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })
@@ -54,13 +57,22 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
   playlists: any[] = [];
   videoPlaylistStatus: { [playlistId: number]: boolean } = {};
 
+  // Premium content properties
+  isPremiumContent = false;
+  premiumPrice = 0;
+  premiumCurrency = 'USD';
+  hasPurchased = false;
+  isPurchasing = false;
+
   constructor(
     @Inject(Store) private store: Store<AppState>,
     private videoService: VideoService,
     private watchLaterService: WatchLaterService,
     private playlistService: PlaylistService,
+    private premiumContentService: PremiumContentService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
   }
@@ -80,6 +92,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     // Load playlists and check watch later status
     this.loadPlaylists();
     this.checkWatchLaterStatus();
+    
+    // Check if video is premium content
+    this.checkPremiumContent();
 
     // Record view when user navigates away
     window.addEventListener('beforeunload', () => {
@@ -547,5 +562,71 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     } else {
       return `${minutes}:${secs.toString().padStart(2, '0')}`;
     }
+  }
+
+  // Premium content methods
+  private checkPremiumContent() {
+    if (!this.video?.id) return;
+
+    this.premiumContentService.isVideoPremium(this.video.id).subscribe({
+      next: (isPremium) => {
+        this.isPremiumContent = isPremium;
+        if (isPremium) {
+          this.loadPremiumDetails();
+        }
+      },
+      error: (error) => {
+        console.error('Error checking premium content:', error);
+      }
+    });
+  }
+
+  private loadPremiumDetails() {
+    if (!this.video?.id) return;
+
+    this.premiumContentService.getPremiumVideoByVideoId(this.video.id).subscribe({
+      next: (premiumVideo) => {
+        if (premiumVideo) {
+          this.premiumPrice = premiumVideo.price;
+          this.premiumCurrency = premiumVideo.currency;
+          this.checkPurchaseStatus();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading premium details:', error);
+      }
+    });
+  }
+
+  private checkPurchaseStatus() {
+    if (!this.video?.id) return;
+
+    this.premiumContentService.hasUserPurchased(this.video.id).subscribe({
+      next: (hasPurchased) => {
+        this.hasPurchased = hasPurchased;
+      },
+      error: (error) => {
+        console.error('Error checking purchase status:', error);
+      }
+    });
+  }
+
+  purchasePremiumContent() {
+    if (!this.video?.id || this.isPurchasing) return;
+
+    this.isPurchasing = true;
+    this.snackBar.open('Redirecting to payment...', 'Close', { duration: 3000 });
+    
+    // In a real implementation, you would integrate with a payment provider like Stripe
+    // For now, we'll simulate the purchase process
+    setTimeout(() => {
+      this.isPurchasing = false;
+      this.snackBar.open('Purchase completed! You now have access to this premium content.', 'Close', { duration: 5000 });
+      this.hasPurchased = true;
+    }, 2000);
+  }
+
+  showPremiumDetails() {
+    this.snackBar.open('Premium content provides exclusive access to high-quality videos. Purchase once and watch forever!', 'Close', { duration: 5000 });
   }
 }

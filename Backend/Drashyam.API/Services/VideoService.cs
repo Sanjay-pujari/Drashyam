@@ -92,6 +92,23 @@ public class VideoService : IVideoService
             _context.Videos.Add(video);
             await _context.SaveChangesAsync();
 
+            // Create premium content if specified
+            if (uploadDto.IsPremium && uploadDto.PremiumPrice.HasValue)
+            {
+                var premiumVideo = new PremiumVideo
+                {
+                    VideoId = video.Id,
+                    Price = uploadDto.PremiumPrice.Value,
+                    Currency = uploadDto.PremiumCurrency,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.PremiumVideos.Add(premiumVideo);
+                await _context.SaveChangesAsync();
+            }
+
             // Update channel video count
             if (uploadDto.ChannelId.HasValue)
             {

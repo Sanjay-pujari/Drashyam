@@ -75,6 +75,55 @@
         </button>
       </div>
     </div>
+
+    <!-- Premium Content Section -->
+    @if (isPremiumContent) {
+      <div class="premium-content-section">
+        <div class="premium-banner">
+          <div class="premium-icon">
+            <mat-icon>diamond</mat-icon>
+          </div>
+          <div class="premium-info">
+            <h3>Premium Content</h3>
+            <p>This video requires a one-time purchase to watch</p>
+            <div class="premium-price">
+              <span class="price">{{ premiumPrice | currency:premiumCurrency:'symbol':'1.2-2' }}</span>
+              <span class="currency">{{ premiumCurrency }}</span>
+            </div>
+          </div>
+        </div>
+        
+        @if (currentUser$ | async) {
+          @if (hasPurchased) {
+            <div class="purchased-content">
+              <mat-icon>check_circle</mat-icon>
+              <span>You have access to this premium content</span>
+            </div>
+          } @else {
+            <div class="purchase-actions">
+              <button mat-raised-button color="primary" (click)="purchasePremiumContent()" [disabled]="isPurchasing">
+                <mat-icon *ngIf="isPurchasing">hourglass_empty</mat-icon>
+                <mat-icon *ngIf="!isPurchasing">shopping_cart</mat-icon>
+                {{ isPurchasing ? 'Processing...' : 'Purchase for ' + (premiumPrice | currency:premiumCurrency:'symbol':'1.2-2') }}
+              </button>
+              <button mat-button (click)="showPremiumDetails()">
+                <mat-icon>info</mat-icon>
+                Learn More
+              </button>
+            </div>
+          }
+        } @else {
+          <div class="login-required">
+            <p>Please log in to purchase this premium content</p>
+            <button mat-raised-button color="primary" routerLink="/login">
+              <mat-icon>login</mat-icon>
+              Log In
+            </button>
+          </div>
+        }
+      </div>
+    }
+
     <!-- Channel Info -->
     @if (video.channel) {
       <div class="channel-info">

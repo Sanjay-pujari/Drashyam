@@ -133,6 +133,44 @@
             <input matInput formControlName="tags" placeholder="Enter tags separated by commas">
             <mat-hint>Separate tags with commas (e.g., tutorial, coding, javascript)</mat-hint>
           </mat-form-field>
+
+          <!-- Premium Content Section -->
+          <div class="premium-section">
+            <h3>Premium Content Settings</h3>
+            <div class="premium-option">
+              <div class="option-info">
+                <h4>Make this video premium</h4>
+                <p>Set a price for viewers to purchase access to this video</p>
+              </div>
+              <mat-slide-toggle formControlName="isPremium">
+                {{ uploadForm.get('isPremium')?.value ? 'Premium' : 'Free' }}
+              </mat-slide-toggle>
+            </div>
+
+            @if (uploadForm.get('isPremium')?.value) {
+              <div class="premium-details">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Price (USD)</mat-label>
+                  <input matInput formControlName="premiumPrice" type="number" step="0.01" min="0.01" placeholder="0.99">
+                  <mat-error *ngIf="uploadForm.get('premiumPrice')?.hasError('required')">
+                    Price is required for premium content
+                  </mat-error>
+                  <mat-error *ngIf="uploadForm.get('premiumPrice')?.hasError('min')">
+                    Price must be at least $0.01
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Currency</mat-label>
+                  <mat-select formControlName="premiumCurrency">
+                    <mat-option value="USD">USD ($)</mat-option>
+                    <mat-option value="EUR">EUR (€)</mat-option>
+                    <mat-option value="GBP">GBP (£)</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            }
+          </div>
         </div>
 
         <!-- Upload Progress -->

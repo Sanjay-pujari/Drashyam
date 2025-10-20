@@ -413,3 +413,184 @@
     }
   }
 }
+
+// Premium Content Styles
+.premium-content-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.premium-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.premium-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: #ffd700;
+  }
+}
+
+.premium-info {
+  flex: 1;
+  
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0 0 12px 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+}
+
+.premium-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  
+  .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffd700;
+  }
+  
+  .currency {
+    font-size: 1.2rem;
+    opacity: 0.8;
+  }
+}
+
+.purchased-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  
+  mat-icon {
+    color: #4caf50;
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  span {
+    font-weight: 500;
+  }
+}
+
+.purchase-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  
+  button {
+    min-width: 200px;
+    
+    &[color="primary"] {
+      background: #ffd700;
+      color: #333;
+      font-weight: 600;
+      
+      &:hover {
+        background: #ffed4e;
+      }
+      
+      &:disabled {
+        background: rgba(255, 215, 0, 0.5);
+        color: rgba(51, 51, 51, 0.5);
+      }
+    }
+    
+    &[mat-button] {
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+}
+
+.login-required {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  
+  p {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+  }
+  
+  button {
+    background: #ffd700;
+    color: #333;
+    font-weight: 600;
+    
+    &:hover {
+      background: #ffed4e;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .premium-icon {
+    width: 50px;
+    height: 50px;
+    
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+  
+  .premium-info h3 {
+    font-size: 1.3rem;
+  }
+  
+  .premium-price .price {
+    font-size: 1.5rem;
+  }
+  
+  .purchase-actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}

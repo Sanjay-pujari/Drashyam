@@ -41,6 +41,9 @@ public class VideoUploadDto
     public VideoVisibility Visibility { get; set; } = VideoVisibility.Public;
     public string? Tags { get; set; }
     public string? Category { get; set; }
+    public bool IsPremium { get; set; } = false;
+    public decimal? PremiumPrice { get; set; }
+    public string PremiumCurrency { get; set; } = "USD";
 }
 
 public class VideoUpdateDto

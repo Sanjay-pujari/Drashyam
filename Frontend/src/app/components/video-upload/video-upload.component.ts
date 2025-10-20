@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
@@ -22,7 +23,7 @@ import { environment } from '../../../environments/environment';
   imports: [
     CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatSelectModule, MatProgressBarModule, MatCardModule,
-    MatIconModule, MatChipsModule
+    MatIconModule, MatChipsModule, MatSlideToggleModule
   ],
   templateUrl: './video-upload.component.html',
   styleUrls: ['./video-upload.component.scss']
@@ -51,7 +52,10 @@ export class VideoUploadComponent implements OnInit {
       channelId: [null],
       visibility: [0, Validators.required], // 0 = Public, 1 = Private, 2 = Unlisted
       category: [''],
-      tags: ['']
+      tags: [''],
+      isPremium: [false],
+      premiumPrice: [null],
+      premiumCurrency: ['USD']
     });
   }
 
@@ -98,6 +102,13 @@ export class VideoUploadComponent implements OnInit {
   }
 
   onSubmit() {
+    // Add conditional validation for premium content
+    if (this.uploadForm.get('isPremium')?.value) {
+      this.uploadForm.get('premiumPrice')?.setValidators([Validators.required, Validators.min(0.01)]);
+    } else {
+      this.uploadForm.get('premiumPrice')?.clearValidators();
+    }
+    this.uploadForm.get('premiumPrice')?.updateValueAndValidity();
     
     if (this.uploadForm.valid && this.selectedFile) {
       this.isUploading = true;
@@ -110,6 +121,13 @@ export class VideoUploadComponent implements OnInit {
       formData.append('visibility', this.uploadForm.value.visibility);
       formData.append('category', this.uploadForm.value.category || '');
       formData.append('tags', this.uploadForm.value.tags || '');
+      
+      // Add premium content fields
+      formData.append('isPremium', this.uploadForm.value.isPremium.toString());
+      if (this.uploadForm.value.isPremium) {
+        formData.append('premiumPrice', this.uploadForm.value.premiumPrice);
+        formData.append('premiumCurrency', this.uploadForm.value.premiumCurrency);
+      }
       
       if (this.uploadForm.value.channelId) {
         formData.append('channelId', this.uploadForm.value.channelId);
