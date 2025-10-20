@@ -77,8 +77,23 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
       }
     } catch (err: any) {
       console.error('Error accessing camera:', err);
-      this.error = this.getErrorMessage(err);
-      this.hasPermission = false;
+      // Retry without audio if audio is the problem
+      try {
+        const fallbackConstraints: MediaStreamConstraints = {
+          video: (this.constraints.video as MediaTrackConstraints) || true,
+          audio: false
+        };
+        this.stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+        this.hasPermission = true;
+        if (this.videoElement) {
+          this.videoElement.nativeElement.srcObject = this.stream;
+        }
+        this.error = null;
+      } catch (err2: any) {
+        console.error('Fallback getUserMedia failed:', err2);
+        this.error = this.getErrorMessage(err2);
+        this.hasPermission = false;
+      }
     } finally {
       this.isInitializing = false;
     }
@@ -96,7 +111,7 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
     }
   }
 
-  startRecording() {
+  async startRecording() {
     if (!this.stream) {
       this.snackBar.open('Camera not available', 'Close', { duration: 3000 });
       return;
@@ -125,8 +140,48 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
       this.startTimer();
       
       this.snackBar.open('Recording started', 'Close', { duration: 2000 });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting recording:', error);
+      // Handle common case: audio track unsupported for selected mime
+      const msg = (error && (error.message || error.toString())) || '';
+      if (msg.includes('audio track cannot be recorded')) {
+        try {
+          // Recreate stream without audio and retry
+          if (this.stream) {
+            this.stream.getAudioTracks().forEach(t => t.stop());
+          }
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
+            video: (this.constraints.video as MediaTrackConstraints) || true,
+            audio: false
+          });
+          this.stream = fallbackStream;
+          if (this.videoElement) {
+            this.videoElement.nativeElement.srcObject = this.stream;
+          }
+          this.recordedChunks = [];
+          this.mediaRecorder = new MediaRecorder(this.stream, {
+            mimeType: this.getSupportedMimeType()
+          });
+
+          this.mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              this.recordedChunks.push(event.data);
+            }
+          };
+          this.mediaRecorder.onstop = () => {
+            const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+            this.recordingComplete.emit(blob);
+          };
+          this.mediaRecorder.start(1000);
+          this.isRecording = true;
+          this.recordingTime = 0;
+          this.startTimer();
+          this.snackBar.open('Recording started (no audio)', 'Close', { duration: 2000 });
+          return;
+        } catch (retryErr) {
+          console.error('Retry without audio failed:', retryErr);
+        }
+      }
       this.snackBar.open('Failed to start recording', 'Close', { duration: 3000 });
     }
   }
@@ -203,6 +258,7 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
 
   private getSupportedMimeType(): string {
     const types = [
+      'video/webm;codecs=h264',
       'video/webm;codecs=vp9',
       'video/webm;codecs=vp8',
       'video/webm',
