@@ -29,6 +29,16 @@ public class AdController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
+            // Basic validations to avoid 500s from EF or mapping issues
+            if (string.IsNullOrWhiteSpace(campaignDto.Name))
+                return BadRequest("Name is required");
+
+            if (campaignDto.Budget < 0 || campaignDto.CostPerView < 0 || campaignDto.CostPerClick < 0)
+                return BadRequest("Budget/CPV/CPC must be non-negative");
+
+            if (campaignDto.EndDate < campaignDto.StartDate)
+                return BadRequest("EndDate must be greater than or equal to StartDate");
+
             campaignDto.AdvertiserId = userId;
             var campaign = await _adService.CreateCampaignAsync(campaignDto);
             return Ok(campaign);
@@ -36,7 +46,7 @@ public class AdController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating ad campaign");
-            return StatusCode(500, "An error occurred while creating the campaign");
+            return StatusCode(500, ex.Message);
         }
     }
 

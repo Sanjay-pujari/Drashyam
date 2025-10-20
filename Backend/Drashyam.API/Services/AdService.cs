@@ -21,9 +21,38 @@ public class AdService : IAdService
 
     public async Task<AdCampaignDto> CreateCampaignAsync(AdCampaignCreateDto campaignDto)
     {
+        // Ensure advertiser exists to satisfy FK and avoid inner exception
+        var advertiser = await _context.Users.FirstOrDefaultAsync(u => u.Id == campaignDto.AdvertiserId);
+        if (advertiser == null)
+        {
+            throw new ArgumentException("Advertiser not found for the current user");
+        }
+
         var campaign = _mapper.Map<AdCampaign>(campaignDto);
+        // Set navigation to avoid null FK issues during save
+        campaign.Advertiser = advertiser;
+        // Also set FK explicitly
+        campaign.AdvertiserId = advertiser.Id;
+        // Normalize fields
+        campaign.Status = AdStatus.Draft;
+        campaign.CreatedAt = DateTime.UtcNow;
+        // Ensure UTC DateTimes for PostgreSQL 'timestamptz'
+        if (campaign.StartDate.Kind == DateTimeKind.Unspecified)
+            campaign.StartDate = DateTime.SpecifyKind(campaign.StartDate, DateTimeKind.Utc);
+        if (campaign.EndDate.Kind == DateTimeKind.Unspecified)
+            campaign.EndDate = DateTime.SpecifyKind(campaign.EndDate, DateTimeKind.Utc);
+
         _context.AdCampaigns.Add(campaign);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            // Surface the DB error clearly to the controller
+            var inner = ex.InnerException?.Message ?? ex.Message;
+            throw new ArgumentException($"Failed to create campaign: {inner}");
+        }
 
         return _mapper.Map<AdCampaignDto>(campaign);
     }

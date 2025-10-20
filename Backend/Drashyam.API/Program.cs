@@ -32,6 +32,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // Use camelCase
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Allow case insensitive
+        // Accept string values for enums (e.g., "Banner") in requests and emit strings in responses
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

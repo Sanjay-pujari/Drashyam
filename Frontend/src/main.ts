@@ -65,6 +65,7 @@ const routes: Routes = [
   { path: 'my-channels', loadComponent: () => import('./app/components/my-channels/my-channels.component').then(m => m.MyChannelsComponent), canActivate: [authGuard] },
   { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },
   { path: 'settings', loadComponent: () => import('./app/components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] }
+  ,{ path: 'ad-campaigns', loadComponent: () => import('./app/components/manage-campaigns/manage-campaigns.component').then(m => m.ManageCampaignsComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {

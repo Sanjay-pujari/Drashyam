@@ -74,7 +74,7 @@ public class MappingProfile : Profile
 
         // Ad Campaign mappings
         CreateMap<AdCampaign, AdCampaignDto>()
-            .ForMember(dest => dest.AdvertiserName, opt => opt.MapFrom(src => $"{src.Advertiser.FirstName} {src.Advertiser.LastName}"));
+            .ForMember(dest => dest.AdvertiserName, opt => opt.MapFrom(src => src.Advertiser != null ? $"{src.Advertiser.FirstName} {src.Advertiser.LastName}" : string.Empty));
         CreateMap<AdCampaignCreateDto, AdCampaign>();
         CreateMap<AdCampaignUpdateDto, AdCampaign>();
         CreateMap<AdImpression, AdImpressionDto>();
