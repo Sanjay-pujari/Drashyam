@@ -3,6 +3,8 @@ using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using Drashyam.API.Hubs;
 
 namespace Drashyam.API.Services;
 
@@ -10,18 +12,19 @@ public class NotificationService : INotificationService
 {
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IHubContext<NotificationHub> _hubContext;
 
-    public NotificationService(DrashyamDbContext context, IMapper mapper)
+    public NotificationService(DrashyamDbContext context, IMapper mapper, IHubContext<NotificationHub> hubContext)
     {
         _context = context;
         _mapper = mapper;
+        _hubContext = hubContext;
     }
 
     public async Task<PagedResult<VideoNotificationDto>> GetUserNotificationsAsync(string userId, int page = 1, int pageSize = 20)
     {
         var query = _context.Notifications
             .Where(n => n.UserId == userId)
-            .Include(n => n.RelatedEntityId)
             .OrderByDescending(n => n.CreatedAt);
 
         var totalCount = await query.CountAsync();
@@ -136,6 +139,12 @@ public class NotificationService : INotificationService
 
         _context.Notifications.AddRange(notifications);
         await _context.SaveChangesAsync();
+
+        // Broadcast to each subscriber's group for instant updates
+        foreach (var userId in subscribers)
+        {
+            await _hubContext.Clients.Group($"user_{userId}").SendAsync("NotificationReceived");
+        }
     }
 
     public async Task DeleteNotificationAsync(int notificationId, string userId)

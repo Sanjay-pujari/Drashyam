@@ -97,16 +97,13 @@
               <div class="notification-item" 
                    [class.unread]="!notification.isRead"
                    (click)="onNotificationClick(notification)">
-                <div class="notification-thumbnail">
-                  <img [src]="notification.videoThumbnailUrl || '/assets/default-video-thumbnail.svg'" 
-                       [alt]="notification.videoTitle"
-                       (error)="onImageError($event)">
+                <div class="notification-icon">
+                  <mat-icon>play_circle</mat-icon>
                 </div>
                 <div class="notification-content">
                   <div class="notification-text">
                     <p class="notification-title">{{ notification.videoTitle }}</p>
-                    <p class="notification-channel">{{ notification.channelName }}</p>
-                    <p class="notification-time">{{ notification.createdAt | date:'short' }}</p>
+                    <p class="notification-meta">{{ notification.channelName }} · {{ notification.createdAt | date:'short' }}</p>
                   </div>
                   <div class="notification-actions">
                     <button mat-icon-button (click)="$event.stopPropagation(); deleteNotification(notification.id)">

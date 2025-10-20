@@ -9,7 +9,7 @@ import { Video } from '../../models/video.model';
 import { AppState } from '../../store/app.state';
 import { selectCurrentUser } from '../../store/user/user.selectors';
 import { selectVideoById } from '../../store/video/video.selectors';
-import { recordVideoView, likeVideo } from '../../store/video/video.actions';
+import { recordVideoView, recordVideoViewSuccess, likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
@@ -144,7 +144,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       controls: true,
       responsive: true,
       fluid: true,
-      playbackRates: [0.5, 1, 1.25, 1.5, 2]
+      preload: 'metadata',
+      playbackRates: [0.5, 1, 1.25, 1.5, 2],
+      userActions: { hotkeys: true }
     });
 
     // Set video source
@@ -157,7 +159,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     
     this.player.src({
       src: videoUrl,
-      type: 'video/mp4'
+      type: this.detectMimeType(videoUrl)
     });
 
     // Add error handling
@@ -240,11 +242,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     // Record initial view with minimal duration
     this.videoService.recordVideoView(this.video.id, 1).subscribe({
       next: (updatedVideo) => {
-        // Update the video in the store
-        this.store.dispatch(recordVideoView({
-          videoId: this.video!.id,
-          watchDuration: 1
-        }));
+        // Update store without triggering another API call
+        this.store.dispatch(recordVideoViewSuccess({ video: updatedVideo }));
       },
       error: (error) => {
       }
@@ -258,15 +257,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
     const watchDuration = (Date.now() - this.watchStartTime) / 1000;
     if (watchDuration > 5) { // Only record if watched for more than 5 seconds
-      
       // Record view using the video service endpoint (this also creates history entries)
-      this.videoService.recordVideoView(this.video.id, Math.round(watchDuration)).subscribe({
+      const seconds = Math.round(watchDuration);
+      this.videoService.recordVideoView(this.video.id, seconds).subscribe({
         next: (updatedVideo) => {
-          // Update the video in the store
-          this.store.dispatch(recordVideoView({ 
-            videoId: this.video!.id, 
-            watchDuration 
-          }));
+          // Update the video in the store without re-calling the API
+          this.store.dispatch(recordVideoViewSuccess({ video: updatedVideo }));
         },
         error: (error) => {
         }
@@ -275,6 +271,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       // Reset the start time for potential future recordings
       this.watchStartTime = Date.now();
     }
+  }
+
+  private detectMimeType(url: string): string {
+    const lower = (url || '').toLowerCase();
+    if (lower.endsWith('.mp4')) return 'video/mp4';
+    if (lower.endsWith('.webm')) return 'video/webm';
+    if (lower.endsWith('.ogg') || lower.endsWith('.ogv')) return 'video/ogg';
+    return 'video/mp4';
   }
 
 

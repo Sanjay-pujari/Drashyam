@@ -107,6 +107,21 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"] ?? "Drashyam.Client",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
+
+    // Allow SignalR to receive access token via query string for WebSockets/SSE
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"].ToString();
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // CORS
@@ -210,6 +225,7 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
+app.MapHub<NotificationHub>("/notificationHub");
 
 // Seed database
 using (var scope = app.Services.CreateScope())

@@ -55,7 +55,7 @@
 
 // Notification Menu Styling
 .notification-menu {
-  width: 400px;
+  width: 520px;
   max-height: 500px;
   overflow: hidden;
 
@@ -130,16 +130,15 @@
           border-left: 3px solid #2196f3;
         }
 
-        .notification-thumbnail {
+        .notification-icon {
           flex-shrink: 0;
           margin-right: 12px;
-
-          img {
-            width: 60px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 4px;
-          }
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          color: #2196f3;
         }
 
         .notification-content {
@@ -163,16 +162,13 @@
               overflow: hidden;
             }
 
-            .notification-channel {
-              font-size: 0.75rem;
+            .notification-meta {
+              font-size: 0.78rem;
               color: #666;
-              margin: 0 0 2px 0;
-            }
-
-            .notification-time {
-              font-size: 0.75rem;
-              color: #999;
               margin: 0;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
           }
 

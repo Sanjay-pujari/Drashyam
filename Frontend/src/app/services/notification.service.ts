@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import * as signalR from '@microsoft/signalr';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PagedResult } from './video.service';
@@ -29,8 +30,35 @@ export class NotificationService {
   private apiUrl = `${environment.apiUrl}/api/notification`;
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
+  private hubConnection?: signalR.HubConnection;
 
   constructor(private http: HttpClient) {}
+
+  // SignalR real-time notifications
+  startConnection(token?: string): void {
+    if (this.hubConnection) return;
+    this.hubConnection = new signalR.HubConnectionBuilder()
+      .withUrl(`${environment.apiUrl.replace(/\/$/, '')}/notificationHub`, {
+        accessTokenFactory: () => token || localStorage.getItem('token') || ''
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.hubConnection.on('NotificationReceived', () => {
+      this.refreshUnreadCount();
+    });
+
+    this.hubConnection.onreconnected(() => this.refreshUnreadCount());
+
+    this.hubConnection.start().catch(() => {});
+  }
+
+  stopConnection(): void {
+    if (this.hubConnection) {
+      this.hubConnection.stop().catch(() => {});
+      this.hubConnection = undefined;
+    }
+  }
 
   getNotifications(page: number = 1, pageSize: number = 20): Observable<PagedResult<VideoNotification>> {
     let params = new HttpParams()

@@ -52,6 +52,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (isAuth) {
         // Load notification count when user is authenticated
         this.notificationService.refreshUnreadCount();
+        // Start SignalR connection for real-time notifications
+        this.notificationService.startConnection();
       }
     });
   }
@@ -66,6 +68,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+    this.notificationService.stopConnection();
     this.router.navigateByUrl('/');
   }
 
