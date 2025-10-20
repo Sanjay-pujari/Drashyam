@@ -30,7 +30,7 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Use PascalCase
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // Use camelCase
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Allow case insensitive
     });
 builder.Services.AddEndpointsApiExplorer();
