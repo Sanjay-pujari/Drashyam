@@ -1,0 +1,347 @@
+.premium-content-management {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    margin-bottom: 32px;
+    text-align: center;
+
+    h2 {
+      margin: 0 0 8px 0;
+      color: #1976d2;
+      font-size: 2.5rem;
+      font-weight: 300;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .form-card {
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    .premium-form {
+      .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+
+        .full-width {
+          flex: 1;
+        }
+
+        .half-width {
+          flex: 1;
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+
+        button {
+          min-width: 160px;
+        }
+      }
+    }
+  }
+
+  .section-header {
+    margin-bottom: 24px;
+
+    h3 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+    }
+  }
+
+  .premium-videos-list {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+
+    .premium-video-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .video-info {
+        display: flex;
+        gap: 16px;
+
+        .video-thumbnail {
+          flex-shrink: 0;
+
+          .thumbnail {
+            width: 120px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+        }
+
+        .video-details {
+          flex: 1;
+          min-width: 0;
+
+          h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .creator {
+            margin: 0 0 8px 0;
+            color: #666;
+            font-size: 0.9rem;
+          }
+
+          .price-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+
+            .price {
+              font-size: 1.2rem;
+              font-weight: 600;
+              color: #1976d2;
+            }
+
+            .currency {
+              color: #666;
+              font-size: 0.9rem;
+            }
+          }
+
+          .status-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .status {
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 0.8rem;
+              font-weight: 500;
+
+              &.active {
+                background-color: #e8f5e8;
+                color: #2e7d32;
+              }
+
+              &.inactive {
+                background-color: #ffebee;
+                color: #c62828;
+              }
+            }
+
+            .created-date {
+              color: #666;
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+
+      .video-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        justify-content: flex-end;
+      }
+    }
+  }
+
+  .purchases-list {
+    display: grid;
+    gap: 16px;
+
+    .purchase-card {
+      .purchase-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .purchase-details {
+          flex: 1;
+
+          h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+          }
+
+          .purchase-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            .amount {
+              font-size: 1.1rem;
+              font-weight: 600;
+              color: #1976d2;
+            }
+
+            .status {
+              font-weight: 500;
+              text-transform: uppercase;
+              font-size: 0.8rem;
+            }
+
+            .date {
+              color: #666;
+              font-size: 0.9rem;
+            }
+          }
+        }
+
+        .purchase-actions {
+          display: flex;
+          gap: 8px;
+        }
+      }
+    }
+  }
+
+  .analytics-content {
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .analytics-card {
+        text-align: center;
+
+        .metric {
+          .metric-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 8px;
+          }
+
+          .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+      }
+    }
+  }
+
+  .no-content {
+    text-align: center;
+    padding: 48px 24px;
+    color: #666;
+
+    mat-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+
+    h3 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0 0 24px 0;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    button {
+      min-width: 160px;
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .header h2 {
+      font-size: 2rem;
+    }
+
+    .premium-videos-list {
+      grid-template-columns: 1fr;
+
+      .premium-video-card .video-info {
+        flex-direction: column;
+
+        .video-thumbnail .thumbnail {
+          width: 100%;
+          height: 120px;
+        }
+      }
+    }
+
+    .form-card .premium-form .form-row {
+      flex-direction: column;
+    }
+  }
+}
+
+// Material Design overrides
+::ng-deep {
+  .mat-tab-group {
+    .mat-tab-header {
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .mat-tab-label {
+      min-width: 120px;
+      font-weight: 500;
+    }
+
+    .mat-tab-label-active {
+      color: #1976d2;
+    }
+  }
+
+  .mat-card {
+    border-radius: 8px;
+  }
+
+  .mat-form-field {
+    width: 100%;
+  }
+
+  .mat-paginator {
+    background: transparent;
+    border-top: 1px solid #e0e0e0;
+  }
+}
