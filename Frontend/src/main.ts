@@ -66,7 +66,8 @@ const routes: Routes = [
   { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },
   { path: 'settings', loadComponent: () => import('./app/components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] },
   { path: 'ad-campaigns', loadComponent: () => import('./app/components/manage-campaigns/manage-campaigns.component').then(m => m.ManageCampaignsComponent), canActivate: [authGuard] },
-  { path: 'my-videos', loadComponent: () => import('./app/components/video-management/video-management.component').then(m => m.VideoManagementComponent), canActivate: [authGuard] }
+  { path: 'my-videos', loadComponent: () => import('./app/components/video-management/video-management.component').then(m => m.VideoManagementComponent), canActivate: [authGuard] },
+  { path: 'premium-content', loadComponent: () => import('./app/components/premium-content-management/premium-content-management.component').then(m => m.PremiumContentManagementComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {

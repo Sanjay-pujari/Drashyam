@@ -1,0 +1,29 @@
+{
+  "name": "Drashyam - Backend Only",
+  "folders": [
+    {
+      "path": "./Backend"
+    }
+  ],
+  "settings": {
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/bin/**": true,
+      "**/obj/**": true,
+      "**/node_modules/**": true,
+      "**/.angular/**": true,
+      "**/dist/**": true
+    },
+    "search.exclude": {
+      "**/bin/**": true,
+      "**/obj/**": true,
+      "**/node_modules/**": true,
+      "**/.angular/**": true,
+      "**/dist/**": true
+    },
+    "files.exclude": {
+      "**/bin/**": true,
+      "**/obj/**": true
+    }
+  }
+}

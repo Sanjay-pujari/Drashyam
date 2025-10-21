@@ -1,0 +1,42 @@
+# Cursor-specific ignore file for better performance
+.git/objects/
+.git/packed-refs
+node_modules/
+bin/
+obj/
+dist/
+.angular/
+coverage/
+.nyc_output/
+tmp/
+temp/
+*.log
+*.cache
+*.user
+*.suo
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+uploads/
+videos/
+thumbnails/
+
+# Specific large directories
+Frontend/.angular/
+Frontend/node_modules/
+Frontend/dist/
+Backend/bin/
+Backend/obj/
+Backend/Drashyam.API/bin/
+Backend/Drashyam.API/obj/
+
+# Large files
+*.pack
+*.pack_
+esbuild.wasm
+esbuild.exe
+

@@ -145,6 +145,24 @@ public class PremiumContentController : ControllerBase
         }
     }
 
+    [HttpGet("videos/by-video/{videoId}")]
+    public async Task<ActionResult<PremiumVideoDto>> GetPremiumVideoByVideoId(int videoId)
+    {
+        try
+        {
+            var premiumVideo = await _premiumContentService.GetPremiumVideoByVideoIdAsync(videoId);
+            if (premiumVideo == null)
+                return NotFound("Premium content not found for this video");
+            
+            return Ok(premiumVideo);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting premium video by video ID {VideoId}", videoId);
+            return StatusCode(500, "An error occurred while retrieving premium content");
+        }
+    }
+
     [HttpGet("videos/{premiumVideoId}/has-purchased")]
     [Authorize]
     public async Task<ActionResult<bool>> HasUserPurchased(int premiumVideoId)

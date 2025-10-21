@@ -245,4 +245,16 @@ public class PremiumContentService : IPremiumContentService
 
         return await query.SumAsync(pp => pp.Amount);
     }
+
+    public async Task<PremiumVideoDto?> GetPremiumVideoByVideoIdAsync(int videoId)
+    {
+        var premiumVideo = await _context.PremiumVideos
+            .Include(pv => pv.Video)
+            .FirstOrDefaultAsync(pv => pv.VideoId == videoId);
+
+        if (premiumVideo == null)
+            return null;
+
+        return _mapper.Map<PremiumVideoDto>(premiumVideo);
+    }
 }

@@ -8,6 +8,7 @@ public interface IPremiumContentService
     Task<PremiumVideoDto> UpdatePremiumVideoAsync(int premiumVideoId, PremiumVideoUpdateDto premiumVideoDto);
     Task<bool> DeletePremiumVideoAsync(int premiumVideoId);
     Task<PremiumVideoDto> GetPremiumVideoAsync(int premiumVideoId);
+    Task<PremiumVideoDto?> GetPremiumVideoByVideoIdAsync(int videoId);
     Task<PagedResult<PremiumVideoDto>> GetPremiumVideosAsync(int page = 1, int pageSize = 20);
     Task<bool> IsVideoPremiumAsync(int videoId);
     Task<bool> HasUserPurchasedAsync(int premiumVideoId, string userId);
