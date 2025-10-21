@@ -148,7 +148,7 @@
             </mat-card-header>
             <mat-card-content>
               <div class="engagement-metric" *ngIf="summary">
-                <div class="metric-value">{{ formatPercentage(summary.engagementRate) }}</div>
+                <div class="metric-value">{{ formatPercentage(summary.engagementRate || 0) }}</div>
                 <div class="metric-trend" [class]="getEngagementTrend()">
                   <mat-icon>{{ getEngagementTrend() === 'up' ? 'trending_up' : getEngagementTrend() === 'down' ? 'trending_down' : 'trending_flat' }}</mat-icon>
                 </div>
@@ -254,7 +254,7 @@
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Growth Rate</div>
-                  <div class="metric-value">{{ formatPercentage(revenueAnalytics.revenueGrowthRate / 100) }}</div>
+                  <div class="metric-value">{{ formatPercentage((revenueAnalytics.revenueGrowthRate || 0) / 100) }}</div>
                 </div>
               </div>
             </mat-card-content>
@@ -279,7 +279,7 @@
                   </div>
                   <div class="country-stats">
                     <span class="views">{{ formatNumber(geo.views) }} views</span>
-                    <span class="percentage">{{ formatPercentage(geo.percentage / 100) }}</span>
+                    <span class="percentage">{{ formatPercentage((geo.percentage || 0) / 100) }}</span>
                   </div>
                 </div>
               </div>
@@ -300,7 +300,7 @@
                   </div>
                   <div class="device-stats">
                     <span class="views">{{ formatNumber(device.views) }} views</span>
-                    <span class="percentage">{{ formatPercentage(device.percentage / 100) }}</span>
+                    <span class="percentage">{{ formatPercentage((device.percentage || 0) / 100) }}</span>
                   </div>
                 </div>
               </div>
@@ -321,27 +321,27 @@
               <div class="engagement-metrics">
                 <div class="metric-item">
                   <div class="metric-label">Like Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.likeRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.likeRate || 0) }}</div>
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Comment Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.commentRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.commentRate || 0) }}</div>
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Share Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.shareRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.shareRate || 0) }}</div>
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Watch Time Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.watchTimeRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.watchTimeRate || 0) }}</div>
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Click Through Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.clickThroughRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.clickThroughRate || 0) }}</div>
                 </div>
                 <div class="metric-item">
                   <div class="metric-label">Retention Rate</div>
-                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.retentionRate) }}</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.retentionRate || 0) }}</div>
                 </div>
               </div>
             </mat-card-content>

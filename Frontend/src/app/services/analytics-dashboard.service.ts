@@ -4,37 +4,37 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface AnalyticsSummary {
-  totalViews: number;
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
-  totalSubscribers: number;
-  totalRevenue: number;
-  averageWatchTime: number;
-  engagementRate: number;
-  revenueGrowth: number;
-  subscriberGrowth: number;
+  totalViews?: number;
+  totalLikes?: number;
+  totalComments?: number;
+  totalShares?: number;
+  totalSubscribers?: number;
+  totalRevenue?: number;
+  averageWatchTime?: number;
+  engagementRate?: number;
+  revenueGrowth?: number;
+  subscriberGrowth?: number;
 }
 
 export interface TimeSeriesData {
   date: string;
-  views: number;
-  likes: number;
-  comments: number;
-  shares: number;
-  revenue: number;
-  engagementRate: number;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  revenue?: number;
+  engagementRate?: number;
 }
 
 export interface TopVideoAnalytics {
   videoId: number;
   title: string;
   thumbnailUrl: string;
-  views: number;
-  likes: number;
-  comments: number;
-  revenue: number;
-  engagementRate: number;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  revenue?: number;
+  engagementRate?: number;
   createdAt: string;
 }
 
@@ -43,41 +43,41 @@ export interface RevenueAnalytics {
   userId: string;
   channelId?: number;
   date: string;
-  totalRevenue: number;
-  adRevenue: number;
-  subscriptionRevenue: number;
-  premiumContentRevenue: number;
-  merchandiseRevenue: number;
-  donationRevenue: number;
-  referralRevenue: number;
-  revenuePerView: number;
-  revenuePerSubscriber: number;
-  revenueGrowthRate: number;
+  totalRevenue?: number;
+  adRevenue?: number;
+  subscriptionRevenue?: number;
+  premiumContentRevenue?: number;
+  merchandiseRevenue?: number;
+  donationRevenue?: number;
+  referralRevenue?: number;
+  revenuePerView?: number;
+  revenuePerSubscriber?: number;
+  revenueGrowthRate?: number;
   createdAt: string;
 }
 
 export interface GeographicAnalytics {
   country: string;
   countryCode: string;
-  views: number;
-  revenue: number;
-  percentage: number;
-  subscribers: number;
+  views?: number;
+  revenue?: number;
+  percentage?: number;
+  subscribers?: number;
 }
 
 export interface DeviceAnalytics {
   deviceType: string;
-  views: number;
-  percentage: number;
-  averageWatchTime: number;
-  engagementRate: number;
+  views?: number;
+  percentage?: number;
+  averageWatchTime?: number;
+  engagementRate?: number;
 }
 
 export interface ReferrerAnalytics {
   referrer: string;
-  views: number;
-  percentage: number;
-  conversionRate: number;
+  views?: number;
+  percentage?: number;
+  conversionRate?: number;
 }
 
 export interface AudienceAnalytics {
@@ -90,10 +90,10 @@ export interface AudienceAnalytics {
   country?: string;
   deviceType?: string;
   referrer?: string;
-  viewCount: number;
-  watchTime: number;
-  engagementScore: number;
-  revenue: number;
+  viewCount?: number;
+  watchTime?: number;
+  engagementScore?: number;
+  revenue?: number;
   createdAt: string;
 }
 
@@ -102,16 +102,16 @@ export interface EngagementAnalytics {
   userId: string;
   channelId?: number;
   date: string;
-  likeRate: number;
-  commentRate: number;
-  shareRate: number;
-  watchTimeRate: number;
-  clickThroughRate: number;
-  retentionRate: number;
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
-  totalViews: number;
+  likeRate?: number;
+  commentRate?: number;
+  shareRate?: number;
+  watchTimeRate?: number;
+  clickThroughRate?: number;
+  retentionRate?: number;
+  totalLikes?: number;
+  totalComments?: number;
+  totalShares?: number;
+  totalViews?: number;
   createdAt: string;
 }
 
@@ -122,15 +122,15 @@ export interface VideoAnalytics {
   videoThumbnailUrl: string;
   userId: string;
   date: string;
-  views: number;
-  uniqueViews: number;
-  likes: number;
-  dislikes: number;
-  comments: number;
-  shares: number;
-  revenue: number;
-  averageWatchTime: number;
-  engagementRate: number;
+  views?: number;
+  uniqueViews?: number;
+  likes?: number;
+  dislikes?: number;
+  comments?: number;
+  shares?: number;
+  revenue?: number;
+  averageWatchTime?: number;
+  engagementRate?: number;
   country?: string;
   deviceType?: string;
   referrer?: string;
@@ -140,11 +140,11 @@ export interface VideoAnalytics {
 export interface ChannelComparison {
   channelId: number;
   channelName: string;
-  views: number;
-  subscribers: number;
-  revenue: number;
-  engagementRate: number;
-  growthRate: number;
+  views?: number;
+  subscribers?: number;
+  revenue?: number;
+  engagementRate?: number;
+  growthRate?: number;
 }
 
 export interface AnalyticsFilter {
@@ -181,7 +181,7 @@ export interface TrackRevenueRequest {
   providedIn: 'root'
 })
 export class AnalyticsDashboardService {
-  private apiUrl = `${environment.apiUrl}/analytics-dashboard`;
+  private apiUrl = `${environment.apiUrl}/api/analytics`;
 
   constructor(private http: HttpClient) { }
 
@@ -363,7 +363,10 @@ export class AnalyticsDashboardService {
   }
 
   // Helper methods
-  formatNumber(value: number): string {
+  formatNumber(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value)) {
+      return '0';
+    }
     if (value >= 1000000) {
       return (value / 1000000).toFixed(1) + 'M';
     } else if (value >= 1000) {
@@ -372,18 +375,27 @@ export class AnalyticsDashboardService {
     return value.toString();
   }
 
-  formatCurrency(value: number, currency: string = 'USD'): string {
+  formatCurrency(value: number | undefined | null, currency: string = 'USD'): string {
+    if (value === undefined || value === null || isNaN(value)) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency
     }).format(value);
   }
 
-  formatPercentage(value: number): string {
+  formatPercentage(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value)) {
+      return '0.0%';
+    }
     return (value * 100).toFixed(1) + '%';
   }
 
-  formatDuration(seconds: number): string {
+  formatDuration(seconds: number | undefined | null): string {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) {
+      return '0:00';
+    }
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);

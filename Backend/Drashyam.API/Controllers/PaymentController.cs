@@ -18,6 +18,14 @@ public class PaymentController : ControllerBase
         _logger = logger;
     }
 
+    // Helper method to convert DateTime parameters to UTC for PostgreSQL compatibility
+    private static (DateTime? utcStartDate, DateTime? utcEndDate) ConvertToUtc(DateTime? startDate, DateTime? endDate)
+    {
+        var utcStartDate = startDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : startDate;
+        var utcEndDate = endDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : endDate;
+        return (utcStartDate, utcEndDate);
+    }
+
     [HttpPost("process")]
     [Authorize]
     public async Task<ActionResult<PaymentResultDto>> Process([FromBody] PaymentDto payment)
@@ -102,7 +110,8 @@ public class PaymentController : ControllerBase
     [Authorize]
     public async Task<ActionResult<decimal>> Revenue([FromRoute] string userId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
-        var revenue = await _paymentService.CalculateRevenueAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var revenue = await _paymentService.CalculateRevenueAsync(userId, utcStartDate, utcEndDate);
         return Ok(revenue);
     }
 }

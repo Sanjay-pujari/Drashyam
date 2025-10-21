@@ -6,7 +6,7 @@ using Drashyam.API.Services;
 namespace Drashyam.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/analytics/legacy")]
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsService _analyticsService;
@@ -18,12 +18,21 @@ public class AnalyticsController : ControllerBase
         _logger = logger;
     }
 
+    // Helper method to convert DateTime parameters to UTC for PostgreSQL compatibility
+    private static (DateTime? utcStartDate, DateTime? utcEndDate) ConvertToUtc(DateTime? startDate, DateTime? endDate)
+    {
+        var utcStartDate = startDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : startDate;
+        var utcEndDate = endDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : endDate;
+        return (utcStartDate, utcEndDate);
+    }
+
     [HttpGet("video/{videoId:int}")]
     [Authorize]
     public async Task<ActionResult<AnalyticsDto>> Video([FromRoute] int videoId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var analytics = await _analyticsService.GetVideoAnalyticsAsync(videoId, userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var analytics = await _analyticsService.GetVideoAnalyticsAsync(videoId, userId, utcStartDate, utcEndDate);
         return Ok(analytics);
     }
 
@@ -32,7 +41,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<AnalyticsDto>> Channel([FromRoute] int channelId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var analytics = await _analyticsService.GetChannelAnalyticsAsync(channelId, userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var analytics = await _analyticsService.GetChannelAnalyticsAsync(channelId, userId, utcStartDate, utcEndDate);
         return Ok(analytics);
     }
 
@@ -41,7 +51,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<AnalyticsDto>> Me([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var analytics = await _analyticsService.GetUserAnalyticsAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var analytics = await _analyticsService.GetUserAnalyticsAsync(userId, utcStartDate, utcEndDate);
         return Ok(analytics);
     }
 
@@ -50,7 +61,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<List<RevenueDto>>> Revenue([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var data = await _analyticsService.GetRevenueAnalyticsAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var data = await _analyticsService.GetRevenueAnalyticsAsync(userId, utcStartDate, utcEndDate);
         return Ok(data);
     }
 
@@ -77,7 +89,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<List<GeographicDataDto>>> Geographic([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var data = await _analyticsService.GetGeographicDataAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var data = await _analyticsService.GetGeographicDataAsync(userId, utcStartDate, utcEndDate);
         return Ok(data);
     }
 
@@ -86,7 +99,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<List<DeviceDataDto>>> Devices([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var data = await _analyticsService.GetDeviceDataAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var data = await _analyticsService.GetDeviceDataAsync(userId, utcStartDate, utcEndDate);
         return Ok(data);
     }
 
@@ -95,7 +109,8 @@ public class AnalyticsController : ControllerBase
     public async Task<ActionResult<EngagementMetricsDto>> Engagement([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         var userId = User.Identity?.Name ?? string.Empty;
-        var data = await _analyticsService.GetEngagementMetricsAsync(userId, startDate, endDate);
+        var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+        var data = await _analyticsService.GetEngagementMetricsAsync(userId, utcStartDate, utcEndDate);
         return Ok(data);
     }
 }

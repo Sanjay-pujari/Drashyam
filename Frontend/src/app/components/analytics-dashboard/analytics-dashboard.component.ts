@@ -259,19 +259,19 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   }
 
   // Helper methods for template
-  formatNumber(value: number): string {
+  formatNumber(value: number | undefined | null): string {
     return this.analyticsService.formatNumber(value);
   }
 
-  formatCurrency(value: number): string {
+  formatCurrency(value: number | undefined | null): string {
     return this.analyticsService.formatCurrency(value);
   }
 
-  formatPercentage(value: number): string {
+  formatPercentage(value: number | undefined | null): string {
     return this.analyticsService.formatPercentage(value);
   }
 
-  formatDuration(seconds: number): string {
+  formatDuration(seconds: number | undefined | null): string {
     return this.analyticsService.formatDuration(seconds);
   }
 

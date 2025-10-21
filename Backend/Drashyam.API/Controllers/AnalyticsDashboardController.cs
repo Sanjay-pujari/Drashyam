@@ -7,7 +7,7 @@ using Drashyam.API.Services;
 namespace Drashyam.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/analytics")]
 [Authorize]
 public class AnalyticsDashboardController : ControllerBase
 {
@@ -22,6 +22,14 @@ public class AnalyticsDashboardController : ControllerBase
         _logger = logger;
     }
 
+    // Helper method to convert DateTime parameters to UTC for PostgreSQL compatibility
+    private static (DateTime? utcStartDate, DateTime? utcEndDate) ConvertToUtc(DateTime? startDate, DateTime? endDate)
+    {
+        var utcStartDate = startDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : startDate;
+        var utcEndDate = endDate?.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : endDate;
+        return (utcStartDate, utcEndDate);
+    }
+
     [HttpGet("summary")]
     public async Task<ActionResult<AnalyticsSummaryDto>> GetSummary(
         [FromQuery] DateTime? startDate = null,
@@ -30,7 +38,9 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var summary = await _analyticsService.GetAnalyticsSummaryAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            
+            var summary = await _analyticsService.GetAnalyticsSummaryAsync(userId, utcStartDate, utcEndDate);
             return Ok(summary);
         }
         catch (Exception ex)
@@ -48,7 +58,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var timeSeries = await _analyticsService.GetTimeSeriesDataAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var timeSeries = await _analyticsService.GetTimeSeriesDataAsync(userId, utcStartDate, utcEndDate);
             return Ok(timeSeries);
         }
         catch (Exception ex)
@@ -67,7 +78,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var topVideos = await _analyticsService.GetTopVideosAsync(userId, count, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var topVideos = await _analyticsService.GetTopVideosAsync(userId, count, utcStartDate, utcEndDate);
             return Ok(topVideos);
         }
         catch (Exception ex)
@@ -85,7 +97,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var revenue = await _analyticsService.GetRevenueAnalyticsAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var revenue = await _analyticsService.GetRevenueAnalyticsAsync(userId, utcStartDate, utcEndDate);
             return Ok(revenue);
         }
         catch (Exception ex)
@@ -103,7 +116,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var revenueTimeSeries = await _analyticsService.GetRevenueTimeSeriesAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var revenueTimeSeries = await _analyticsService.GetRevenueTimeSeriesAsync(userId, utcStartDate, utcEndDate);
             return Ok(revenueTimeSeries);
         }
         catch (Exception ex)
@@ -121,7 +135,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var totalRevenue = await _analyticsService.GetTotalRevenueAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var totalRevenue = await _analyticsService.GetTotalRevenueAsync(userId, utcStartDate, utcEndDate);
             return Ok(totalRevenue);
         }
         catch (Exception ex)
@@ -139,7 +154,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var geographicData = await _analyticsService.GetGeographicDataAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var geographicData = await _analyticsService.GetGeographicDataAsync(userId, utcStartDate, utcEndDate);
             return Ok(geographicData);
         }
         catch (Exception ex)
@@ -157,7 +173,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var deviceData = await _analyticsService.GetDeviceDataAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var deviceData = await _analyticsService.GetDeviceDataAsync(userId, utcStartDate, utcEndDate);
             return Ok(deviceData);
         }
         catch (Exception ex)
@@ -175,7 +192,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var referrerData = await _analyticsService.GetReferrerDataAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var referrerData = await _analyticsService.GetReferrerDataAsync(userId, utcStartDate, utcEndDate);
             return Ok(referrerData);
         }
         catch (Exception ex)
@@ -193,7 +211,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var audienceData = await _analyticsService.GetAudienceInsightsAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var audienceData = await _analyticsService.GetAudienceInsightsAsync(userId, utcStartDate, utcEndDate);
             return Ok(audienceData);
         }
         catch (Exception ex)
@@ -211,7 +230,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var engagement = await _analyticsService.GetEngagementMetricsAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var engagement = await _analyticsService.GetEngagementMetricsAsync(userId, utcStartDate, utcEndDate);
             return Ok(engagement);
         }
         catch (Exception ex)
@@ -229,7 +249,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var engagementTimeSeries = await _analyticsService.GetEngagementTimeSeriesAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var engagementTimeSeries = await _analyticsService.GetEngagementTimeSeriesAsync(userId, utcStartDate, utcEndDate);
             return Ok(engagementTimeSeries);
         }
         catch (Exception ex)
@@ -248,7 +269,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var videoAnalytics = await _analyticsService.GetVideoAnalyticsAsync(videoId, userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var videoAnalytics = await _analyticsService.GetVideoAnalyticsAsync(videoId, userId, utcStartDate, utcEndDate);
             return Ok(videoAnalytics);
         }
         catch (Exception ex)
@@ -266,7 +288,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var videoAnalytics = await _analyticsService.GetVideoAnalyticsListAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var videoAnalytics = await _analyticsService.GetVideoAnalyticsListAsync(userId, utcStartDate, utcEndDate);
             return Ok(videoAnalytics);
         }
         catch (Exception ex)
@@ -284,7 +307,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var channelComparison = await _analyticsService.GetChannelComparisonAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var channelComparison = await _analyticsService.GetChannelComparisonAsync(userId, utcStartDate, utcEndDate);
             return Ok(channelComparison);
         }
         catch (Exception ex)
@@ -303,7 +327,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var channelAnalytics = await _analyticsService.GetChannelAnalyticsAsync(channelId, userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var channelAnalytics = await _analyticsService.GetChannelAnalyticsAsync(channelId, userId, utcStartDate, utcEndDate);
             return Ok(channelAnalytics);
         }
         catch (Exception ex)
@@ -422,7 +447,12 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var reportData = await _analyticsService.ExportAnalyticsReportAsync(userId, startDate, endDate, format);
+            
+            // Convert DateTime parameters to UTC for PostgreSQL compatibility
+            var utcStartDate = startDate.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(startDate, DateTimeKind.Utc) : startDate;
+            var utcEndDate = endDate.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(endDate, DateTimeKind.Utc) : endDate;
+            
+            var reportData = await _analyticsService.ExportAnalyticsReportAsync(userId, utcStartDate, utcEndDate, format);
 
             var contentType = format.ToLower() switch
             {
@@ -432,7 +462,7 @@ public class AnalyticsDashboardController : ControllerBase
                 _ => "application/octet-stream"
             };
 
-            var fileName = $"analytics-report-{startDate:yyyy-MM-dd}-to-{endDate:yyyy-MM-dd}.{format}";
+            var fileName = $"analytics-report-{utcStartDate:yyyy-MM-dd}-to-{utcEndDate:yyyy-MM-dd}.{format}";
 
             return File(reportData, contentType, fileName);
         }
@@ -451,7 +481,8 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var dashboardReport = await _analyticsService.GenerateDashboardReportAsync(userId, startDate, endDate);
+            var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
+            var dashboardReport = await _analyticsService.GenerateDashboardReportAsync(userId, utcStartDate, utcEndDate);
             return Ok(dashboardReport);
         }
         catch (Exception ex)
