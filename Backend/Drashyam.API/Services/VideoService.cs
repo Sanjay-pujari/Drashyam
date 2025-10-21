@@ -161,17 +161,19 @@ public class VideoService : IVideoService
 
     public async Task<PagedResult<VideoDto>> GetVideosAsync(VideoFilterDto filter)
     {
-        var query = _context.Videos
-            .Include(v => v.User)
-            .Include(v => v.Channel)
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
+        try
+        {
+            var query = _context.Videos
+                .Include(v => v.User)
+                .Include(v => v.Channel)
+                .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
 
         // Apply filters
         if (!string.IsNullOrEmpty(filter.Search))
         {
             query = query.Where(v => v.Title.Contains(filter.Search) || 
-                                   v.Description.Contains(filter.Search) ||
-                                   v.Tags.Contains(filter.Search));
+                                   (v.Description != null && v.Description.Contains(filter.Search)) ||
+                                   (v.Tags != null && v.Tags.Contains(filter.Search)));
         }
 
         if (!string.IsNullOrEmpty(filter.Category))
@@ -206,6 +208,12 @@ public class VideoService : IVideoService
             Page = filter.Page,
             PageSize = filter.PageSize
         };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetVideosAsync: {Message}", ex.Message);
+            throw;
+        }
     }
 
     public async Task<PagedResult<VideoDto>> GetUserVideosAsync(string userId, VideoFilterDto filter)
