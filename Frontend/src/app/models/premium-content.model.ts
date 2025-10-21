@@ -19,7 +19,7 @@ export interface PremiumVideoCreate {
 }
 
 export interface PremiumVideoUpdate {
-  creatorId: string;
+  creatorId?: string;
   price?: number;
   currency?: string;
   isActive?: boolean;

@@ -179,6 +179,44 @@ public class MonetizationController : ControllerBase
         var report = await _monetizationService.GetRevenueReportAsync(userId, startDate, endDate);
         return Ok(report);
     }
+
+    // Merchandise Orders
+    [HttpGet("merchandise/orders")]
+    [Authorize]
+    public async Task<ActionResult<List<MerchandiseOrderDto>>> GetMerchandiseOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var orders = await _monetizationService.GetMerchandiseOrdersAsync(userId, page, pageSize);
+        return Ok(orders);
+    }
+
+    [HttpPost("merchandise/orders")]
+    [Authorize]
+    public async Task<ActionResult<MerchandiseOrderDto>> CreateMerchandiseOrder([FromBody] MerchandiseOrderRequestDto request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var order = await _monetizationService.CreateMerchandiseOrderAsync(request, userId);
+        return Ok(order);
+    }
+
+    [HttpPut("merchandise/orders/{orderId:int}")]
+    [Authorize]
+    public async Task<ActionResult<MerchandiseOrderDto>> UpdateMerchandiseOrder([FromRoute] int orderId, [FromBody] MerchandiseOrderUpdateDto request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var order = await _monetizationService.UpdateMerchandiseOrderStatusAsync(orderId, request.Status, userId, request.TrackingNumber);
+        return Ok(order);
+    }
+
+    // Merchandise Analytics
+    [HttpGet("merchandise/analytics")]
+    [Authorize]
+    public async Task<ActionResult<MerchandiseAnalyticsDto>> GetMerchandiseAnalytics([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var analytics = await _monetizationService.GetMerchandiseAnalyticsAsync(userId, startDate, endDate);
+        return Ok(analytics);
+    }
 }
 
 

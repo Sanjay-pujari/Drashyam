@@ -59,6 +59,15 @@ public class VideoController : ControllerBase
         return Ok(videos);
     }
 
+    [HttpGet("user/{userId}")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<VideoDto>>> GetUserVideos([FromRoute] string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var filter = new VideoFilterDto { Page = page, PageSize = pageSize };
+        var videos = await _videoService.GetUserVideosAsync(userId, filter);
+        return Ok(videos);
+    }
+
     [HttpGet("channel/{channelId:int}")]
     public async Task<ActionResult<PagedResult<VideoDto>>> GetChannelVideos([FromRoute] int channelId, [FromQuery] VideoFilterDto filter)
     {

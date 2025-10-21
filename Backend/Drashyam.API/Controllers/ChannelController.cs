@@ -78,6 +78,14 @@ public class ChannelController : ControllerBase
         return Ok(channels);
     }
 
+    [HttpGet("user/{userId}")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<ChannelDto>>> GetUserChannels([FromRoute] string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var channels = await _channelService.GetUserChannelsAsync(userId, page, pageSize);
+        return Ok(channels);
+    }
+
     [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult<PagedResult<ChannelDto>>> GetMyChannels([FromQuery] int page = 1, [FromQuery] int pageSize = 20)

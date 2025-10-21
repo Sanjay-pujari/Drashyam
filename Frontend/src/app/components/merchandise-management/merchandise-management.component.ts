@@ -40,8 +40,6 @@ import { PagedResult } from '../../models/paged-result.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    DatePipe,
-    DecimalPipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -64,6 +62,9 @@ import { PagedResult } from '../../models/paged-result.model';
 export class MerchandiseManagementComponent implements OnInit {
   loading = false;
   MerchandiseOrderStatus = MerchandiseOrderStatus;
+
+  // Chip input separator keys
+  separatorKeysCodes: number[] = [13, 188]; // Enter and comma
 
   // Forms
   merchandiseForm: FormGroup;
@@ -145,10 +146,10 @@ export class MerchandiseManagementComponent implements OnInit {
   loadChannels(): void {
     if (this.currentUserId) {
       this.channelService.getUserChannels(this.currentUserId).subscribe({
-        next: (channels) => {
-          this.channels = channels;
+        next: (result: PagedResult<Channel>) => {
+          this.channels = result.items;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading channels:', error);
         }
       });
@@ -345,5 +346,16 @@ export class MerchandiseManagementComponent implements OnInit {
       colors.splice(index, 1);
       this.merchandiseForm.get('colors')?.setValue(colors);
     }
+  }
+
+  // Missing methods referenced in template
+  editMerchandiseItem(item: MerchandiseItem): void {
+    // TODO: Implement edit functionality
+    console.log('Edit merchandise item:', item);
+  }
+
+  viewOrder(order: MerchandiseOrder): void {
+    // TODO: Implement view order functionality
+    console.log('View order:', order);
   }
 }

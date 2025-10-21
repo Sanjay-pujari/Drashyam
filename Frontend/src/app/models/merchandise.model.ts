@@ -123,3 +123,32 @@ export interface MerchandiseOrderFilter {
   endDate?: Date;
   search?: string;
 }
+
+export interface MerchandiseStore {
+  id: number;
+  channelId: number;
+  platform: StorePlatform;
+  storeName: string;
+  storeUrl: string;
+  description: string;
+  logoUrl: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  createdAt: Date;
+}
+
+export enum StorePlatform {
+  Shopify = 'Shopify',
+  WooCommerce = 'WooCommerce',
+  Etsy = 'Etsy',
+  Amazon = 'Amazon',
+  Custom = 'Custom'
+}
+
+export const STORE_PLATFORM_OPTIONS = [
+  { value: StorePlatform.Shopify, label: 'Shopify' },
+  { value: StorePlatform.WooCommerce, label: 'WooCommerce' },
+  { value: StorePlatform.Etsy, label: 'Etsy' },
+  { value: StorePlatform.Amazon, label: 'Amazon' },
+  { value: StorePlatform.Custom, label: 'Custom' }
+];

@@ -9,6 +9,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { PremiumContentService } from '../../services/premium-content.service';
 import { VideoService } from '../../services/video.service';
 import { UserService } from '../../services/user.service';
@@ -29,8 +33,7 @@ import { Video } from '../../models/video.model';
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
-    DatePipe, 
-    DecimalPipe,
+    DatePipe,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
@@ -38,7 +41,11 @@ import { Video } from '../../models/video.model';
     MatTableModule,
     MatPaginatorModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSlideToggleModule
   ],
   templateUrl: './premium-content-management.component.html',
   styleUrls: ['./premium-content-management.component.scss']
@@ -94,11 +101,11 @@ export class PremiumContentManagementComponent implements OnInit {
 
   getCurrentUser(): void {
     this.userService.getCurrentUser().subscribe({
-      next: (user) => {
+      next: (user: any) => {
         this.currentUserId = user.id;
         this.loadAvailableVideos();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error getting current user:', error);
         this.snackBar.open('Error loading user data', 'Close', { duration: 3000 });
       }

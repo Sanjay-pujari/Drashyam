@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NotificationService, Notification } from '../../services/notification.service';
+import { NotificationService, VideoNotification } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./notification-center.component.scss']
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
-  notifications: Notification[] = [];
+  notifications: VideoNotification[] = [];
   isOpen = false;
   private subscription: Subscription = new Subscription();
 
@@ -19,8 +19,8 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.notificationService.getNotifications().subscribe(notifications => {
-        this.notifications = notifications;
+      this.notificationService.getNotifications().subscribe(result => {
+        this.notifications = result.items;
       })
     );
   }
@@ -38,11 +38,13 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   }
 
   clearAll(): void {
-    this.notificationService.clearNotifications();
+    // TODO: Implement clear notifications functionality
+    console.log('Clear all notifications');
   }
 
-  markAsRead(notification: Notification): void {
-    this.notificationService.markAsRead(notification);
+  markAsRead(notification: VideoNotification): void {
+    // TODO: Implement mark as read functionality
+    console.log('Mark as read:', notification);
   }
 
   getNotificationIcon(type: string): string {
@@ -101,7 +103,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
     return new Date(timestamp).toLocaleDateString();
   }
 
-  trackByTimestamp(index: number, notification: Notification): any {
-    return notification.timestamp;
+  trackByTimestamp(index: number, notification: VideoNotification): any {
+    return notification.createdAt;
   }
 }

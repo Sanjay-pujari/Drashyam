@@ -33,4 +33,5 @@ public interface IMonetizationService
     Task<MerchandiseOrderDto> CreateMerchandiseOrderAsync(MerchandiseOrderRequestDto request, string customerId);
     Task<MerchandiseOrderDto> UpdateMerchandiseOrderStatusAsync(int orderId, MerchandiseOrderStatus status, string userId, string? trackingNumber = null);
     Task<List<MerchandiseOrderDto>> GetCustomerOrdersAsync(string customerId, int page = 1, int pageSize = 20);
+    Task<MerchandiseAnalyticsDto> GetMerchandiseAnalyticsAsync(string userId, DateTime? startDate = null, DateTime? endDate = null);
 }

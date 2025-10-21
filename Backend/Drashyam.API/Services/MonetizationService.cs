@@ -502,4 +502,68 @@ public class MonetizationService : IMonetizationService
             throw;
         }
     }
+
+    public async Task<MerchandiseAnalyticsDto> GetMerchandiseAnalyticsAsync(string userId, DateTime? startDate = null, DateTime? endDate = null)
+    {
+        try
+        {
+            var query = _context.MerchandiseOrders
+                .Include(o => o.MerchandiseItem)
+                .ThenInclude(m => m.Channel)
+                .Where(o => o.MerchandiseItem.Channel.UserId == userId);
+
+            if (startDate.HasValue)
+                query = query.Where(o => o.OrderedAt >= startDate.Value);
+            if (endDate.HasValue)
+                query = query.Where(o => o.OrderedAt <= endDate.Value);
+
+            var orders = await query.ToListAsync();
+            var items = await _context.MerchandiseItems
+                .Include(m => m.Channel)
+                .Where(m => m.Channel.UserId == userId)
+                .ToListAsync();
+
+            var analytics = new MerchandiseAnalyticsDto
+            {
+                TotalItems = items.Count,
+                TotalOrders = orders.Count,
+                TotalRevenue = orders.Sum(o => o.Amount),
+                AverageOrderValue = orders.Any() ? orders.Average(o => o.Amount) : 0,
+                PendingOrders = orders.Count(o => o.Status == MerchandiseOrderStatus.Pending),
+                ShippedOrders = orders.Count(o => o.Status == MerchandiseOrderStatus.Shipped),
+                DeliveredOrders = orders.Count(o => o.Status == MerchandiseOrderStatus.Delivered),
+                TopSellingItems = orders
+                    .GroupBy(o => new { o.MerchandiseItemId, o.MerchandiseItem.Name })
+                    .Select(g => new MerchandiseItemAnalyticsDto
+                    {
+                        ItemId = g.Key.MerchandiseItemId,
+                        ItemName = g.Key.Name,
+                        TotalSales = g.Sum(o => o.Quantity),
+                        TotalRevenue = g.Sum(o => o.Amount)
+                    })
+                    .OrderByDescending(x => x.TotalSales)
+                    .Take(5)
+                    .ToList(),
+                RecentOrders = orders
+                    .OrderByDescending(o => o.OrderedAt)
+                    .Take(10)
+                    .Select(o => new MerchandiseOrderAnalyticsDto
+                    {
+                        OrderId = o.Id,
+                        CustomerName = o.CustomerName,
+                        Amount = o.Amount,
+                        Status = o.Status,
+                        OrderedAt = o.OrderedAt
+                    })
+                    .ToList()
+            };
+
+            return analytics;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving merchandise analytics for user {UserId}", userId);
+            throw;
+        }
+    }
 }

@@ -283,11 +283,11 @@ export class MerchandiseDisplayComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.subscriptions.add(
       this.merchandiseService.getChannelStores(this.channelId).subscribe({
-        next: (stores) => {
+        next: (stores: MerchandiseStore[]) => {
           this.stores = stores;
           this.isLoading = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isLoading = false;
           console.error('Failed to load merchandise stores:', error);
         }
@@ -296,12 +296,12 @@ export class MerchandiseDisplayComponent implements OnInit, OnDestroy {
   }
 
   getPlatformLabel(platform: StorePlatform): string {
-    const option = STORE_PLATFORM_OPTIONS.find(opt => opt.value === platform);
+    const option = STORE_PLATFORM_OPTIONS.find((opt: any) => opt.value === platform);
     return option ? option.label : platform;
   }
 
   getPlatformIcon(platform: StorePlatform): string {
-    const option = STORE_PLATFORM_OPTIONS.find(opt => opt.value === platform);
-    return option ? option.icon : 'store';
+    const option = STORE_PLATFORM_OPTIONS.find((opt: any) => opt.value === platform);
+    return option ? option.label.toLowerCase() : 'store';
   }
 }

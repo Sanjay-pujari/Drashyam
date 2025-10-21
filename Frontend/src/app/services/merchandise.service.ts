@@ -12,7 +12,8 @@ import {
   MerchandiseAnalytics,
   MerchandiseFilter,
   MerchandiseOrderFilter,
-  MerchandiseOrderStatus
+  MerchandiseOrderStatus,
+  MerchandiseStore
 } from '../models/merchandise.model';
 import { PagedResult } from '../models/paged-result.model';
 
@@ -146,5 +147,10 @@ export class MerchandiseService {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // Store management methods
+  getChannelStores(channelId: number): Observable<MerchandiseStore[]> {
+    return this.http.get<MerchandiseStore[]>(`${this.apiUrl}/stores/channel/${channelId}`);
   }
 }

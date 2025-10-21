@@ -166,6 +166,42 @@ public class MerchandiseOrderRequestDto
     public string PaymentMethodId { get; set; } = string.Empty;
 }
 
+public class MerchandiseOrderUpdateDto
+{
+    public MerchandiseOrderStatus Status { get; set; }
+    public string? TrackingNumber { get; set; }
+}
+
+public class MerchandiseAnalyticsDto
+{
+    public int TotalItems { get; set; }
+    public int TotalOrders { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public int PendingOrders { get; set; }
+    public int ShippedOrders { get; set; }
+    public int DeliveredOrders { get; set; }
+    public List<MerchandiseItemAnalyticsDto> TopSellingItems { get; set; } = new();
+    public List<MerchandiseOrderAnalyticsDto> RecentOrders { get; set; } = new();
+}
+
+public class MerchandiseItemAnalyticsDto
+{
+    public int ItemId { get; set; }
+    public string ItemName { get; set; } = string.Empty;
+    public int TotalSales { get; set; }
+    public decimal TotalRevenue { get; set; }
+}
+
+public class MerchandiseOrderAnalyticsDto
+{
+    public int OrderId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public MerchandiseOrderStatus Status { get; set; }
+    public DateTime OrderedAt { get; set; }
+}
+
 public class RevenueReportDto
 {
     public decimal TotalRevenue { get; set; }

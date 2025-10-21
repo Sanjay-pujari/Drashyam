@@ -53,6 +53,14 @@ export class PremiumContentService {
     return this.http.get<PremiumVideo>(`${this.apiUrl}/videos/by-video/${videoId}`);
   }
 
+  updatePremiumVideoByVideoId(videoId: number, premiumVideo: PremiumVideoUpdate): Observable<PremiumVideo> {
+    return this.http.put<PremiumVideo>(`${this.apiUrl}/videos/by-video/${videoId}`, premiumVideo);
+  }
+
+  deletePremiumVideoByVideoId(videoId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/videos/by-video/${videoId}`);
+  }
+
   hasUserPurchased(premiumVideoId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/videos/${premiumVideoId}/has-purchased`);
   }
