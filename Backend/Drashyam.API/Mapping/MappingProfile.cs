@@ -89,6 +89,11 @@ public class MappingProfile : Profile
         CreateMap<PremiumPurchase, PremiumPurchaseDto>()
             .ForMember(dest => dest.VideoTitle, opt => opt.MapFrom(src => src.PremiumVideo.Video.Title));
         CreateMap<PremiumPurchaseCreateDto, PremiumPurchase>();
+
+        // Merchandise Store mappings
+        CreateMap<MerchandiseStore, MerchandiseStoreDto>();
+        CreateMap<MerchandiseStoreCreateDto, MerchandiseStore>();
+        CreateMap<MerchandiseStoreUpdateDto, MerchandiseStore>();
     }
 
     private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)

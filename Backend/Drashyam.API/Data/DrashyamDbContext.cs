@@ -38,6 +38,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<UserSettings> UserSettings { get; set; }
     public DbSet<PremiumVideo> PremiumVideos { get; set; }
     public DbSet<PremiumPurchase> PremiumPurchases { get; set; }
+    public DbSet<MerchandiseStore> MerchandiseStores { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -345,6 +346,20 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.Status);
             entity.Property(e => e.Amount).HasPrecision(10, 2);
             entity.Property(e => e.Currency).HasMaxLength(3);
+        });
+
+        // Configure MerchandiseStore entity
+        builder.Entity<MerchandiseStore>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Platform);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.IsFeatured);
+            entity.Property(e => e.StoreName).HasMaxLength(100);
+            entity.Property(e => e.StoreUrl).HasMaxLength(500);
+            entity.Property(e => e.Description).HasMaxLength(200);
+            entity.Property(e => e.LogoUrl).HasMaxLength(500);
         });
     }
 }

@@ -51,6 +51,7 @@ public class Channel
 
     public virtual ICollection<Video> Videos { get; set; } = new List<Video>();
     public virtual ICollection<ChannelSubscription> Subscriptions { get; set; } = new List<ChannelSubscription>();
+    public virtual ICollection<MerchandiseStore> MerchandiseStores { get; set; } = new List<MerchandiseStore>();
 }
 
 public enum ChannelType

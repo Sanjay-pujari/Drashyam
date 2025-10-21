@@ -11,11 +11,13 @@ namespace Drashyam.API.Controllers;
 public class ChannelController : ControllerBase
 {
     private readonly IChannelService _channelService;
+    private readonly IMerchandiseService _merchandiseService;
     private readonly ILogger<ChannelController> _logger;
 
-    public ChannelController(IChannelService channelService, ILogger<ChannelController> logger)
+    public ChannelController(IChannelService channelService, IMerchandiseService merchandiseService, ILogger<ChannelController> logger)
     {
         _channelService = channelService;
+        _merchandiseService = merchandiseService;
         _logger = logger;
     }
 
@@ -169,6 +171,171 @@ public class ChannelController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var result = await _channelService.UpdateChannelProfilePictureAsync(channelId, profilePicture, userId);
         return Ok(result);
+    }
+
+    // Merchandise Store Endpoints
+    [HttpPost("{channelId:int}/merchandise")]
+    [Authorize]
+    public async Task<ActionResult<MerchandiseStoreDto>> CreateMerchandiseStore([FromRoute] int channelId, [FromBody] MerchandiseStoreCreateDto createDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the channel
+        var channel = await _channelService.GetChannelByIdAsync(channelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var store = await _merchandiseService.CreateStoreAsync(channelId, createDto);
+        return CreatedAtAction(nameof(GetMerchandiseStore), new { storeId = store.Id }, store);
+    }
+
+    [HttpGet("merchandise/{storeId:int}")]
+    public async Task<ActionResult<MerchandiseStoreDto>> GetMerchandiseStore([FromRoute] int storeId)
+    {
+        var store = await _merchandiseService.GetStoreAsync(storeId);
+        if (store == null)
+        {
+            return NotFound();
+        }
+        return Ok(store);
+    }
+
+    [HttpGet("{channelId:int}/merchandise")]
+    public async Task<ActionResult<List<MerchandiseStoreDto>>> GetChannelMerchandiseStores([FromRoute] int channelId)
+    {
+        var stores = await _merchandiseService.GetChannelStoresAsync(channelId);
+        return Ok(stores);
+    }
+
+    [HttpPut("merchandise/{storeId:int}")]
+    [Authorize]
+    public async Task<ActionResult<MerchandiseStoreDto>> UpdateMerchandiseStore([FromRoute] int storeId, [FromBody] MerchandiseStoreUpdateDto updateDto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the store
+        var store = await _merchandiseService.GetStoreAsync(storeId);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var channel = await _channelService.GetChannelByIdAsync(store.ChannelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var updatedStore = await _merchandiseService.UpdateStoreAsync(storeId, updateDto);
+        return Ok(updatedStore);
+    }
+
+    [HttpDelete("merchandise/{storeId:int}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteMerchandiseStore([FromRoute] int storeId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the store
+        var store = await _merchandiseService.GetStoreAsync(storeId);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var channel = await _channelService.GetChannelByIdAsync(store.ChannelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var result = await _merchandiseService.DeleteStoreAsync(storeId);
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{channelId:int}/merchandise/reorder")]
+    [Authorize]
+    public async Task<IActionResult> ReorderMerchandiseStores([FromRoute] int channelId, [FromBody] List<int> storeIds)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the channel
+        var channel = await _channelService.GetChannelByIdAsync(channelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var result = await _merchandiseService.ReorderStoresAsync(channelId, storeIds);
+        if (!result)
+        {
+            return BadRequest();
+        }
+
+        return Ok();
+    }
+
+    [HttpPut("merchandise/{storeId:int}/toggle-status")]
+    [Authorize]
+    public async Task<IActionResult> ToggleMerchandiseStoreStatus([FromRoute] int storeId, [FromBody] bool isActive)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the store
+        var store = await _merchandiseService.GetStoreAsync(storeId);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var channel = await _channelService.GetChannelByIdAsync(store.ChannelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var result = await _merchandiseService.ToggleStoreStatusAsync(storeId, isActive);
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return Ok();
+    }
+
+    [HttpPut("merchandise/{storeId:int}/toggle-featured")]
+    [Authorize]
+    public async Task<IActionResult> ToggleMerchandiseStoreFeatured([FromRoute] int storeId, [FromBody] bool isFeatured)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Verify user owns the store
+        var store = await _merchandiseService.GetStoreAsync(storeId);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var channel = await _channelService.GetChannelByIdAsync(store.ChannelId);
+        if (channel.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        var result = await _merchandiseService.ToggleStoreFeaturedAsync(storeId, isFeatured);
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return Ok();
     }
 }
 

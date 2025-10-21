@@ -189,6 +189,7 @@ builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
+builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
 
 var app = builder.Build();
 

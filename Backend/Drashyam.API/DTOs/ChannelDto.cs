@@ -25,6 +25,7 @@ public class ChannelDto
     public string? CustomUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     public string? SocialLinks { get; set; }
+    public List<MerchandiseStoreDto> MerchandiseStores { get; set; } = new List<MerchandiseStoreDto>();
     public UserDto? User { get; set; }
     public bool IsSubscribed { get; set; }
 }
