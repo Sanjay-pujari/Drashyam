@@ -53,6 +53,7 @@ export class InviteManagementComponent implements OnInit {
       error: (error) => {
         console.error('Error loading invites:', error);
         this.loading = false;
+        alert('Failed to load invites. Please try again.');
       }
     });
   }
@@ -64,6 +65,7 @@ export class InviteManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading stats:', error);
+        alert('Failed to load invite statistics. Please try again.');
       }
     });
   }
@@ -83,10 +85,12 @@ export class InviteManagementComponent implements OnInit {
           });
           this.loadStats();
           this.loading = false;
+          alert('Invitation sent successfully!');
         },
         error: (error) => {
           console.error('Error creating invite:', error);
           this.loading = false;
+          alert('Failed to send invitation. Please try again.');
         }
       });
     }
@@ -96,9 +100,12 @@ export class InviteManagementComponent implements OnInit {
     this.inviteService.resendInvite(inviteId).subscribe({
       next: () => {
         this.loadInvites();
+        this.loadStats();
+        alert('Invitation resent successfully!');
       },
       error: (error) => {
         console.error('Error resending invite:', error);
+        alert('Failed to resend invitation. Please try again.');
       }
     });
   }
@@ -109,9 +116,11 @@ export class InviteManagementComponent implements OnInit {
         next: () => {
           this.loadInvites();
           this.loadStats();
+          alert('Invitation cancelled successfully!');
         },
         error: (error) => {
           console.error('Error cancelling invite:', error);
+          alert('Failed to cancel invitation. Please try again.');
         }
       });
     }

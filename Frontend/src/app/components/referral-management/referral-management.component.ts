@@ -72,6 +72,8 @@ export class ReferralManagementComponent implements OnInit {
       error: (error) => {
         console.error('Error loading referrals:', error);
         this.loading = false;
+        // Show user-friendly error message
+        alert('Failed to load referrals. Please try again.');
       }
     });
   }
@@ -84,6 +86,7 @@ export class ReferralManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading rewards:', error);
+        alert('Failed to load rewards. Please try again.');
       }
     });
   }
@@ -95,6 +98,7 @@ export class ReferralManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading stats:', error);
+        alert('Failed to load referral statistics. Please try again.');
       }
     });
   }
@@ -106,6 +110,7 @@ export class ReferralManagementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading referral code:', error);
+        // Don't show alert for this as it's expected if no code exists
       }
     });
   }
@@ -121,10 +126,12 @@ export class ReferralManagementComponent implements OnInit {
           this.referralForm.reset();
           this.loadStats();
           this.loading = false;
+          alert('Referral created successfully!');
         },
         error: (error) => {
           console.error('Error creating referral:', error);
           this.loading = false;
+          alert('Failed to create referral. Please try again.');
         }
       });
     }
@@ -144,10 +151,12 @@ export class ReferralManagementComponent implements OnInit {
             rewardType: 'Points'
           });
           this.loading = false;
+          alert('Referral code created successfully!');
         },
         error: (error) => {
           console.error('Error creating referral code:', error);
           this.loading = false;
+          alert('Failed to create referral code. Please try again.');
         }
       });
     }
@@ -160,9 +169,11 @@ export class ReferralManagementComponent implements OnInit {
       next: (reward) => {
         this.loadRewards();
         this.loadStats();
+        alert('Reward claimed successfully!');
       },
       error: (error) => {
         console.error('Error claiming reward:', error);
+        alert('Failed to claim reward. Please try again.');
       }
     });
   }
@@ -170,8 +181,9 @@ export class ReferralManagementComponent implements OnInit {
   copyReferralCode(): void {
     if (this.referralCode?.code) {
       navigator.clipboard.writeText(this.referralCode.code).then(() => {
-        // Show success message
-        console.log('Referral code copied to clipboard');
+        alert('Referral code copied to clipboard!');
+      }).catch(() => {
+        alert('Failed to copy referral code. Please try again.');
       });
     }
   }
