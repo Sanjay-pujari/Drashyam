@@ -1,15 +1,16 @@
 .sidebar {
   width: 280px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-variant) 100%);
+  color: var(--color-on-surface);
   height: calc(100vh - 64px); // Account for header height
   position: fixed;
   left: 0;
   top: 64px; // Start below the header
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
-  border-right: 1px solid #e1e5e9;
+  box-shadow: 2px 0 10px var(--color-shadow);
+  border-right: 1px solid var(--color-outline);
   overflow-y: auto;
   z-index: 50; // Lower than header
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background var(--transition-normal), color var(--transition-normal);
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -21,12 +22,12 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #c1c8cd;
+    background: var(--color-outline);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #a8b2ba;
+    background: var(--color-on-surface-variant);
   }
 
   // Collapsed state
@@ -100,10 +101,10 @@
     margin-bottom: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: #5f6368;
+    color: var(--color-on-surface-variant);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid #e8eaed;
+    border-bottom: 1px solid var(--color-outline);
 
     mat-icon {
       font-size: 18px;
@@ -127,7 +128,7 @@
       gap: 12px;
       padding: 12px 16px;
       text-decoration: none;
-      color: #3c4043;
+      color: var(--color-on-surface);
       border-radius: 8px;
       transition: all 0.2s ease;
       position: relative;
@@ -138,7 +139,7 @@
         font-size: 20px;
         width: 20px;
         height: 20px;
-        color: #5f6368;
+        color: var(--color-on-surface-variant);
         transition: color 0.2s ease;
       }
 
@@ -148,8 +149,8 @@
       }
 
       .nav-count {
-        background: #e8f0fe;
-        color: #1a73e8;
+        background: var(--color-primary);
+        color: var(--color-on-primary);
         font-size: 12px;
         font-weight: 600;
         padding: 2px 8px;
@@ -160,31 +161,31 @@
       }
 
       &:hover {
-        background: #f1f3f4;
-        color: #1a73e8;
+        background: var(--color-surface-variant);
+        color: var(--color-primary);
 
         mat-icon {
-          color: #1a73e8;
+          color: var(--color-primary);
         }
 
         .nav-count {
-          background: #1a73e8;
-          color: white;
+          background: var(--color-primary);
+          color: var(--color-on-primary);
         }
       }
 
       &.active {
-        background: #e8f0fe;
-        color: #1a73e8;
+        background: var(--color-primary);
+        color: var(--color-on-primary);
         font-weight: 600;
 
         mat-icon {
-          color: #1a73e8;
+          color: var(--color-on-primary);
         }
 
         .nav-count {
-          background: #1a73e8;
-          color: white;
+          background: var(--color-on-primary);
+          color: var(--color-primary);
         }
 
         &::before {
@@ -195,7 +196,7 @@
           transform: translateY(-50%);
           width: 3px;
           height: 20px;
-          background: #1a73e8;
+          background: var(--color-on-primary);
           border-radius: 0 2px 2px 0;
         }
       }
@@ -219,7 +220,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #c1c8cd;
+      background: var(--color-outline);
       border-radius: 2px;
     }
   }
@@ -235,7 +236,7 @@
     margin-bottom: 4px;
 
     &:hover {
-      background: #f1f3f4;
+      background: var(--color-surface-variant);
     }
 
     .subscription-avatar {
@@ -260,7 +261,7 @@
         display: block;
         font-size: 13px;
         font-weight: 500;
-        color: #3c4043;
+        color: var(--color-on-surface);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -270,7 +271,7 @@
       .subscription-subscribers {
         display: block;
         font-size: 11px;
-        color: #5f6368;
+        color: var(--color-on-surface-variant);
       }
     }
 
@@ -279,11 +280,11 @@
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #5f6368;
+        color: var(--color-on-surface-variant);
         transition: color 0.2s ease;
 
         &.active {
-          color: #1a73e8;
+          color: var(--color-primary);
         }
       }
     }
@@ -292,13 +293,13 @@
   .no-subscriptions {
     text-align: center;
     padding: 24px 16px;
-    color: #5f6368;
+    color: var(--color-on-surface-variant);
 
     mat-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #dadce0;
+      color: var(--color-outline);
       margin-bottom: 12px;
     }
 
@@ -308,8 +309,8 @@
     }
 
     .explore-channels-btn {
-      background: #1a73e8;
-      color: white;
+      background: var(--color-primary);
+      color: var(--color-on-primary);
       border: none;
       padding: 8px 16px;
       border-radius: 20px;
@@ -319,7 +320,7 @@
       transition: background-color 0.2s ease;
 
       &:hover {
-        background: #1557b0;
+        background: var(--color-secondary);
       }
     }
   }
@@ -338,59 +339,4 @@
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .sidebar {
-    background: linear-gradient(180deg, #202124 0%, #171717 100%);
-    border-right-color: #3c4043;
-
-    .section-header {
-      color: #9aa0a6;
-      border-bottom-color: #3c4043;
-    }
-
-    .nav-link {
-      color: #e8eaed;
-
-      mat-icon {
-        color: #9aa0a6;
-      }
-
-      &:hover {
-        background: #3c4043;
-        color: #1a73e8;
-      }
-
-      &.active {
-        background: #1a73e8;
-        color: white;
-
-        mat-icon {
-          color: white;
-        }
-      }
-    }
-
-    .subscription-item {
-      &:hover {
-        background: #3c4043;
-      }
-
-      .subscription-name {
-        color: #e8eaed;
-      }
-
-      .subscription-subscribers {
-        color: #9aa0a6;
-      }
-    }
-
-    .no-subscriptions {
-      color: #9aa0a6;
-
-      mat-icon {
-        color: #3c4043;
-      }
-    }
-  }
-}
+// Theme support is now handled by CSS variables
