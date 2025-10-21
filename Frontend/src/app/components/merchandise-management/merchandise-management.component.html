@@ -123,16 +123,21 @@
             <mat-card-title>Merchandise Items</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div *ngIf="loading" class="loading-spinner">
-              <mat-spinner diameter="50"></mat-spinner>
-            </div>
+            @if (loading) {
+              <div class="loading-spinner">
+                <mat-spinner diameter="50"></mat-spinner>
+              </div>
+            }
 
-            <div *ngIf="!loading && merchandiseItems && merchandiseItems.length === 0" class="no-data">
-              <mat-icon>inventory</mat-icon>
-              <p>No merchandise items found</p>
-            </div>
+            @if (!loading && merchandiseItems && merchandiseItems.length === 0) {
+              <div class="no-data">
+                <mat-icon>inventory</mat-icon>
+                <p>No merchandise items found</p>
+              </div>
+            }
 
-            <div *ngIf="!loading && merchandiseItems && merchandiseItems.length > 0" class="table-container">
+            @if (!loading && merchandiseItems && merchandiseItems.length > 0) {
+              <div class="table-container">
               <table mat-table [dataSource]="merchandiseItems" class="merchandise-table">
                 <ng-container matColumnDef="name">
                   <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -183,7 +188,8 @@
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
               </table>
-            </div>
+              </div>
+            }
           </mat-card-content>
         </mat-card>
       </div>
@@ -197,12 +203,15 @@
             <mat-card-title>Merchandise Orders</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div *ngIf="orders && orders.length === 0" class="no-data">
-              <mat-icon>shopping_cart</mat-icon>
-              <p>No orders found</p>
-            </div>
+            @if (orders && orders.length === 0) {
+              <div class="no-data">
+                <mat-icon>shopping_cart</mat-icon>
+                <p>No orders found</p>
+              </div>
+            }
 
-            <div *ngIf="orders && orders.length > 0" class="table-container">
+            @if (orders && orders.length > 0) {
+              <div class="table-container">
               <table mat-table [dataSource]="orders" class="orders-table">
                 <ng-container matColumnDef="merchandiseName">
                   <th mat-header-cell *matHeaderCellDef>Item</th>
@@ -263,7 +272,8 @@
                 [pageSizeOptions]="[5, 10, 25, 50]"
                 (page)="onPageChange($event)">
               </mat-paginator>
-            </div>
+              </div>
+            }
           </mat-card-content>
         </mat-card>
       </div>
@@ -272,39 +282,43 @@
     <!-- Analytics Tab -->
     <mat-tab label="Analytics">
       <div class="tab-content">
-        <div *ngIf="analytics" class="analytics-grid">
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-value">{{ analytics.totalItems }}</div>
-              <div class="stat-label">Total Items</div>
-            </mat-card-content>
-          </mat-card>
+        @if (analytics) {
+          <div class="analytics-grid">
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-value">{{ analytics.totalItems }}</div>
+                <div class="stat-label">Total Items</div>
+              </mat-card-content>
+            </mat-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-value">{{ analytics.totalOrders }}</div>
-              <div class="stat-label">Total Orders</div>
-            </mat-card-content>
-          </mat-card>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-value">{{ analytics.totalOrders }}</div>
+                <div class="stat-label">Total Orders</div>
+              </mat-card-content>
+            </mat-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-value">{{ formatCurrency(analytics.totalRevenue) }}</div>
-              <div class="stat-label">Total Revenue</div>
-            </mat-card-content>
-          </mat-card>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-value">{{ formatCurrency(analytics.totalRevenue) }}</div>
+                <div class="stat-label">Total Revenue</div>
+              </mat-card-content>
+            </mat-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-value">{{ formatCurrency(analytics.averageOrderValue) }}</div>
-              <div class="stat-label">Average Order Value</div>
-            </mat-card-content>
-          </mat-card>
-        </div>
+            <mat-card class="stat-card">
+              <mat-card-content>
+                <div class="stat-value">{{ formatCurrency(analytics.averageOrderValue) }}</div>
+                <div class="stat-label">Average Order Value</div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
 
-        <div *ngIf="!analytics" class="loading-spinner">
-          <mat-spinner diameter="50"></mat-spinner>
-        </div>
+        @if (!analytics) {
+          <div class="loading-spinner">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
+        }
       </div>
     </mat-tab>
   </mat-tab-group>

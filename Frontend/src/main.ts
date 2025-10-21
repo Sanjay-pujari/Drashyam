@@ -68,7 +68,8 @@ const routes: Routes = [
   { path: 'ad-campaigns', loadComponent: () => import('./app/components/manage-campaigns/manage-campaigns.component').then(m => m.ManageCampaignsComponent), canActivate: [authGuard] },
   { path: 'my-videos', loadComponent: () => import('./app/components/video-management/video-management.component').then(m => m.VideoManagementComponent), canActivate: [authGuard] },
   { path: 'premium-content', loadComponent: () => import('./app/components/premium-content-management/premium-content-management.component').then(m => m.PremiumContentManagementComponent), canActivate: [authGuard] },
-  { path: 'merchandise', loadComponent: () => import('./app/components/merchandise-management/merchandise-management.component').then(m => m.MerchandiseManagementComponent), canActivate: [authGuard] }
+  { path: 'merchandise', loadComponent: () => import('./app/components/merchandise-management/merchandise-management.component').then(m => m.MerchandiseManagementComponent), canActivate: [authGuard] },
+  { path: 'accessibility', loadComponent: () => import('./app/components/accessibility-settings/accessibility-settings.component').then(m => m.AccessibilitySettingsComponent) }
 ];
 
 bootstrapApplication(AppComponent, {

@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { NotificationService, VideoNotification } from '../../services/notification.service';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 import { User } from '../../models/user.model';
 import { Observable, Subscription } from 'rxjs';
 
@@ -18,7 +19,7 @@ import { Observable, Subscription } from 'rxjs';
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
     standalone: true,
-    imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, MatProgressSpinnerModule]
+    imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, MatProgressSpinnerModule, ThemeToggleComponent]
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   title = 'Drashyam';

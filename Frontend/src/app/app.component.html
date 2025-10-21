@@ -1,4 +1,7 @@
 <div class="app-container">
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
   <!-- Header -->
   <app-header></app-header>
 
@@ -10,7 +13,7 @@
     }
 
     <!-- Router Outlet -->
-    <div class="content-area" 
+    <div id="main-content" class="content-area" 
          [class.with-sidebar]="isAuthenticated"
          [class.sidebar-collapsed]="(sidebarService.isCollapsed$ | async) && isAuthenticated">
       <router-outlet></router-outlet>
