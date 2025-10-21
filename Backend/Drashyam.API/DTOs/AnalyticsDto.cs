@@ -63,7 +63,7 @@ public class ReferralEventDto
     public string? IpAddress { get; set; }
 }
 
-public class AnalyticsSummaryDto
+public class InviteReferralSummaryDto
 {
     public InviteAnalyticsDto InviteAnalytics { get; set; } = new();
     public ReferralAnalyticsDto ReferralAnalytics { get; set; } = new();

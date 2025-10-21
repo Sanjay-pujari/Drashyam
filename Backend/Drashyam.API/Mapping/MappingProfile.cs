@@ -44,6 +44,13 @@ public class MappingProfile : Profile
 
         // Analytics mappings
         CreateMap<Analytics, AnalyticsDto>();
+        
+        // Analytics Dashboard mappings
+        CreateMap<AnalyticsDashboard, AnalyticsDashboardDto>();
+        CreateMap<VideoAnalytics, VideoAnalyticsDto>();
+        CreateMap<RevenueAnalytics, RevenueAnalyticsDto>();
+        CreateMap<AudienceAnalytics, AudienceAnalyticsDto>();
+        CreateMap<EngagementAnalytics, EngagementAnalyticsDto>();
 
         // Invite mappings
         CreateMap<UserInvite, UserInviteDto>()

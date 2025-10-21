@@ -146,6 +146,9 @@ builder.Services.AddSignalR();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+// Memory Cache
+builder.Services.AddMemoryCache();
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<UserRegistrationValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateInviteValidator>();
@@ -193,6 +196,7 @@ builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
 builder.Services.AddScoped<IMonetizationService, MonetizationService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IRecommendationCacheService, RecommendationCacheService>();
+builder.Services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
 
 // Background services
 builder.Services.AddHostedService<RecommendationBackgroundService>();

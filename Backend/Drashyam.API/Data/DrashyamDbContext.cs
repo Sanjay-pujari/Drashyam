@@ -45,6 +45,13 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<UserInteraction> UserInteractions { get; set; }
     public DbSet<Recommendation> Recommendations { get; set; }
     public DbSet<TrendingVideo> TrendingVideos { get; set; }
+    
+    // Analytics Dashboard
+    public DbSet<AnalyticsDashboard> AnalyticsDashboards { get; set; }
+    public DbSet<VideoAnalytics> VideoAnalytics { get; set; }
+    public DbSet<RevenueAnalytics> RevenueAnalytics { get; set; }
+    public DbSet<AudienceAnalytics> AudienceAnalytics { get; set; }
+    public DbSet<EngagementAnalytics> EngagementAnalytics { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -449,6 +456,85 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.Position);
             entity.HasIndex(e => e.ExpiresAt);
             entity.Property(e => e.TrendingScore).HasPrecision(10, 4);
+        });
+
+        // Configure AnalyticsDashboard entity
+        builder.Entity<AnalyticsDashboard>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Date);
+            entity.Property(e => e.TotalRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.AdRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.SubscriptionRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.PremiumContentRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.MerchandiseRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.DonationRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.AverageWatchTime).HasPrecision(8, 2);
+            entity.Property(e => e.EngagementRate).HasPrecision(5, 2);
+            entity.Property(e => e.LikeRate).HasPrecision(5, 2);
+            entity.Property(e => e.CommentRate).HasPrecision(5, 2);
+            entity.Property(e => e.ShareRate).HasPrecision(5, 2);
+            entity.Property(e => e.ClickThroughRate).HasPrecision(5, 2);
+        });
+
+        // Configure VideoAnalytics entity
+        builder.Entity<VideoAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Date);
+            entity.Property(e => e.Revenue).HasPrecision(10, 2);
+            entity.Property(e => e.AverageWatchTime).HasPrecision(8, 2);
+            entity.Property(e => e.EngagementRate).HasPrecision(5, 2);
+        });
+
+        // Configure RevenueAnalytics entity
+        builder.Entity<RevenueAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Date);
+            entity.Property(e => e.TotalRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.AdRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.SubscriptionRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.PremiumContentRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.MerchandiseRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.DonationRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.ReferralRevenue).HasPrecision(10, 2);
+            entity.Property(e => e.RevenuePerView).HasPrecision(10, 4);
+            entity.Property(e => e.RevenuePerSubscriber).HasPrecision(10, 4);
+            entity.Property(e => e.RevenueGrowthRate).HasPrecision(5, 2);
+        });
+
+        // Configure AudienceAnalytics entity
+        builder.Entity<AudienceAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Date);
+            entity.Property(e => e.WatchTime).HasPrecision(8, 2);
+            entity.Property(e => e.EngagementScore).HasPrecision(5, 2);
+            entity.Property(e => e.Revenue).HasPrecision(10, 2);
+        });
+
+        // Configure EngagementAnalytics entity
+        builder.Entity<EngagementAnalytics>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Date);
+            entity.Property(e => e.LikeRate).HasPrecision(5, 2);
+            entity.Property(e => e.CommentRate).HasPrecision(5, 2);
+            entity.Property(e => e.ShareRate).HasPrecision(5, 2);
+            entity.Property(e => e.WatchTimeRate).HasPrecision(5, 2);
+            entity.Property(e => e.ClickThroughRate).HasPrecision(5, 2);
+            entity.Property(e => e.RetentionRate).HasPrecision(5, 2);
         });
     }
 }

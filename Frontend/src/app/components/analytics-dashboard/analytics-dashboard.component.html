@@ -1,0 +1,434 @@
+<div class="analytics-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>
+          <mat-icon>analytics</mat-icon>
+          Analytics Dashboard
+        </h1>
+        <p>Track your content performance and revenue</p>
+      </div>
+      
+      <div class="controls-section">
+        <!-- Date Range Selector -->
+        <mat-form-field appearance="outline" class="date-range-selector">
+          <mat-label>Date Range</mat-label>
+          <mat-select [(ngModel)]="dateRange" (selectionChange)="onDateRangeChange()">
+            <mat-option *ngFor="let option of dateRangeOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Custom Date Range -->
+        <div class="custom-date-range" *ngIf="dateRange === 'custom'">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="customStartDate" (dateChange)="onCustomDateChange()">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="customEndDate" (dateChange)="onCustomDateChange()">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button mat-button (click)="refreshData()" [disabled]="isLoading">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+          <button mat-raised-button color="primary" (click)="exportReport()" [disabled]="isLoading">
+            <mat-icon>download</mat-icon>
+            Export Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+    <p>Loading analytics data...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="!isLoading">
+    <!-- Summary Cards -->
+    <div class="summary-cards" *ngIf="summary">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>visibility</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatNumber(summary.totalViews) }}</h3>
+              <p>Total Views</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>favorite</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatNumber(summary.totalLikes) }}</h3>
+              <p>Total Likes</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>comment</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatNumber(summary.totalComments) }}</h3>
+              <p>Total Comments</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>share</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatNumber(summary.totalShares) }}</h3>
+              <p>Total Shares</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>people</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatNumber(summary.totalSubscribers) }}</h3>
+              <p>Subscribers</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card revenue-card">
+        <mat-card-content>
+          <div class="metric">
+            <mat-icon>attach_money</mat-icon>
+            <div class="metric-content">
+              <h3>{{ formatCurrency(summary.totalRevenue) }}</h3>
+              <p>Total Revenue</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Analytics Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTab" class="analytics-tabs">
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <!-- Engagement Rate -->
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>Engagement Rate</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="engagement-metric" *ngIf="summary">
+                <div class="metric-value">{{ formatPercentage(summary.engagementRate) }}</div>
+                <div class="metric-trend" [class]="getEngagementTrend()">
+                  <mat-icon>{{ getEngagementTrend() === 'up' ? 'trending_up' : getEngagementTrend() === 'down' ? 'trending_down' : 'trending_flat' }}</mat-icon>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Average Watch Time -->
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>Average Watch Time</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="watch-time-metric" *ngIf="summary">
+                <div class="metric-value">{{ formatDuration(summary.averageWatchTime) }}</div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Top Videos -->
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>Top Performing Videos</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="top-videos-list" *ngIf="topVideos.length > 0">
+                <div class="video-item" *ngFor="let video of topVideos.slice(0, 5); let i = index">
+                  <div class="rank">{{ i + 1 }}</div>
+                  <div class="video-thumbnail">
+                    <img [src]="video.thumbnailUrl" [alt]="video.title">
+                  </div>
+                  <div class="video-info">
+                    <h4>{{ video.title }}</h4>
+                    <div class="video-stats">
+                      <span>{{ formatNumber(video.views) }} views</span>
+                      <span>{{ formatNumber(video.likes) }} likes</span>
+                      <span>{{ formatCurrency(video.revenue) }} revenue</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="empty-state" *ngIf="topVideos.length === 0">
+                <mat-icon>video_library</mat-icon>
+                <p>No video data available</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Revenue Tab -->
+      <mat-tab label="Revenue">
+        <div class="tab-content">
+          <!-- Revenue Breakdown -->
+          <mat-card class="chart-card" *ngIf="revenueAnalytics">
+            <mat-card-header>
+              <mat-card-title>Revenue Breakdown</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="revenue-breakdown">
+                <div class="revenue-item">
+                  <div class="revenue-label">Ad Revenue</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.adRevenue) }}</div>
+                </div>
+                <div class="revenue-item">
+                  <div class="revenue-label">Subscription Revenue</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.subscriptionRevenue) }}</div>
+                </div>
+                <div class="revenue-item">
+                  <div class="revenue-label">Premium Content</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.premiumContentRevenue) }}</div>
+                </div>
+                <div class="revenue-item">
+                  <div class="revenue-label">Merchandise</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.merchandiseRevenue) }}</div>
+                </div>
+                <div class="revenue-item">
+                  <div class="revenue-label">Donations</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.donationRevenue) }}</div>
+                </div>
+                <div class="revenue-item total">
+                  <div class="revenue-label">Total Revenue</div>
+                  <div class="revenue-value">{{ formatCurrency(revenueAnalytics.totalRevenue) }}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Revenue Metrics -->
+          <mat-card class="chart-card" *ngIf="revenueAnalytics">
+            <mat-card-header>
+              <mat-card-title>Revenue Metrics</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="revenue-metrics">
+                <div class="metric-item">
+                  <div class="metric-label">Revenue per View</div>
+                  <div class="metric-value">{{ formatCurrency(revenueAnalytics.revenuePerView) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Revenue per Subscriber</div>
+                  <div class="metric-value">{{ formatCurrency(revenueAnalytics.revenuePerSubscriber) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Growth Rate</div>
+                  <div class="metric-value">{{ formatPercentage(revenueAnalytics.revenueGrowthRate / 100) }}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Audience Tab -->
+      <mat-tab label="Audience">
+        <div class="tab-content">
+          <!-- Geographic Distribution -->
+          <mat-card class="chart-card" *ngIf="geographicData.length > 0">
+            <mat-card-header>
+              <mat-card-title>Geographic Distribution</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="geographic-list">
+                <div class="geo-item" *ngFor="let geo of geographicData.slice(0, 10)">
+                  <div class="country-info">
+                    <span class="country-name">{{ geo.country }}</span>
+                    <span class="country-code">{{ geo.countryCode }}</span>
+                  </div>
+                  <div class="country-stats">
+                    <span class="views">{{ formatNumber(geo.views) }} views</span>
+                    <span class="percentage">{{ formatPercentage(geo.percentage / 100) }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Device Distribution -->
+          <mat-card class="chart-card" *ngIf="deviceData.length > 0">
+            <mat-card-header>
+              <mat-card-title>Device Distribution</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="device-list">
+                <div class="device-item" *ngFor="let device of deviceData">
+                  <div class="device-info">
+                    <mat-icon>{{ device.deviceType === 'mobile' ? 'phone_android' : device.deviceType === 'tablet' ? 'tablet' : 'computer' }}</mat-icon>
+                    <span class="device-type">{{ device.deviceType | titlecase }}</span>
+                  </div>
+                  <div class="device-stats">
+                    <span class="views">{{ formatNumber(device.views) }} views</span>
+                    <span class="percentage">{{ formatPercentage(device.percentage / 100) }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Engagement Tab -->
+      <mat-tab label="Engagement">
+        <div class="tab-content">
+          <!-- Engagement Metrics -->
+          <mat-card class="chart-card" *ngIf="engagementAnalytics">
+            <mat-card-header>
+              <mat-card-title>Engagement Metrics</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="engagement-metrics">
+                <div class="metric-item">
+                  <div class="metric-label">Like Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.likeRate) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Comment Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.commentRate) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Share Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.shareRate) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Watch Time Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.watchTimeRate) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Click Through Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.clickThroughRate) }}</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-label">Retention Rate</div>
+                  <div class="metric-value">{{ formatPercentage(engagementAnalytics.retentionRate) }}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Engagement Counts -->
+          <mat-card class="chart-card" *ngIf="engagementAnalytics">
+            <mat-card-header>
+              <mat-card-title>Engagement Counts</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="engagement-counts">
+                <div class="count-item">
+                  <mat-icon>favorite</mat-icon>
+                  <span class="count-value">{{ formatNumber(engagementAnalytics.totalLikes) }}</span>
+                  <span class="count-label">Likes</span>
+                </div>
+                <div class="count-item">
+                  <mat-icon>comment</mat-icon>
+                  <span class="count-value">{{ formatNumber(engagementAnalytics.totalComments) }}</span>
+                  <span class="count-label">Comments</span>
+                </div>
+                <div class="count-item">
+                  <mat-icon>share</mat-icon>
+                  <span class="count-value">{{ formatNumber(engagementAnalytics.totalShares) }}</span>
+                  <span class="count-label">Shares</span>
+                </div>
+                <div class="count-item">
+                  <mat-icon>visibility</mat-icon>
+                  <span class="count-value">{{ formatNumber(engagementAnalytics.totalViews) }}</span>
+                  <span class="count-label">Views</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Videos Tab -->
+      <mat-tab label="Videos">
+        <div class="tab-content">
+          <!-- Video Analytics List -->
+          <mat-card class="chart-card" *ngIf="videoAnalytics.length > 0">
+            <mat-card-header>
+              <mat-card-title>Video Performance</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="video-analytics-list">
+                <div class="video-analytics-item" *ngFor="let video of videoAnalytics">
+                  <div class="video-thumbnail">
+                    <img [src]="video.videoThumbnailUrl" [alt]="video.videoTitle">
+                  </div>
+                  <div class="video-details">
+                    <h4>{{ video.videoTitle }}</h4>
+                    <div class="video-stats">
+                      <div class="stat">
+                        <mat-icon>visibility</mat-icon>
+                        <span>{{ formatNumber(video.views) }}</span>
+                      </div>
+                      <div class="stat">
+                        <mat-icon>favorite</mat-icon>
+                        <span>{{ formatNumber(video.likes) }}</span>
+                      </div>
+                      <div class="stat">
+                        <mat-icon>comment</mat-icon>
+                        <span>{{ formatNumber(video.comments) }}</span>
+                      </div>
+                      <div class="stat">
+                        <mat-icon>attach_money</mat-icon>
+                        <span>{{ formatCurrency(video.revenue) }}</span>
+                      </div>
+                    </div>
+                    <div class="engagement-rate">
+                      Engagement Rate: {{ formatPercentage(video.engagementRate) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <div class="empty-state" *ngIf="videoAnalytics.length === 0">
+            <mat-icon>video_library</mat-icon>
+            <p>No video analytics data available</p>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

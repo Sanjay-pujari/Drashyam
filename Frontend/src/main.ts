@@ -71,7 +71,8 @@ const routes: Routes = [
   { path: 'merchandise', loadComponent: () => import('./app/components/merchandise-management/merchandise-management.component').then(m => m.MerchandiseManagementComponent), canActivate: [authGuard] },
   { path: 'accessibility', loadComponent: () => import('./app/components/accessibility-settings/accessibility-settings.component').then(m => m.AccessibilitySettingsComponent) },
   { path: 'recommendations', loadComponent: () => import('./app/components/recommendations/recommendations.component').then(m => m.RecommendationsComponent), canActivate: [authGuard] },
-  { path: 'recommendation-preferences', loadComponent: () => import('./app/components/recommendation-preferences/recommendation-preferences.component').then(m => m.RecommendationPreferencesComponent), canActivate: [authGuard] }
+  { path: 'recommendation-preferences', loadComponent: () => import('./app/components/recommendation-preferences/recommendation-preferences.component').then(m => m.RecommendationPreferencesComponent), canActivate: [authGuard] },
+  { path: 'analytics', loadComponent: () => import('./app/components/analytics-dashboard/analytics-dashboard.component').then(m => m.AnalyticsDashboardComponent), canActivate: [authGuard] }
 ];
 
 bootstrapApplication(AppComponent, {
