@@ -20,4 +20,8 @@ public interface IAdService
     // Analytics
     Task<AdAnalyticsDto> GetCampaignAnalyticsAsync(int campaignId, DateTime? startDate = null, DateTime? endDate = null);
     Task<decimal> CalculateRevenueAsync(string advertiserId, DateTime? startDate = null, DateTime? endDate = null);
+    
+    // Video ads
+    Task<VideoAdResponseDto> ServeVideoAdAsync(VideoAdRequestDto request);
+    Task<bool> RecordAdCompletionAsync(int campaignId, string? userId, int? videoId, int? watchedDuration);
 }

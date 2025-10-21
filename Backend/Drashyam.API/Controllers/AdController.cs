@@ -248,6 +248,41 @@ public class AdController : ControllerBase
             return StatusCode(500, "An error occurred while calculating revenue");
         }
     }
+
+    [HttpPost("video-ad")]
+    [AllowAnonymous]
+    public async Task<ActionResult<VideoAdResponseDto>> GetVideoAd([FromBody] VideoAdRequestDto request)
+    {
+        try
+        {
+            var adResponse = await _adService.ServeVideoAdAsync(request);
+            return Ok(adResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error serving video ad");
+            return StatusCode(500, "An error occurred while serving the video ad");
+        }
+    }
+
+    [HttpPost("completion")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RecordAdCompletion([FromBody] AdCompletionRequestDto request)
+    {
+        try
+        {
+            var result = await _adService.RecordAdCompletionAsync(request.CampaignId, request.UserId, request.VideoId, request.WatchedDuration);
+            if (!result)
+                return BadRequest("Failed to record ad completion");
+
+            return Ok(new { message = "Ad completion recorded successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error recording ad completion");
+            return StatusCode(500, "An error occurred while recording ad completion");
+        }
+    }
 }
 
 public class AdImpressionRequestDto
@@ -263,3 +298,4 @@ public class AdClickRequestDto
     public string? UserId { get; set; }
     public int? VideoId { get; set; }
 }
+

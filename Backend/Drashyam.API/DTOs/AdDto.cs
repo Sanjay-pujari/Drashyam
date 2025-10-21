@@ -101,3 +101,38 @@ public class AdImpressionDto
     public DateTime? ClickedAt { get; set; }
     public decimal Revenue { get; set; }
 }
+
+public class VideoAdRequestDto
+{
+    public int VideoId { get; set; }
+    public string? UserId { get; set; }
+    public string? Category { get; set; }
+    public string? DeviceType { get; set; }
+}
+
+public class VideoAdResponseDto
+{
+    public bool HasAd { get; set; }
+    public VideoAdDto? Ad { get; set; }
+}
+
+public class VideoAdDto
+{
+    public int Id { get; set; }
+    public int CampaignId { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string? Url { get; set; }
+    public string? ThumbnailUrl { get; set; }
+    public int Duration { get; set; }
+    public int SkipAfter { get; set; }
+    public int? Position { get; set; }
+}
+
+public class AdCompletionRequestDto
+{
+    public int CampaignId { get; set; }
+    public string? UserId { get; set; }
+    public int? VideoId { get; set; }
+    public int? WatchedDuration { get; set; }
+}

@@ -269,4 +269,101 @@ public class AdService : IAdService
 
         return await query.SumAsync(i => i.Revenue);
     }
+
+    public async Task<VideoAdResponseDto> ServeVideoAdAsync(VideoAdRequestDto request)
+    {
+        // Get active campaigns that match targeting criteria
+        var campaigns = await _context.AdCampaigns
+            .Where(c => c.Status == AdStatus.Active && 
+                       c.StartDate <= DateTime.UtcNow && 
+                       c.EndDate >= DateTime.UtcNow)
+            .ToListAsync();
+
+        if (!campaigns.Any())
+        {
+            return new VideoAdResponseDto { HasAd = false };
+        }
+
+        // Simple random selection (can be enhanced with more sophisticated algorithms)
+        var random = new Random();
+        var selectedCampaign = campaigns[random.Next(campaigns.Count)];
+
+        // Record impression
+        await RecordImpressionAsync(selectedCampaign.Id, request.UserId, request.VideoId);
+
+        return new VideoAdResponseDto
+        {
+            HasAd = true,
+            Ad = new VideoAdDto
+            {
+                Id = selectedCampaign.Id,
+                CampaignId = selectedCampaign.Id,
+                Type = selectedCampaign.Type.ToString().ToLower(),
+                Content = selectedCampaign.AdContent ?? "Advertisement",
+                Url = selectedCampaign.AdUrl,
+                ThumbnailUrl = selectedCampaign.ThumbnailUrl,
+                Duration = GetAdDuration(selectedCampaign.Type),
+                SkipAfter = GetSkipAfterTime(selectedCampaign.Type),
+                Position = null // Will be set by frontend for mid-roll ads
+            }
+        };
+    }
+
+    public async Task<bool> RecordAdCompletionAsync(int campaignId, string? userId, int? videoId, int? watchedDuration)
+    {
+        try
+        {
+            var impression = await _context.AdImpressions
+                .FirstOrDefaultAsync(i => i.AdCampaignId == campaignId && 
+                                         i.UserId == userId && 
+                                         i.VideoId == videoId);
+
+            if (impression == null)
+                return false;
+
+            // Update impression with completion data
+            impression.WasClicked = true; // Mark as completed
+            impression.ClickedAt = DateTime.UtcNow;
+            
+            // Calculate revenue based on watched duration
+            var campaign = await _context.AdCampaigns.FindAsync(campaignId);
+            if (campaign != null && watchedDuration.HasValue)
+            {
+                var completionRate = Math.Min(1.0m, (decimal)watchedDuration.Value / GetAdDuration(campaign.Type));
+                impression.Revenue = campaign.CostPerView * completionRate;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error recording ad completion for campaign {CampaignId}", campaignId);
+            return false;
+        }
+    }
+
+    private int GetAdDuration(Models.AdType adType)
+    {
+        return adType switch
+        {
+            Models.AdType.Video => 30, // 30 seconds for video ads
+            Models.AdType.Banner => 15, // 15 seconds for banner ads
+            Models.AdType.Overlay => 10, // 10 seconds for overlay ads
+            Models.AdType.Sponsored => 20, // 20 seconds for sponsored content
+            _ => 15
+        };
+    }
+
+    private int GetSkipAfterTime(Models.AdType adType)
+    {
+        return adType switch
+        {
+            Models.AdType.Video => 5, // Can skip after 5 seconds
+            Models.AdType.Banner => 0, // Can skip immediately
+            Models.AdType.Overlay => 0, // Can skip immediately
+            Models.AdType.Sponsored => 3, // Can skip after 3 seconds
+            _ => 5
+        };
+    }
 }

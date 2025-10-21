@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommentsComponent } from '../comments/comments.component';
+import { VideoAdOverlayComponent } from '../video-ad-overlay/video-ad-overlay.component';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, interval } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Video } from '../../models/video.model';
 import { AppState } from '../../store/app.state';
 import { selectCurrentUser } from '../../store/user/user.selectors';
@@ -14,6 +16,7 @@ import { VideoService } from '../../services/video.service';
 import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
 import { PremiumContentService } from '../../services/premium-content.service';
+import { VideoAdService, VideoAd, AdRequest } from '../../services/video-ad.service';
 import { User } from '../../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,7 +29,7 @@ declare var videojs: any;
 @Component({
     selector: 'app-video-player',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, CommentsComponent],
+    imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule, CommentsComponent, VideoAdOverlayComponent],
     templateUrl: './video-player.component.html',
     styleUrls: ['./video-player.component.scss']
 })
@@ -64,12 +67,21 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
   hasPurchased = false;
   isPurchasing = false;
 
+  // Ad properties
+  currentAd: VideoAd | null = null;
+  showAdOverlay = false;
+  adPositions: number[] = [];
+  currentAdPosition = 0;
+  isAdPlaying = false;
+  userSubscription = 'Free';
+
   constructor(
     @Inject(Store) private store: Store<AppState>,
     private videoService: VideoService,
     private watchLaterService: WatchLaterService,
     private playlistService: PlaylistService,
     private premiumContentService: PremiumContentService,
+    private videoAdService: VideoAdService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
@@ -189,6 +201,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.isLoading = false;
       this.duration = this.player.duration();
       this.watchStartTime = Date.now();
+      
+      // Setup ad positions for mid-roll ads
+      this.setupAdPositions();
+      
+      // Load pre-roll ad before video starts
+      this.loadPreRollAd();
     });
 
     this.player.on('play', () => {
@@ -211,10 +229,16 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.videoEnded.emit();
       this.stopWatchTimer();
       this.recordView();
+      
+      // Load post-roll ad after video ends
+      this.loadPostRollAd();
     });
 
     this.player.on('timeupdate', () => {
       this.currentTime = this.player.currentTime();
+      
+      // Check for mid-roll ads
+      this.checkMidRollAds();
     });
 
     this.player.on('volumechange', () => {
@@ -628,5 +652,151 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
   showPremiumDetails() {
     this.snackBar.open('Premium content provides exclusive access to high-quality videos. Purchase once and watch forever!', 'Close', { duration: 5000 });
+  }
+
+  // Ad-related methods
+  private async loadPreRollAd() {
+    if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
+      return;
+    }
+
+    try {
+      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+      const adRequest: AdRequest = {
+        videoId: this.video.id,
+        userId: currentUser?.id,
+        category: this.video.category,
+        deviceType: this.getDeviceType()
+      };
+
+      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
+      if (adResponse?.hasAd && adResponse.ad) {
+        this.currentAd = adResponse.ad;
+        this.showAdOverlay = true;
+        this.isAdPlaying = true;
+        this.pauseVideo();
+      }
+    } catch (error) {
+      console.error('Error loading pre-roll ad:', error);
+    }
+  }
+
+  private async loadMidRollAd(position: number) {
+    if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
+      return;
+    }
+
+    try {
+      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+      const adRequest: AdRequest = {
+        videoId: this.video.id,
+        userId: currentUser?.id,
+        category: this.video.category,
+        deviceType: this.getDeviceType()
+      };
+
+      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
+      if (adResponse?.hasAd && adResponse.ad) {
+        this.currentAd = adResponse.ad;
+        this.showAdOverlay = true;
+        this.isAdPlaying = true;
+        this.pauseVideo();
+      }
+    } catch (error) {
+      console.error('Error loading mid-roll ad:', error);
+    }
+  }
+
+  private async loadPostRollAd() {
+    if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
+      return;
+    }
+
+    try {
+      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+      const adRequest: AdRequest = {
+        videoId: this.video.id,
+        userId: currentUser?.id,
+        category: this.video.category,
+        deviceType: this.getDeviceType()
+      };
+
+      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
+      if (adResponse?.hasAd && adResponse.ad) {
+        this.currentAd = adResponse.ad;
+        this.showAdOverlay = true;
+        this.isAdPlaying = true;
+      }
+    } catch (error) {
+      console.error('Error loading post-roll ad:', error);
+    }
+  }
+
+  private setupAdPositions() {
+    if (this.video && this.duration > 0) {
+      this.adPositions = this.videoAdService.getMidRollPositions(this.duration);
+    }
+  }
+
+  private checkMidRollAds() {
+    if (this.adPositions.length > 0 && this.currentAdPosition < this.adPositions.length) {
+      const nextAdPosition = this.adPositions[this.currentAdPosition];
+      if (this.currentTime >= nextAdPosition) {
+        this.loadMidRollAd(nextAdPosition);
+        this.currentAdPosition++;
+      }
+    }
+  }
+
+  private pauseVideo() {
+    if (this.player) {
+      this.player.pause();
+    }
+  }
+
+  private resumeVideo() {
+    if (this.player && !this.isAdPlaying) {
+      this.player.play();
+    }
+  }
+
+  private getDeviceType(): string {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('mobile')) return 'mobile';
+    if (userAgent.includes('tablet')) return 'tablet';
+    return 'desktop';
+  }
+
+  // Ad event handlers
+  onAdCompleted() {
+    this.showAdOverlay = false;
+    this.currentAd = null;
+    this.isAdPlaying = false;
+    this.resumeVideo();
+  }
+
+  onAdSkipped() {
+    this.showAdOverlay = false;
+    this.currentAd = null;
+    this.isAdPlaying = false;
+    this.resumeVideo();
+  }
+
+  async onAdClicked() {
+    if (this.currentAd) {
+      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+      this.videoAdService.recordAdClick(
+        this.currentAd.campaignId,
+        this.video?.id || 0,
+        currentUser?.id
+      ).subscribe();
+    }
+  }
+
+  onAdClosed() {
+    this.showAdOverlay = false;
+    this.currentAd = null;
+    this.isAdPlaying = false;
+    this.resumeVideo();
   }
 }

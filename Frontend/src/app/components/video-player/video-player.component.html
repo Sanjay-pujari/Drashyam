@@ -1,7 +1,7 @@
 @if (video) {
   <div class="video-player-container">
     <!-- Video Player -->
-    <div class="video-wrapper">
+    <div class="video-wrapper" style="position: relative;">
       @if (hasError) {
         <div class="video-error">
           <mat-icon>error_outline</mat-icon>
@@ -24,6 +24,16 @@
           </p>
         </video>
       }
+      
+      <!-- Ad Overlay -->
+      <app-video-ad-overlay
+        [ad]="currentAd"
+        [isVisible]="showAdOverlay"
+        (adCompleted)="onAdCompleted()"
+        (adSkipped)="onAdSkipped()"
+        (adClicked)="onAdClicked()"
+        (adClosed)="onAdClosed()">
+      </app-video-ad-overlay>
     </div>
     <!-- Video Info -->
     <div class="video-info">
