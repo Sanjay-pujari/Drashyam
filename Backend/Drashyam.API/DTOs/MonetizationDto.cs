@@ -1,3 +1,5 @@
+using Drashyam.API.Models;
+
 namespace Drashyam.API.DTOs;
 
 public class MonetizationStatusDto
@@ -99,6 +101,8 @@ public class DonationRequestDto
 public class MerchandiseDto
 {
     public int Id { get; set; }
+    public int ChannelId { get; set; }
+    public string ChannelName { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
@@ -110,10 +114,12 @@ public class MerchandiseDto
     public List<string> Sizes { get; set; } = new();
     public List<string> Colors { get; set; } = new();
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
 
 public class MerchandiseRequestDto
 {
+    public int ChannelId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
@@ -124,6 +130,40 @@ public class MerchandiseRequestDto
     public string Category { get; set; } = string.Empty;
     public List<string> Sizes { get; set; } = new();
     public List<string> Colors { get; set; } = new();
+}
+
+public class MerchandiseOrderDto
+{
+    public int Id { get; set; }
+    public int MerchandiseItemId { get; set; }
+    public string MerchandiseName { get; set; } = string.Empty;
+    public string CustomerId { get; set; } = string.Empty;
+    public string CustomerName { get; set; } = string.Empty;
+    public string? CustomerEmail { get; set; }
+    public string? CustomerAddress { get; set; }
+    public decimal Amount { get; set; }
+    public string Currency { get; set; } = "USD";
+    public int Quantity { get; set; }
+    public string? Size { get; set; }
+    public string? Color { get; set; }
+    public string PaymentIntentId { get; set; } = string.Empty;
+    public MerchandiseOrderStatus Status { get; set; }
+    public DateTime OrderedAt { get; set; }
+    public DateTime? ShippedAt { get; set; }
+    public DateTime? DeliveredAt { get; set; }
+    public string? TrackingNumber { get; set; }
+}
+
+public class MerchandiseOrderRequestDto
+{
+    public int MerchandiseItemId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string? CustomerEmail { get; set; }
+    public string? CustomerAddress { get; set; }
+    public int Quantity { get; set; } = 1;
+    public string? Size { get; set; }
+    public string? Color { get; set; }
+    public string PaymentMethodId { get; set; } = string.Empty;
 }
 
 public class RevenueReportDto

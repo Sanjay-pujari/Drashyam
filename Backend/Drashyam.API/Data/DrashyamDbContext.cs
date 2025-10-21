@@ -39,6 +39,8 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<PremiumVideo> PremiumVideos { get; set; }
     public DbSet<PremiumPurchase> PremiumPurchases { get; set; }
     public DbSet<MerchandiseStore> MerchandiseStores { get; set; }
+    public DbSet<MerchandiseItem> MerchandiseItems { get; set; }
+    public DbSet<MerchandiseOrder> MerchandiseOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -360,6 +362,42 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.StoreUrl).HasMaxLength(500);
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.LogoUrl).HasMaxLength(500);
+        });
+
+        // Configure MerchandiseItem entity
+        builder.Entity<MerchandiseItem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ChannelId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.IsActive);
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Price).HasPrecision(10, 2);
+            entity.Property(e => e.Currency).HasMaxLength(3);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.Category).HasMaxLength(50);
+            entity.Property(e => e.Sizes).HasMaxLength(500);
+            entity.Property(e => e.Colors).HasMaxLength(500);
+        });
+
+        // Configure MerchandiseOrder entity
+        builder.Entity<MerchandiseOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.MerchandiseItemId);
+            entity.HasIndex(e => e.CustomerId);
+            entity.HasIndex(e => e.PaymentIntentId);
+            entity.HasIndex(e => e.Status);
+            entity.Property(e => e.CustomerName).HasMaxLength(200);
+            entity.Property(e => e.CustomerEmail).HasMaxLength(200);
+            entity.Property(e => e.CustomerAddress).HasMaxLength(500);
+            entity.Property(e => e.Amount).HasPrecision(10, 2);
+            entity.Property(e => e.Currency).HasMaxLength(3);
+            entity.Property(e => e.Size).HasMaxLength(50);
+            entity.Property(e => e.Color).HasMaxLength(50);
+            entity.Property(e => e.PaymentIntentId).HasMaxLength(200);
+            entity.Property(e => e.TrackingNumber).HasMaxLength(100);
         });
     }
 }

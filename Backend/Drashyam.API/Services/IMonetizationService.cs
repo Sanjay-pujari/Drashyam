@@ -1,4 +1,5 @@
 using Drashyam.API.DTOs;
+using Drashyam.API.Models;
 
 namespace Drashyam.API.Services;
 
@@ -26,4 +27,10 @@ public interface IMonetizationService
     Task ProcessSponsorRevenueAsync(int sponsorId, decimal amount);
     Task ProcessDonationRevenueAsync(int donationId, decimal amount);
     Task ProcessMerchandiseRevenueAsync(int merchandiseId, decimal amount);
+    
+    // Merchandise Order Methods
+    Task<List<MerchandiseOrderDto>> GetMerchandiseOrdersAsync(string userId, int page = 1, int pageSize = 20);
+    Task<MerchandiseOrderDto> CreateMerchandiseOrderAsync(MerchandiseOrderRequestDto request, string customerId);
+    Task<MerchandiseOrderDto> UpdateMerchandiseOrderStatusAsync(int orderId, MerchandiseOrderStatus status, string userId, string? trackingNumber = null);
+    Task<List<MerchandiseOrderDto>> GetCustomerOrdersAsync(string customerId, int page = 1, int pageSize = 20);
 }

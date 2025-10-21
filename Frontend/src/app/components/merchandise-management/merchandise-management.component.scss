@@ -1,0 +1,205 @@
+.merchandise-management {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    margin-bottom: 24px;
+    
+    h1 {
+      margin: 0 0 8px 0;
+      color: #1976d2;
+      font-size: 2rem;
+      font-weight: 500;
+    }
+    
+    p {
+      margin: 0;
+      color: #666;
+      font-size: 1rem;
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .form-card {
+    margin-bottom: 24px;
+    
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      
+      mat-form-field {
+        flex: 1;
+        min-width: 200px;
+      }
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+  }
+
+  .list-card {
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .merchandise-table,
+    .orders-table {
+      width: 100%;
+      
+      th {
+        font-weight: 600;
+        color: #333;
+      }
+      
+      td {
+        padding: 12px 8px;
+      }
+    }
+  }
+
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+  }
+
+  .no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #666;
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    
+    &.status-orange {
+      background-color: #fff3e0;
+      color: #f57c00;
+    }
+    
+    &.status-blue {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    &.status-purple {
+      background-color: #f3e5f5;
+      color: #7b1fa2;
+    }
+    
+    &.status-green {
+      background-color: #e8f5e8;
+      color: #388e3c;
+    }
+    
+    &.status-red {
+      background-color: #ffebee;
+      color: #d32f2f;
+    }
+    
+    &.status-gray {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+  }
+
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+    
+    .stat-card {
+      text-align: center;
+      
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #1976d2;
+        margin-bottom: 8px;
+      }
+      
+      .stat-label {
+        font-size: 1rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 16px;
+    
+    .form-row {
+      flex-direction: column;
+      
+      mat-form-field {
+        min-width: 100%;
+      }
+    }
+    
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .table-container {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Material Design overrides
+.mat-mdc-tab-group {
+  .mat-mdc-tab-body-content {
+    overflow: visible;
+  }
+}
+
+.mat-mdc-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    border-radius: 4px;
+  }
+}
+
+.mat-mdc-chip-grid {
+  .mat-mdc-chip {
+    border-radius: 16px;
+  }
+}

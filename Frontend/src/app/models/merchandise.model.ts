@@ -1,60 +1,125 @@
-export interface MerchandiseStore {
+export interface MerchandiseItem {
   id: number;
   channelId: number;
-  storeName: string;
-  platform: StorePlatform;
-  storeUrl: string;
-  description?: string;
-  logoUrl?: string;
+  channelName: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  imageUrl: string;
+  stockQuantity: number;
   isActive: boolean;
-  isFeatured: boolean;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt?: string;
+  category: string;
+  sizes: string[];
+  colors: string[];
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
-export interface MerchandiseStoreCreate {
-  storeName: string;
-  platform: StorePlatform;
-  storeUrl: string;
-  description?: string;
-  logoUrl?: string;
+export interface MerchandiseItemCreate {
+  channelId: number;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  stockQuantity: number;
+  isActive: boolean;
+  category: string;
+  sizes: string[];
+  colors: string[];
+}
+
+export interface MerchandiseItemUpdate {
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  stockQuantity: number;
+  isActive: boolean;
+  category: string;
+  sizes: string[];
+  colors: string[];
+}
+
+export interface MerchandiseOrder {
+  id: number;
+  merchandiseItemId: number;
+  merchandiseName: string;
+  customerId: string;
+  customerName: string;
+  customerEmail?: string;
+  customerAddress?: string;
+  amount: number;
+  currency: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+  paymentIntentId: string;
+  status: MerchandiseOrderStatus;
+  orderedAt: Date;
+  shippedAt?: Date;
+  deliveredAt?: Date;
+  trackingNumber?: string;
+}
+
+export interface MerchandiseOrderCreate {
+  merchandiseItemId: number;
+  customerName: string;
+  customerEmail?: string;
+  customerAddress?: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+  paymentMethodId: string;
+}
+
+export interface MerchandiseOrderUpdate {
+  status: MerchandiseOrderStatus;
+  trackingNumber?: string;
+}
+
+export enum MerchandiseOrderStatus {
+  Pending = 0,
+  Confirmed = 1,
+  Processing = 2,
+  Shipped = 3,
+  Delivered = 4,
+  Cancelled = 5,
+  Refunded = 6
+}
+
+export interface MerchandiseAnalytics {
+  totalItems: number;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  topSellingItems: Array<{
+    itemId: number;
+    itemName: string;
+    totalSold: number;
+    revenue: number;
+  }>;
+  ordersByStatus: Array<{
+    status: MerchandiseOrderStatus;
+    count: number;
+  }>;
+  revenueByMonth: Array<{
+    month: string;
+    revenue: number;
+  }>;
+}
+
+export interface MerchandiseFilter {
+  category?: string;
   isActive?: boolean;
-  isFeatured?: boolean;
-  displayOrder?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  search?: string;
 }
 
-export interface MerchandiseStoreUpdate {
-  storeName?: string;
-  platform?: StorePlatform;
-  storeUrl?: string;
-  description?: string;
-  logoUrl?: string;
-  isActive?: boolean;
-  isFeatured?: boolean;
-  displayOrder?: number;
+export interface MerchandiseOrderFilter {
+  status?: MerchandiseOrderStatus;
+  startDate?: Date;
+  endDate?: Date;
+  search?: string;
 }
-
-export enum StorePlatform {
-  Shopify = 'Shopify',
-  Etsy = 'Etsy',
-  Amazon = 'Amazon',
-  Teespring = 'Teespring',
-  Redbubble = 'Redbubble',
-  Spreadshirt = 'Spreadshirt',
-  Zazzle = 'Zazzle',
-  Custom = 'Custom',
-  Other = 'Other'
-}
-
-export const STORE_PLATFORM_OPTIONS = [
-  { value: StorePlatform.Shopify, label: 'Shopify', icon: 'store' },
-  { value: StorePlatform.Etsy, label: 'Etsy', icon: 'shopping_bag' },
-  { value: StorePlatform.Amazon, label: 'Amazon', icon: 'shopping_cart' },
-  { value: StorePlatform.Teespring, label: 'Teespring', icon: 'shirt' },
-  { value: StorePlatform.Redbubble, label: 'Redbubble', icon: 'palette' },
-  { value: StorePlatform.Spreadshirt, label: 'Spreadshirt', icon: 'print' },
-  { value: StorePlatform.Zazzle, label: 'Zazzle', icon: 'design_services' },
-  { value: StorePlatform.Custom, label: 'Custom Store', icon: 'storefront' },
-  { value: StorePlatform.Other, label: 'Other', icon: 'more_horiz' }
-];
