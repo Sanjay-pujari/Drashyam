@@ -228,13 +228,16 @@ app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
 app.MapHub<NotificationHub>("/notificationHub");
 
-// Seed database
-using (var scope = app.Services.CreateScope())
+// Seed database only in development and only if database is empty
+if (app.Environment.IsDevelopment())
 {
-    var ctx = scope.ServiceProvider.GetRequiredService<DrashyamDbContext>();
-    var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedData.Initialize(ctx, userMgr, roleMgr);
+    using (var scope = app.Services.CreateScope())
+    {
+        var ctx = scope.ServiceProvider.GetRequiredService<DrashyamDbContext>();
+        var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        await SeedData.Initialize(ctx, userMgr, roleMgr);
+    }
 }
 
 app.Run();

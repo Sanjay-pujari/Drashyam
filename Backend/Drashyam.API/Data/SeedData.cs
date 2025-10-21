@@ -11,8 +11,32 @@ public static class SeedData
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager)
     {
+        // Only run migrations, don't recreate database
         await context.Database.MigrateAsync();
 
+        // Check if database already has users - if so, skip seeding to preserve existing data
+        var existingUsersCount = await context.Users.CountAsync();
+        Console.WriteLine($"Database seeding: Found {existingUsersCount} existing users");
+        
+        if (existingUsersCount > 0)
+        {
+            Console.WriteLine("Database already has users - skipping seeding to preserve existing data");
+            // Database already has data, only ensure roles exist
+            var roles = new[] { "Admin", "User" };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    Console.WriteLine($"Creating missing role: {role}");
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+            return; // Exit early to preserve existing data
+        }
+        
+        Console.WriteLine("Database is empty - proceeding with initial seeding");
+
+        // Only seed if database is empty
         // Roles
         var roles = new[] { "Admin", "User" };
         foreach (var role in roles)
