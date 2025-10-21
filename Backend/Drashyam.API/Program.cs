@@ -190,6 +190,7 @@ builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
 builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
+builder.Services.AddScoped<IMonetizationService, MonetizationService>();
 
 var app = builder.Build();
 

@@ -22,8 +22,8 @@ public static class SeedData
         {
             Console.WriteLine("Database already has users - skipping seeding to preserve existing data");
             // Database already has data, only ensure roles exist
-            var roles = new[] { "Admin", "User" };
-            foreach (var role in roles)
+            var roles1 = new[] { "Admin", "User" };
+            foreach (var role in roles1)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
