@@ -192,6 +192,10 @@ builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
 builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
 builder.Services.AddScoped<IMonetizationService, MonetizationService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<IRecommendationCacheService, RecommendationCacheService>();
+
+// Background services
+builder.Services.AddHostedService<RecommendationBackgroundService>();
 
 var app = builder.Build();
 

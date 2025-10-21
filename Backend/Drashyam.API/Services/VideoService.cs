@@ -341,7 +341,7 @@ public class VideoService : IVideoService
                 }
                 else
                 {
-                    video.DislikeCount--;
+video.DislikeCount--;
                     video.LikeCount++;
                 }
                 existingLike.Type = (Models.LikeType)type;
@@ -364,6 +364,10 @@ public class VideoService : IVideoService
         }
 
         await _context.SaveChangesAsync();
+
+        // Track interaction for recommendations
+        await TrackRecommendationInteractionAsync(userId, videoId, type == DTOs.LikeType.Like ? "Like" : "Dislike", type == DTOs.LikeType.Like ? 1.0m : -0.5m);
+
         return await GetVideoByIdAsync(videoId);
     }
 
@@ -418,6 +422,8 @@ public class VideoService : IVideoService
         video.ViewCount++;
         await _context.SaveChangesAsync();
 
+        // Track interaction for recommendations
+        await TrackRecommendationInteractionAsync(userId, videoId, "View", 0.5m);
 
         // Return updated video
         return await GetVideoByIdAsync(videoId);
@@ -632,5 +638,27 @@ public class VideoService : IVideoService
         }
 
         return "Desktop";
+    }
+
+    private async Task TrackRecommendationInteractionAsync(string userId, int videoId, string interactionType, decimal score)
+    {
+        try
+        {
+            // Add interaction to UserInteractions table
+            _context.UserInteractions.Add(new UserInteraction
+            {
+                UserId = userId,
+                VideoId = videoId,
+                Type = Enum.Parse<InteractionType>(interactionType),
+                Score = score,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            // Log error but don't fail the main operation
+        }
     }
 }

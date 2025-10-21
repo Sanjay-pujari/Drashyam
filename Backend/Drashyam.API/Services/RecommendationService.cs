@@ -11,15 +11,18 @@ public class RecommendationService : IRecommendationService
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
     private readonly ILogger<RecommendationService> _logger;
+    private readonly IRecommendationCacheService _cacheService;
 
     public RecommendationService(
         DrashyamDbContext context,
         IMapper mapper,
-        ILogger<RecommendationService> logger)
+        ILogger<RecommendationService> logger,
+        IRecommendationCacheService cacheService)
     {
         _context = context;
         _mapper = mapper;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public async Task<List<RecommendationDto>> GetPersonalizedRecommendationsAsync(string userId, RecommendationRequestDto request)
