@@ -41,6 +41,10 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<MerchandiseStore> MerchandiseStores { get; set; }
     public DbSet<MerchandiseItem> MerchandiseItems { get; set; }
     public DbSet<MerchandiseOrder> MerchandiseOrders { get; set; }
+    public DbSet<UserPreference> UserPreferences { get; set; }
+    public DbSet<UserInteraction> UserInteractions { get; set; }
+    public DbSet<Recommendation> Recommendations { get; set; }
+    public DbSet<TrendingVideo> TrendingVideos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -398,6 +402,53 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Color).HasMaxLength(50);
             entity.Property(e => e.PaymentIntentId).HasMaxLength(200);
             entity.Property(e => e.TrackingNumber).HasMaxLength(100);
+        });
+
+        // Configure UserPreference entity
+        builder.Entity<UserPreference>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.Tag);
+            entity.Property(e => e.Weight).HasPrecision(5, 2);
+        });
+
+        // Configure UserInteraction entity
+        builder.Entity<UserInteraction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.Property(e => e.Score).HasPrecision(5, 2);
+            entity.Property(e => e.WatchDuration).HasConversion(
+                v => v.HasValue ? v.Value.Ticks : (long?)null,
+                v => v.HasValue ? TimeSpan.FromTicks(v.Value) : null);
+        });
+
+        // Configure Recommendation entity
+        builder.Entity<Recommendation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.ExpiresAt);
+            entity.Property(e => e.Score).HasPrecision(5, 2);
+        });
+
+        // Configure TrendingVideo entity
+        builder.Entity<TrendingVideo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.VideoId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.Country);
+            entity.HasIndex(e => e.Position);
+            entity.HasIndex(e => e.ExpiresAt);
+            entity.Property(e => e.TrendingScore).HasPrecision(10, 4);
         });
     }
 }

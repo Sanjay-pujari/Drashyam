@@ -94,6 +94,12 @@ public class MappingProfile : Profile
         CreateMap<MerchandiseStore, MerchandiseStoreDto>();
         CreateMap<MerchandiseStoreCreateDto, MerchandiseStore>();
         CreateMap<MerchandiseStoreUpdateDto, MerchandiseStore>();
+
+        // Recommendation mappings
+        CreateMap<Recommendation, RecommendationDto>();
+        CreateMap<TrendingVideo, TrendingVideoDto>();
+        CreateMap<UserPreference, UserPreferenceDto>();
+        CreateMap<UserInteraction, InteractionDto>();
     }
 
     private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)

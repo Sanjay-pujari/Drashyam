@@ -249,6 +249,36 @@ import { User } from '../../models/user.model';
           </div>
         </mat-tab>
 
+        <!-- Recommendation Preferences Tab -->
+        <mat-tab label="Recommendations">
+          <div class="tab-content">
+            <mat-card class="settings-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>recommend</mat-icon>
+                  Recommendation Preferences
+                </mat-card-title>
+                <mat-card-subtitle>Customize your video recommendations</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="recommendation-settings">
+                  <p>Manage your recommendation preferences to discover content you'll love.</p>
+                  <div class="setting-actions">
+                    <button mat-raised-button color="primary" (click)="navigateToRecommendationPreferences()">
+                      <mat-icon>tune</mat-icon>
+                      Manage Recommendation Preferences
+                    </button>
+                    <button mat-button (click)="navigateToRecommendations()">
+                      <mat-icon>recommend</mat-icon>
+                      View Recommendations
+                    </button>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
         <!-- Account Settings Tab -->
         <mat-tab label="Account">
           <div class="tab-content">
@@ -468,6 +498,29 @@ import { User } from '../../models/user.model';
       .account-actions {
         flex-direction: column;
       }
+    }
+
+    .recommendation-settings {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .recommendation-settings p {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .setting-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .setting-actions button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
   `]
 })
@@ -852,7 +905,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   private getTabIndexByName(tabName: string): number {
-    const tabNames = ['profile', 'privacy', 'notifications', 'account'];
+    const tabNames = ['profile', 'privacy', 'notifications', 'recommendations', 'account'];
     return tabNames.indexOf(tabName.toLowerCase());
   }
 
@@ -860,6 +913,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
   testTabNavigation(): void {
     console.log('Current tab index:', this.selectedTabIndex);
     console.log('Current tab name:', this.getCurrentTabName());
-    console.log('All tab names:', ['profile', 'privacy', 'notifications', 'account']);
+    console.log('All tab names:', ['profile', 'privacy', 'notifications', 'recommendations', 'account']);
+  }
+
+  navigateToRecommendationPreferences(): void {
+    this.router.navigate(['/recommendation-preferences']);
+  }
+
+  navigateToRecommendations(): void {
+    this.router.navigate(['/recommendations']);
   }
 }
