@@ -127,12 +127,12 @@
               <mat-spinner diameter="50"></mat-spinner>
             </div>
 
-            <div *ngIf="!loading && merchandiseItems.length === 0" class="no-data">
+            <div *ngIf="!loading && merchandiseItems && merchandiseItems.length === 0" class="no-data">
               <mat-icon>inventory</mat-icon>
               <p>No merchandise items found</p>
             </div>
 
-            <div *ngIf="!loading && merchandiseItems.length > 0" class="table-container">
+            <div *ngIf="!loading && merchandiseItems && merchandiseItems.length > 0" class="table-container">
               <table mat-table [dataSource]="merchandiseItems" class="merchandise-table">
                 <ng-container matColumnDef="name">
                   <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -197,12 +197,12 @@
             <mat-card-title>Merchandise Orders</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div *ngIf="orders.length === 0" class="no-data">
+            <div *ngIf="orders && orders.length === 0" class="no-data">
               <mat-icon>shopping_cart</mat-icon>
               <p>No orders found</p>
             </div>
 
-            <div *ngIf="orders.length > 0" class="table-container">
+            <div *ngIf="orders && orders.length > 0" class="table-container">
               <table mat-table [dataSource]="orders" class="orders-table">
                 <ng-container matColumnDef="merchandiseName">
                   <th mat-header-cell *matHeaderCellDef>Item</th>

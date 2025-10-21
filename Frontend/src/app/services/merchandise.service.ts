@@ -21,7 +21,7 @@ import { PagedResult } from '../models/paged-result.model';
   providedIn: 'root'
 })
 export class MerchandiseService {
-  private apiUrl = `${environment.apiUrl}/monetization`;
+  private apiUrl = `${environment.apiUrl}/api/monetization`;
 
   constructor(private http: HttpClient) {}
 
