@@ -604,13 +604,12 @@ export class VideoManagementComponent implements OnInit, OnDestroy {
     if (this.editForm.invalid) return;
 
     this.isUpdating = true;
-    const updateData = {
-      title: this.editForm.value.title,
-      description: this.editForm.value.description,
-      visibility: this.editForm.value.visibility,
-      category: this.editForm.value.category,
-      tags: this.editForm.value.tags
-    };
+    const updateData = new FormData();
+    updateData.append('title', this.editForm.value.title);
+    updateData.append('description', this.editForm.value.description || '');
+    updateData.append('visibility', this.editForm.value.visibility.toString());
+    updateData.append('category', this.editForm.value.category || '');
+    updateData.append('tags', this.editForm.value.tags || '');
 
     this.subscriptions.add(
       this.videoService.updateVideo(this.editingVideo.id, updateData).subscribe({
@@ -637,7 +636,7 @@ export class VideoManagementComponent implements OnInit, OnDestroy {
     };
 
     this.subscriptions.add(
-      this.premiumContentService.updatePremiumVideo(videoId, premiumData).subscribe({
+      this.premiumContentService.updatePremiumVideoByVideoId(videoId, premiumData).subscribe({
         next: () => {
           this.isUpdating = false;
           this.snackBar.open('Video updated successfully', 'Close', { duration: 3000 });
@@ -654,7 +653,7 @@ export class VideoManagementComponent implements OnInit, OnDestroy {
 
   private removePremiumContent(videoId: number) {
     this.subscriptions.add(
-      this.premiumContentService.deletePremiumVideo(videoId).subscribe({
+      this.premiumContentService.deletePremiumVideoByVideoId(videoId).subscribe({
         next: () => {
           this.isUpdating = false;
           this.snackBar.open('Video updated successfully', 'Close', { duration: 3000 });

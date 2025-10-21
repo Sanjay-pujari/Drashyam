@@ -140,11 +140,11 @@ export class PremiumContentService {
     return this.http.get<PremiumVideo | null>(`${this.apiUrl}/videos/by-video/${videoId}`);
   }
 
-  updatePremiumVideo(videoId: number, premiumData: { price: number; currency: string }): Observable<PremiumVideo> {
+  updatePremiumVideoByVideoId(videoId: number, premiumData: { price: number; currency: string }): Observable<PremiumVideo> {
     return this.http.put<PremiumVideo>(`${this.apiUrl}/videos/by-video/${videoId}`, premiumData);
   }
 
-  deletePremiumVideo(videoId: number): Observable<void> {
+  deletePremiumVideoByVideoId(videoId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/videos/by-video/${videoId}`);
   }
 }
