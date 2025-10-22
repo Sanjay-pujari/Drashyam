@@ -13,18 +13,20 @@
 .user-info {
   padding: 16px;
   min-width: 200px;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
 }
 
 .user-welcome {
   .welcome-text {
     font-weight: 500;
     margin: 0 0 4px 0;
-    color: var(--color-on-primary);
+    color: var(--color-on-surface);
   }
   
   .user-email {
     font-size: 0.875rem;
-    color: var(--color-on-primary);
+    color: var(--color-on-surface);
     margin: 0;
     opacity: 0.8;
   }
