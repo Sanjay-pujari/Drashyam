@@ -11,6 +11,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChannelService } from '../../services/channel.service';
 import { VideoService } from '../../services/video.service';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 import { Channel } from '../../models/channel.model';
 import { Video } from '../../models/video.model';
 
@@ -27,6 +28,7 @@ import { Video } from '../../models/video.model';
 export class ChannelDetailComponent implements OnInit {
   channel: Channel | null = null;
   videos: Video[] = [];
+  merchandise: any[] = [];
   isLoading = true;
   isSubscribed = false;
   isOwner = false;
@@ -39,7 +41,8 @@ export class ChannelDetailComponent implements OnInit {
     private router: Router,
     private channelService: ChannelService,
     private videoService: VideoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cartService: CartService
   ) {}
 
   ngOnInit() {
@@ -48,6 +51,7 @@ export class ChannelDetailComponent implements OnInit {
       if (this.channelId) {
         this.loadChannel();
         this.loadChannelVideos();
+        this.loadChannelMerchandise();
         this.checkSubscription();
         this.checkOwnership();
       } else {
@@ -213,5 +217,55 @@ export class ChannelDetailComponent implements OnInit {
         this.notificationsEnabled = true; // Default to enabled
       }
     });
+  }
+
+  loadChannelMerchandise() {
+    if (!this.channelId) return;
+    
+    // For now, we'll create a simple HTTP call to the new API endpoint
+    // In a real implementation, you'd want to create a proper service
+    fetch(`/api/monetization/channels/${this.channelId}/merchandise`)
+      .then(response => response.json())
+      .then(data => {
+        this.merchandise = data;
+      })
+      .catch(error => {
+        console.error('Error loading merchandise:', error);
+        this.merchandise = [];
+      });
+  }
+
+  viewMerchandise(merchandiseId: number) {
+    // For now, we'll just log the merchandise ID
+    // In a real implementation, you'd navigate to a merchandise detail page
+    console.log('Viewing merchandise:', merchandiseId);
+    // this.router.navigate(['/merchandise', merchandiseId]);
+  }
+
+  addToCart(item: any) {
+    if (!this.authService.isAuthenticated()) {
+      alert('Please login to add items to cart');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      currency: item.currency,
+      imageUrl: item.imageUrl,
+      channelId: item.channelId,
+      channelName: item.channelName,
+      sizes: item.sizes,
+      colors: item.colors
+    };
+
+    this.cartService.addItem(cartItem);
+    alert(`${item.name} added to cart!`);
+  }
+
+  isInCart(item: any): boolean {
+    return this.cartService.isItemInCart(item.id);
   }
 }

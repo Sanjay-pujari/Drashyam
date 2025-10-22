@@ -208,6 +208,22 @@ public class MonetizationController : ControllerBase
         return Ok(order);
     }
 
+    // Public endpoints for customers to browse merchandise
+    [HttpGet("channels/{channelId:int}/merchandise")]
+    public async Task<ActionResult<List<MerchandiseDto>>> GetChannelMerchandise([FromRoute] int channelId)
+    {
+        var merchandise = await _monetizationService.GetChannelMerchandiseAsync(channelId);
+        return Ok(merchandise);
+    }
+
+    [HttpGet("merchandise/{merchandiseId:int}")]
+    public async Task<ActionResult<MerchandiseDto>> GetMerchandiseDetails([FromRoute] int merchandiseId)
+    {
+        var merchandise = await _monetizationService.GetMerchandiseDetailsAsync(merchandiseId);
+        if (merchandise == null) return NotFound();
+        return Ok(merchandise);
+    }
+
     // Merchandise Analytics
     [HttpGet("merchandise/analytics")]
     [Authorize]

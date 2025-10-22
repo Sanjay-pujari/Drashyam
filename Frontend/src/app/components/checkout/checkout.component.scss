@@ -1,0 +1,194 @@
+.checkout-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.checkout-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+  
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+}
+
+.checkout-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 30px;
+}
+
+.checkout-main {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.checkout-section {
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.shipping-form,
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    
+    &.three-column {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #1976d2;
+    background-color: #f5f5f5;
+  }
+  
+  &.selected {
+    border-color: #1976d2;
+    background-color: #e3f2fd;
+  }
+  
+  mat-icon {
+    color: #666;
+  }
+  
+  span {
+    flex: 1;
+    font-weight: 500;
+  }
+}
+
+.checkout-sidebar {
+  .order-summary {
+    position: sticky;
+    top: 20px;
+  }
+}
+
+.order-items {
+  margin-bottom: 16px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    
+    .item-name {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .item-quantity {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+  
+  .item-price {
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.order-totals {
+  margin: 16px 0;
+  
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 1rem;
+    
+    &.final-total {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 8px;
+    }
+  }
+}
+
+.place-order-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 20px;
+  
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .checkout-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .checkout-sidebar {
+    order: -1;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .payment-option {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}

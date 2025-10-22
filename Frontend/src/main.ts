@@ -77,6 +77,8 @@ const routes: Routes = [
   { path: 'my-videos', loadComponent: () => import('./app/components/video-management/video-management.component').then(m => m.VideoManagementComponent), canActivate: [authGuard] },
   { path: 'premium-content', loadComponent: () => import('./app/components/premium-content-management/premium-content-management.component').then(m => m.PremiumContentManagementComponent), canActivate: [authGuard] },
   { path: 'merchandise', loadComponent: () => import('./app/components/merchandise-management/merchandise-management.component').then(m => m.MerchandiseManagementComponent), canActivate: [authGuard] },
+  { path: 'cart', loadComponent: () => import('./app/components/cart/cart.component').then(m => m.CartComponent) },
+  { path: 'checkout', loadComponent: () => import('./app/components/checkout/checkout.component').then(m => m.CheckoutComponent), canActivate: [authGuard] },
   { path: 'accessibility', loadComponent: () => import('./app/components/accessibility-settings/accessibility-settings.component').then(m => m.AccessibilitySettingsComponent) },
   { path: 'recommendations', loadComponent: () => import('./app/components/recommendations/recommendations.component').then(m => m.RecommendationsComponent), canActivate: [authGuard] },
   { path: 'recommendation-preferences', loadComponent: () => import('./app/components/recommendation-preferences/recommendation-preferences.component').then(m => m.RecommendationPreferencesComponent), canActivate: [authGuard] },

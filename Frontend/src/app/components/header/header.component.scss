@@ -56,6 +56,30 @@
   }
 }
 
+// Cart Button Styling
+.cart-button {
+  position: relative;
+  margin-right: 8px;
+
+  .cart-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    line-height: 1;
+  }
+}
+
 // Notification Menu Styling
 .notification-menu {
   width: 520px;

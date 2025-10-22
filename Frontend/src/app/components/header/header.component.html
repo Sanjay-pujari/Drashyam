@@ -33,6 +33,14 @@
       </span>
     </button>
     
+    <!-- Cart Icon -->
+    <button mat-icon-button routerLink="/cart" class="cart-button">
+      <mat-icon>shopping_cart</mat-icon>
+      <span class="cart-badge" *ngIf="cartItemCount > 0">
+        {{ cartItemCount }}
+      </span>
+    </button>
+    
     <button mat-icon-button [matMenuTriggerFor]="userMenu">
       <mat-icon>account_circle</mat-icon>
     </button>

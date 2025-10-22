@@ -566,4 +566,78 @@ public class MonetizationService : IMonetizationService
             throw;
         }
     }
+
+    // Public methods for customers to browse merchandise
+    public async Task<List<MerchandiseDto>> GetChannelMerchandiseAsync(int channelId)
+    {
+        try
+        {
+            var merchandiseItems = await _context.MerchandiseItems
+                .Include(m => m.Channel)
+                .Where(m => m.ChannelId == channelId && m.IsActive)
+                .ToListAsync();
+
+            var merchandise = merchandiseItems.Select(m => new MerchandiseDto
+            {
+                Id = m.Id,
+                ChannelId = m.ChannelId,
+                ChannelName = m.Channel.Name,
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                Currency = m.Currency,
+                ImageUrl = m.ImageUrl,
+                StockQuantity = m.StockQuantity,
+                IsActive = m.IsActive,
+                Category = m.Category,
+                Sizes = !string.IsNullOrEmpty(m.Sizes) ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(m.Sizes) ?? new List<string>() : new List<string>(),
+                Colors = !string.IsNullOrEmpty(m.Colors) ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(m.Colors) ?? new List<string>() : new List<string>(),
+                CreatedAt = m.CreatedAt,
+                UpdatedAt = m.UpdatedAt
+            }).ToList();
+
+            return merchandise;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving merchandise for channel {ChannelId}", channelId);
+            throw;
+        }
+    }
+
+    public async Task<MerchandiseDto?> GetMerchandiseDetailsAsync(int merchandiseId)
+    {
+        try
+        {
+            var merchandise = await _context.MerchandiseItems
+                .Include(m => m.Channel)
+                .FirstOrDefaultAsync(m => m.Id == merchandiseId && m.IsActive);
+
+            if (merchandise == null) return null;
+
+            return new MerchandiseDto
+            {
+                Id = merchandise.Id,
+                ChannelId = merchandise.ChannelId,
+                ChannelName = merchandise.Channel.Name,
+                Name = merchandise.Name,
+                Description = merchandise.Description,
+                Price = merchandise.Price,
+                Currency = merchandise.Currency,
+                ImageUrl = merchandise.ImageUrl,
+                StockQuantity = merchandise.StockQuantity,
+                IsActive = merchandise.IsActive,
+                Category = merchandise.Category,
+                Sizes = !string.IsNullOrEmpty(merchandise.Sizes) ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(merchandise.Sizes) ?? new List<string>() : new List<string>(),
+                Colors = !string.IsNullOrEmpty(merchandise.Colors) ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(merchandise.Colors) ?? new List<string>() : new List<string>(),
+                CreatedAt = merchandise.CreatedAt,
+                UpdatedAt = merchandise.UpdatedAt
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving merchandise details for {MerchandiseId}", merchandiseId);
+            throw;
+        }
+    }
 }

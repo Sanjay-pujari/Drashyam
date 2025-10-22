@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { NotificationService, VideoNotification } from '../../services/notification.service';
+import { CartService } from '../../services/cart.service';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 import { User } from '../../models/user.model';
 import { Observable, Subscription } from 'rxjs';
@@ -29,12 +30,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   unreadCount$: Observable<number>;
   notifications: VideoNotification[] = [];
   isLoadingNotifications = false;
+  cartItemCount = 0;
   private subscription?: Subscription;
 
   constructor(
     private authService: AuthService,
     private sidebarService: SidebarService,
     private notificationService: NotificationService,
+    private cartService: CartService,
     private router: Router
   ) {
     this.currentUser$ = this.authService.currentUser$;
@@ -56,6 +59,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
         // Start SignalR connection for real-time notifications
         this.notificationService.startConnection();
       }
+    });
+
+    // Subscribe to cart changes
+    this.cartService.cart$.subscribe(cart => {
+      this.cartItemCount = cart.totalItems;
     });
   }
 

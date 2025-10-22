@@ -90,6 +90,51 @@
       </ng-template>
     </mat-tab>
     
+    <mat-tab label="Merchandise">
+      <div class="merchandise-section">
+        <div class="merchandise-grid" *ngIf="merchandise.length > 0; else noMerchandise">
+          <mat-card class="merchandise-card" *ngFor="let item of merchandise" (click)="viewMerchandise(item.id)">
+            <div class="merchandise-image">
+              <img [src]="getSafeImageUrl(item.imageUrl ?? null)" [alt]="item.name" (error)="onImageError($event)">
+            </div>
+            <mat-card-content>
+              <h3 class="merchandise-name">{{ item.name }}</h3>
+              <p class="merchandise-description">{{ item.description }}</p>
+              <p class="merchandise-price">{{ item.price | currency:item.currency:'symbol':'1.2-2' }}</p>
+              <p class="merchandise-stock" *ngIf="item.stockQuantity > 0">{{ item.stockQuantity }} in stock</p>
+              <p class="merchandise-stock out-of-stock" *ngIf="item.stockQuantity === 0">Out of stock</p>
+              
+              <div class="merchandise-actions">
+                <button mat-raised-button 
+                        color="primary" 
+                        (click)="addToCart(item); $event.stopPropagation()"
+                        [disabled]="item.stockQuantity === 0"
+                        *ngIf="!isInCart(item)">
+                  <mat-icon>add_shopping_cart</mat-icon>
+                  Add to Cart
+                </button>
+                <button mat-raised-button 
+                        color="accent" 
+                        disabled
+                        *ngIf="isInCart(item)">
+                  <mat-icon>check</mat-icon>
+                  In Cart
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        
+        <ng-template #noMerchandise>
+          <div class="no-content">
+            <mat-icon>store</mat-icon>
+            <h3>No merchandise yet</h3>
+            <p>This channel hasn't added any merchandise items.</p>
+          </div>
+        </ng-template>
+      </div>
+    </mat-tab>
+    
     <mat-tab label="About">
       <div class="about-section">
         <div class="about-content">
