@@ -43,6 +43,19 @@ public class AuthController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Validate password confirmation
+            if (model.Password != model.ConfirmPassword)
+            {
+                return BadRequest("Password and confirmation password do not match");
+            }
+
+            // Check if user already exists
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return BadRequest("A user with this email already exists");
+            }
+
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -50,7 +63,8 @@ public class AuthController : ControllerBase
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                IsActive = true,
+                EmailConfirmed = false // Explicitly set to false for email confirmation flow
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -63,28 +77,48 @@ public class AuthController : ControllerBase
                 if (autoConfirm)
                 {
                     // Auto-confirm email in development or when explicitly enabled
+                    _logger.LogInformation("Auto-confirming email for user: {Email}", user.Email);
                     var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var confirmResult = await _userManager.ConfirmEmailAsync(user, confirmToken);
                     if (!confirmResult.Succeeded)
                     {
+                        _logger.LogError("Failed to auto-confirm email for user: {Email}. Errors: {Errors}", 
+                            user.Email, string.Join(", ", confirmResult.Errors.Select(e => e.Description)));
                         return BadRequest(confirmResult.Errors);
                     }
 
                     var jwt = await GenerateJwtTokenAsync(user);
+                    _logger.LogInformation("User registered and auto-confirmed: {Email}", user.Email);
                     return Ok(new { token = jwt, user = MapToUserDto(user) });
                 }
                 else
                 {
+                    // Send email confirmation
+                    _logger.LogInformation("Sending email confirmation to user: {Email}", user.Email);
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    await _emailService.SendEmailVerificationAsync(user.Email, token);
-                    return Ok(new { message = "Registration successful. Please check your email to confirm your account." });
+                    var emailSent = await _emailService.SendEmailVerificationAsync(user.Email, token);
+                    
+                    if (!emailSent)
+                    {
+                        _logger.LogError("Failed to send email confirmation to user: {Email}", user.Email);
+                        return StatusCode(500, "Registration successful but failed to send confirmation email. Please contact support.");
+                    }
+
+                    _logger.LogInformation("Email confirmation sent successfully to user: {Email}", user.Email);
+                    return Ok(new { 
+                        message = "Registration successful. Please check your email to confirm your account.",
+                        requiresEmailConfirmation = true
+                    });
                 }
             }
 
+            _logger.LogWarning("User registration failed for email: {Email}. Errors: {Errors}", 
+                model.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
             return BadRequest(result.Errors);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during registration for email: {Email}", model.Email);
             return StatusCode(500, "An error occurred during registration");
         }
     }
@@ -204,21 +238,86 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(model.UserId);
-            if (user == null)
-                return BadRequest("Invalid user");
-
-            var result = await _userManager.ConfirmEmailAsync(user, model.Token);
-            if (result.Succeeded)
+            if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Token))
             {
-                return Ok(new { message = "Email confirmed successfully" });
+                return BadRequest("User ID and token are required");
             }
 
-            return BadRequest("Invalid confirmation token");
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                _logger.LogWarning("Email confirmation attempted for non-existent user: {UserId}", model.UserId);
+                return BadRequest("Invalid user");
+            }
+
+            if (user.EmailConfirmed)
+            {
+                _logger.LogInformation("Email already confirmed for user: {Email}", user.Email);
+                return Ok(new { message = "Email is already confirmed" });
+            }
+
+            _logger.LogInformation("Attempting email confirmation for user: {Email}", user.Email);
+            var result = await _userManager.ConfirmEmailAsync(user, model.Token);
+            
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Email confirmed successfully for user: {Email}", user.Email);
+                
+                // Generate JWT token for immediate login after confirmation
+                var jwt = await GenerateJwtTokenAsync(user);
+                return Ok(new { 
+                    message = "Email confirmed successfully", 
+                    token = jwt,
+                    user = MapToUserDto(user)
+                });
+            }
+
+            _logger.LogWarning("Email confirmation failed for user: {Email}. Errors: {Errors}", 
+                user.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
+            return BadRequest("Invalid or expired confirmation token");
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during email confirmation for user: {UserId}", model.UserId);
             return StatusCode(500, "An error occurred during email confirmation");
+        }
+    }
+
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationDto model)
+    {
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                _logger.LogWarning("Resend confirmation requested for non-existent email: {Email}", model.Email);
+                return Ok(new { message = "If the email exists, a confirmation email has been sent" });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                _logger.LogInformation("Resend confirmation requested for already confirmed email: {Email}", model.Email);
+                return Ok(new { message = "Email is already confirmed" });
+            }
+
+            _logger.LogInformation("Resending email confirmation to user: {Email}", user.Email);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var emailSent = await _emailService.SendEmailVerificationAsync(user.Email, token);
+            
+            if (!emailSent)
+            {
+                _logger.LogError("Failed to resend email confirmation to user: {Email}", user.Email);
+                return StatusCode(500, "Failed to send confirmation email");
+            }
+
+            _logger.LogInformation("Email confirmation resent successfully to user: {Email}", user.Email);
+            return Ok(new { message = "If the email exists, a confirmation email has been sent" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during resend confirmation for email: {Email}", model.Email);
+            return StatusCode(500, "An error occurred while resending confirmation email");
         }
     }
 
@@ -229,15 +328,29 @@ public class AuthController : ControllerBase
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
+            {
+                _logger.LogInformation("Password reset requested for non-existent email: {Email}", model.Email);
                 return Ok(new { message = "If the email exists, a password reset link has been sent" });
+            }
 
+            _logger.LogInformation("Generating password reset token for user: {Email}", model.Email);
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            await _emailService.SendPasswordResetEmailAsync(user.Email, token);
+            
+            _logger.LogInformation("Sending password reset email to: {Email}", model.Email);
+            var emailSent = await _emailService.SendPasswordResetEmailAsync(user.Email, token);
+            
+            if (!emailSent)
+            {
+                _logger.LogError("Failed to send password reset email to: {Email}", model.Email);
+                return StatusCode(500, "Failed to send password reset email");
+            }
 
+            _logger.LogInformation("Password reset email sent successfully to: {Email}", model.Email);
             return Ok(new { message = "If the email exists, a password reset link has been sent" });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during forgot password request for email: {Email}", model.Email);
             return StatusCode(500, "An error occurred during password reset request");
         }
     }
@@ -250,20 +363,33 @@ public class AuthController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Validate password confirmation
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                return BadRequest("Password and confirmation password do not match");
+            }
+
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
                 return BadRequest("Invalid email");
 
+            // Log the reset attempt for debugging
+            _logger.LogInformation("Password reset attempt for user: {Email}", model.Email);
+
             var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
             if (result.Succeeded)
             {
+                _logger.LogInformation("Password reset successful for user: {Email}", model.Email);
                 return Ok(new { message = "Password reset successfully" });
             }
 
+            _logger.LogWarning("Password reset failed for user: {Email}. Errors: {Errors}", 
+                model.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
             return BadRequest(result.Errors);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during password reset for email: {Email}", model.Email);
             return StatusCode(500, "An error occurred during password reset");
         }
     }
@@ -363,5 +489,10 @@ public class ConfirmEmailDto
 {
     public string UserId { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
+}
+
+public class ResendConfirmationDto
+{
+    public string Email { get; set; } = string.Empty;
 }
 

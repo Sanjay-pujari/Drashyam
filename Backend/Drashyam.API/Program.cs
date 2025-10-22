@@ -18,6 +18,8 @@ using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -158,6 +160,17 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateReferralValidator>();
 
 // Email Configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Conditionally register SendGrid
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+if (emailSettings?.UseSendGrid == true)
+{
+    var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"];
+    if (!string.IsNullOrEmpty(sendGridApiKey))
+    {
+        builder.Services.AddSingleton<ISendGridClient>(provider => new SendGridClient(sendGridApiKey));
+    }
+}
 
 // Azure Storage Configuration
 builder.Services.Configure<AzureStorageSettings>(builder.Configuration.GetSection("AzureStorage"));
