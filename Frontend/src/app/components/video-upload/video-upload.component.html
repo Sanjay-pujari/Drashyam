@@ -82,7 +82,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Channel (Optional)</mat-label>
-            <mat-select formControlName="channelId" [disabled]="isLoadingChannels">
+            <mat-select formControlName="channelId" [disabled]="isLoadingChannels" (selectionChange)="onChannelChange()">
               <mat-option [value]="null">No Channel (Upload without channel)</mat-option>
               @for (channel of userChannels; track channel.id) {
                 <mat-option [value]="channel.id">{{ channel.name }}</mat-option>
@@ -102,6 +102,24 @@
               }
             </mat-hint>
           </mat-form-field>
+
+          <!-- Quota Warning -->
+          @if (quotaWarning && quotaCheck?.warnings) {
+            <mat-card class="quota-warning-card">
+              <div class="quota-warning-header">
+                <mat-icon color="warn">warning</mat-icon>
+                <h4>Quota Warning</h4>
+              </div>
+              <div class="quota-warning-content">
+                <p>{{ getQuotaWarningMessage() }}</p>
+                <p class="recommendation">{{ getQuotaRecommendation() }}</p>
+                <button mat-stroked-button color="primary" (click)="router.navigate(['/quota'])">
+                  <mat-icon>storage</mat-icon>
+                  View Quota Details
+                </button>
+              </div>
+            </mat-card>
+          }
 
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Visibility</mat-label>

@@ -12,32 +12,55 @@ public class ChannelService : IChannelService
     private readonly IMapper _mapper;
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<ChannelService> _logger;
+    private readonly IQuotaService _quotaService;
 
     public ChannelService(
         DrashyamDbContext context,
         IMapper mapper,
         IFileStorageService fileStorage,
-        ILogger<ChannelService> logger)
+        ILogger<ChannelService> logger,
+        IQuotaService quotaService)
     {
         _context = context;
         _mapper = mapper;
         _fileStorage = fileStorage;
         _logger = logger;
+        _quotaService = quotaService;
     }
 
     public async Task<ChannelDto> CreateChannelAsync(ChannelCreateDto createDto, string userId)
     {
-        
+        // Check channel quota
+        if (!await _quotaService.CanCreateChannelAsync(userId))
+        {
+            var quotaStatus = await _quotaService.GetUserQuotaStatusAsync(userId);
+            throw new InvalidOperationException($"Channel quota exceeded. You can create {quotaStatus.ChannelLimit} channels. Upgrade your plan for more channels.");
+        }
+
         var channel = _mapper.Map<Channel>(createDto);
         channel.UserId = userId;
         channel.CreatedAt = DateTime.UtcNow;
         
+        // Set channel limits based on user's subscription
+        var userQuotaStatus = await _quotaService.GetUserQuotaStatusAsync(userId);
+        var subscriptionType = Enum.Parse<Models.SubscriptionType>(userQuotaStatus.SubscriptionType);
+        channel.MaxVideos = GetMaxVideosForSubscription(subscriptionType);
 
         _context.Channels.Add(channel);
         await _context.SaveChangesAsync();
         
-
         return _mapper.Map<ChannelDto>(channel);
+    }
+
+    private int GetMaxVideosForSubscription(Models.SubscriptionType subscriptionType)
+    {
+        return subscriptionType switch
+        {
+            Models.SubscriptionType.Free => 10,
+            Models.SubscriptionType.Premium => 100,
+            Models.SubscriptionType.Pro => 1000,
+            _ => 10
+        };
     }
 
     public async Task<ChannelDto> GetChannelByIdAsync(int channelId)

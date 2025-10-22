@@ -2,6 +2,7 @@ using AutoMapper;
 using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
+using Drashyam.API.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 

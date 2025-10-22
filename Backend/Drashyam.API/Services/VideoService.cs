@@ -2,6 +2,7 @@ using AutoMapper;
 using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
+using Drashyam.API.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -17,6 +18,7 @@ public class VideoService : IVideoService
     private readonly ILogger<VideoService> _logger;
     private readonly INotificationService _notificationService;
     private readonly IHubContext<VideoHub> _videoHub;
+    private readonly IQuotaService _quotaService;
 
     public VideoService(
         DrashyamDbContext context,
@@ -24,7 +26,8 @@ public class VideoService : IVideoService
         IFileStorageService fileStorage,
         ILogger<VideoService> logger,
         INotificationService notificationService,
-        IHubContext<VideoHub> videoHub)
+        IHubContext<VideoHub> videoHub,
+        IQuotaService quotaService)
     {
         _context = context;
         _mapper = mapper;
@@ -32,6 +35,7 @@ public class VideoService : IVideoService
         _logger = logger;
         _notificationService = notificationService;
         _videoHub = videoHub;
+        _quotaService = quotaService;
     }
 
     public async Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId)
@@ -46,6 +50,19 @@ public class VideoService : IVideoService
             if (user == null)
                 throw new ArgumentException("User not found");
 
+            // Comprehensive quota check
+            if (!await _quotaService.CanUploadVideoAsync(userId, uploadDto.ChannelId ?? 0, uploadDto.VideoFile.Length))
+            {
+                var quotaStatus = await _quotaService.GetUserQuotaStatusAsync(userId);
+                var warnings = await _quotaService.GetQuotaWarningsAsync(userId);
+                
+                if (!await _quotaService.CheckStorageQuotaAsync(userId, uploadDto.VideoFile.Length))
+                    throw new InvalidOperationException($"Storage quota exceeded. Used: {quotaStatus.StorageUsagePercentage:F1}% of {quotaStatus.StorageLimit / (1024 * 1024 * 1024)}GB");
+                
+                if (uploadDto.ChannelId.HasValue && !await _quotaService.CheckVideoQuotaAsync(uploadDto.ChannelId.Value))
+                    throw new InvalidOperationException($"Video quota exceeded for this channel");
+            }
+
             // Validate channel if specified
             if (uploadDto.ChannelId.HasValue)
             {
@@ -54,13 +71,6 @@ public class VideoService : IVideoService
 
                 if (channel == null)
                     throw new ArgumentException("Channel not found or access denied");
-
-                // Check video limit for channel
-                var currentVideoCount = await _context.Videos
-                    .CountAsync(v => v.ChannelId == uploadDto.ChannelId);
-
-                if (currentVideoCount >= channel.MaxVideos)
-                    throw new InvalidOperationException("Channel video limit exceeded");
             }
 
             // Upload video file

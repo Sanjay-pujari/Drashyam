@@ -14,6 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
+import { QuotaService, QuotaCheck } from '../../services/quota.service';
 import { Channel } from '../../models/channel.model';
 import { environment } from '../../../environments/environment';
 
@@ -38,11 +39,14 @@ export class VideoUploadComponent implements OnInit {
   isLoadingChannels = false;
   maxFileSize = environment.maxVideoSize;
   supportedFormats = environment.supportedVideoFormats;
+  quotaCheck: QuotaCheck | null = null;
+  quotaWarning = false;
 
   constructor(
     private fb: FormBuilder,
     private videoService: VideoService,
     private channelService: ChannelService,
+    private quotaService: QuotaService,
     private snackBar: MatSnackBar,
     public router: Router
   ) {
@@ -91,6 +95,9 @@ export class VideoUploadComponent implements OnInit {
       }
       
       this.selectedFile = file;
+      
+      // Check quota when file is selected
+      this.checkQuotaForUpload();
     }
   }
 
@@ -236,5 +243,49 @@ export class VideoUploadComponent implements OnInit {
     
     // Show success message
     this.snackBar.open('Recorded video loaded successfully!', 'Close', { duration: 3000 });
+    
+    // Check quota for recorded video
+    this.checkQuotaForUpload();
+  }
+
+  private checkQuotaForUpload() {
+    if (!this.selectedFile || !this.uploadForm.get('channelId')?.value) return;
+
+    const channelId = this.uploadForm.get('channelId')?.value;
+    const fileSize = this.selectedFile.size;
+
+    this.quotaService.checkVideoUpload(channelId, fileSize).subscribe({
+      next: (quotaCheck) => {
+        this.quotaCheck = quotaCheck;
+        this.quotaWarning = quotaCheck.warnings?.hasWarnings || false;
+
+        if (!quotaCheck.canUpload) {
+          this.snackBar.open(quotaCheck.reason || 'Upload quota exceeded', 'Close', { duration: 5000 });
+        } else if (quotaCheck.warnings?.hasWarnings) {
+          this.snackBar.open('Quota warning: ' + quotaCheck.warnings.warnings.join(', '), 'Close', { duration: 5000 });
+        }
+      },
+      error: (error) => {
+        console.error('Error checking quota:', error);
+        this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  onChannelChange() {
+    // Re-check quota when channel changes
+    if (this.selectedFile) {
+      this.checkQuotaForUpload();
+    }
+  }
+
+  getQuotaWarningMessage(): string {
+    if (!this.quotaCheck?.warnings) return '';
+    return this.quotaCheck.warnings.warnings.join(', ');
+  }
+
+  getQuotaRecommendation(): string {
+    if (!this.quotaCheck?.warnings) return '';
+    return this.quotaCheck.warnings.recommendedAction;
   }
 }
