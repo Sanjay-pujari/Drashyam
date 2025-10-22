@@ -5,8 +5,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Router } from '@angular/router';
 import { VideoRecorderComponent } from '../video-recorder/video-recorder.component';
 import { VideoUploadComponent } from '../video-upload/video-upload.component';
+import { QuotaService, QuotaStatus } from '../../services/quota.service';
 
 @Component({
   selector: 'app-video-record-upload',
@@ -17,6 +20,7 @@ import { VideoUploadComponent } from '../video-upload/video-upload.component';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressBarModule,
     VideoRecorderComponent,
     VideoUploadComponent
   ],
@@ -28,11 +32,19 @@ export class VideoRecordUploadComponent implements OnInit {
 
   selectedTabIndex = 0;
   recordedVideoBlob: Blob | null = null;
+  quotaStatus: QuotaStatus | null = null;
+  quotaWarning = false;
   isProcessingRecording = false;
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(
+    private snackBar: MatSnackBar,
+    private quotaService: QuotaService,
+    private router: Router
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadQuotaStatus();
+  }
 
   onRecordingComplete(blob: Blob) {
     this.recordedVideoBlob = blob;
@@ -81,5 +93,29 @@ export class VideoRecordUploadComponent implements OnInit {
   resetRecording() {
     this.recordedVideoBlob = null;
     this.selectedTabIndex = 0;
+  }
+
+  loadQuotaStatus() {
+    this.quotaService.getQuotaStatus().subscribe({
+      next: (status) => {
+        this.quotaStatus = status;
+        this.quotaWarning = status.videoUsagePercentage >= 100 || status.storageUsagePercentage >= 100;
+      },
+      error: (error) => {
+        console.error('Error loading quota status:', error);
+      }
+    });
+  }
+
+  formatBytes(bytes: number): string {
+    return this.quotaService.formatBytes(bytes);
+  }
+
+  getUsageColor(percentage: number): string {
+    return this.quotaService.getUsageColor(percentage);
+  }
+
+  navigateToQuota() {
+    this.router.navigate(['/quota']);
   }
 }

@@ -33,6 +33,71 @@
           }
         </div>
 
+        <!-- Quota Status Display -->
+        <div class="quota-status-section" *ngIf="quotaStatus">
+          <h3>Upload Quota Status</h3>
+          <div class="quota-cards">
+            <!-- Storage Quota -->
+            <div class="quota-card">
+              <div class="quota-header">
+                <mat-icon>storage</mat-icon>
+                <span>Storage</span>
+              </div>
+              <div class="quota-content">
+                <div class="quota-stats">
+                  <span class="used">{{ formatBytes(quotaStatus.storageUsed) }}</span>
+                  <span class="separator">/</span>
+                  <span class="limit">{{ formatBytes(quotaStatus.storageLimit) }}</span>
+                </div>
+                <mat-progress-bar 
+                  [value]="quotaStatus.storageUsagePercentage"
+                  [color]="getUsageColor(quotaStatus.storageUsagePercentage)">
+                </mat-progress-bar>
+                <div class="quota-percentage">
+                  {{ quotaStatus.storageUsagePercentage | number:'1.1-1' }}% used
+                </div>
+              </div>
+            </div>
+
+            <!-- Video Count Quota -->
+            <div class="quota-card">
+              <div class="quota-header">
+                <mat-icon>video_library</mat-icon>
+                <span>Videos</span>
+              </div>
+              <div class="quota-content">
+                <div class="quota-stats">
+                  <span class="used">{{ quotaStatus.videosUploaded }}</span>
+                  <span class="separator">/</span>
+                  <span class="limit">{{ quotaStatus.videoLimit }}</span>
+                </div>
+                <mat-progress-bar 
+                  [value]="quotaStatus.videoUsagePercentage"
+                  [color]="getUsageColor(quotaStatus.videoUsagePercentage)">
+                </mat-progress-bar>
+                <div class="quota-percentage">
+                  {{ quotaStatus.videoUsagePercentage | number:'1.1-1' }}% used
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quota Warning -->
+          @if (quotaWarning) {
+            <div class="quota-warning">
+              <mat-icon color="warn">warning</mat-icon>
+              <div class="warning-content">
+                <p><strong>Upload quota exceeded!</strong></p>
+                <p>You've reached your upload limit. Please upgrade your plan to upload more videos.</p>
+                <button mat-stroked-button color="primary" (click)="navigateToQuota()">
+                  <mat-icon>upgrade</mat-icon>
+                  Upgrade Plan
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
         <!-- Thumbnail Upload -->
         <div class="file-upload-section">
           <h3>Thumbnail (Optional)</h3>

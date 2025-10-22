@@ -62,13 +62,17 @@ export class VideoUploadComponent implements OnInit {
       description: ['', [Validators.maxLength(1000)]],
       tags: [''],
       channelId: ['', Validators.required],
+      visibility: [0], // 0 = Public, 1 = Private, 2 = Unlisted
+      category: [''],
       isPremium: [false],
-      premiumPrice: [0, [Validators.min(0)]]
+      premiumPrice: [0, [Validators.min(0)]],
+      premiumCurrency: ['USD']
     });
   }
 
   ngOnInit() {
     this.loadUserChannels();
+    this.loadQuotaStatus();
   }
 
   loadUserChannels() {
@@ -160,8 +164,11 @@ export class VideoUploadComponent implements OnInit {
     formData.append('description', this.uploadForm.value.description);
     formData.append('tags', this.uploadForm.value.tags);
     formData.append('channelId', this.uploadForm.value.channelId);
+    formData.append('visibility', this.uploadForm.value.visibility);
+    formData.append('category', this.uploadForm.value.category);
     formData.append('isPremium', this.uploadForm.value.isPremium);
     formData.append('premiumPrice', this.uploadForm.value.premiumPrice);
+    formData.append('premiumCurrency', this.uploadForm.value.premiumCurrency);
 
     if (this.selectedThumbnail) {
       formData.append('thumbnailFile', this.selectedThumbnail);
@@ -309,5 +316,24 @@ export class VideoUploadComponent implements OnInit {
 
   navigateToHome() {
     this.router.navigateByUrl('/');
+  }
+
+  loadQuotaStatus() {
+    this.quotaService.getQuotaStatus().subscribe({
+      next: (status) => {
+        this.quotaStatus = status;
+      },
+      error: (error) => {
+        console.error('Error loading quota status:', error);
+      }
+    });
+  }
+
+  formatBytes(bytes: number): string {
+    return this.quotaService.formatBytes(bytes);
+  }
+
+  getUsageColor(percentage: number): string {
+    return this.quotaService.getUsageColor(percentage);
   }
 }
