@@ -123,7 +123,9 @@ public static class SeedData
                     VideoUrl = "https://example.com/video1.mp4",
                     ThumbnailUrl = "https://example.com/thumb1.jpg",
                     CreatedAt = DateTime.UtcNow,
-                    Duration = TimeSpan.FromMinutes(2)
+                    Duration = TimeSpan.FromMinutes(2),
+                    Category = "Education",
+                    Tags = "tutorial,beginner,guide"
                 },
                 new Video
                 {
@@ -137,7 +139,57 @@ public static class SeedData
                     VideoUrl = "https://example.com/video2.mp4",
                     ThumbnailUrl = "https://example.com/thumb2.jpg",
                     CreatedAt = DateTime.UtcNow,
-                    Duration = TimeSpan.FromMinutes(3)
+                    Duration = TimeSpan.FromMinutes(3),
+                    Category = "Entertainment",
+                    Tags = "fun,comedy,entertainment"
+                },
+                new Video
+                {
+                    Title = "Music Video",
+                    Description = "Amazing music performance",
+                    UserId = demo.Id,
+                    ChannelId = channel.Id,
+                    Status = VideoProcessingStatus.Ready,
+                    Type = VideoType.Uploaded,
+                    Visibility = VideoVisibility.Public,
+                    VideoUrl = "https://example.com/video3.mp4",
+                    ThumbnailUrl = "https://example.com/thumb3.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    Duration = TimeSpan.FromMinutes(4),
+                    Category = "Music",
+                    Tags = "music,song,performance"
+                },
+                new Video
+                {
+                    Title = "Gaming Tutorial",
+                    Description = "Learn how to play this game",
+                    UserId = demo.Id,
+                    ChannelId = channel.Id,
+                    Status = VideoProcessingStatus.Ready,
+                    Type = VideoType.Uploaded,
+                    Visibility = VideoVisibility.Public,
+                    VideoUrl = "https://example.com/video4.mp4",
+                    ThumbnailUrl = "https://example.com/thumb4.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    Duration = TimeSpan.FromMinutes(5),
+                    Category = "Gaming",
+                    Tags = "gaming,tutorial,strategy"
+                },
+                new Video
+                {
+                    Title = "Tech Review",
+                    Description = "Latest technology review",
+                    UserId = demo.Id,
+                    ChannelId = channel.Id,
+                    Status = VideoProcessingStatus.Ready,
+                    Type = VideoType.Uploaded,
+                    Visibility = VideoVisibility.Public,
+                    VideoUrl = "https://example.com/video5.mp4",
+                    ThumbnailUrl = "https://example.com/thumb5.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    Duration = TimeSpan.FromMinutes(6),
+                    Category = "Technology",
+                    Tags = "technology,review,gadgets"
                 }
             );
             await context.SaveChangesAsync();

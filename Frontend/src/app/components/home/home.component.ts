@@ -104,6 +104,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onCategoryChange(category: string) {
     this.selectedCategory = category;
+    
     if (category === 'All') {
       this.store.dispatch(loadVideos({ page: 1, pageSize: 20 }));
     } else {

@@ -135,7 +135,9 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",
-                "https://localhost:4200"
+                "https://localhost:4200",
+                "http://127.0.0.1:4200",
+                "https://127.0.0.1:4200"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -150,6 +152,23 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+    
+    // Development CORS policy - more permissive but still allows credentials
+    if (builder.Environment.IsDevelopment())
+    {
+        options.AddPolicy("AllowAll", policy =>
+        {
+            policy.WithOrigins(
+                    "http://localhost:4200",
+                    "https://localhost:4200",
+                    "http://127.0.0.1:4200",
+                    "https://127.0.0.1:4200"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+    }
 });
 
 // SignalR
@@ -250,7 +269,14 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<EmbedSecurityMiddleware>();
 
 // CORS
-app.UseCors("AllowFrontend");
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseCors("AllowFrontend");
+}
 
 // Static files for uploaded content
 app.UseStaticFiles(new StaticFileOptions
@@ -302,6 +328,9 @@ if (app.Environment.IsDevelopment())
         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         await SeedData.Initialize(ctx, userMgr, roleMgr);
+        
+        // Update existing videos with categories
+        await Drashyam.API.Scripts.UpdateVideoCategories.UpdateExistingVideos(ctx);
     }
 }
 
