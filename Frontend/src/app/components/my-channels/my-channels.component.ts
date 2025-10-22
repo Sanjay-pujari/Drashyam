@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ChannelService } from '../../services/channel.service';
+import { QuotaService, QuotaStatus } from '../../services/quota.service';
 import { Channel } from '../../models/channel.model';
 import { Subscription } from 'rxjs';
 
@@ -25,10 +26,21 @@ import { Subscription } from 'rxjs';
     <div class="my-channels-container">
       <div class="header">
         <h1>My Channels</h1>
-        <button mat-raised-button color="primary" routerLink="/channel/create">
-          <mat-icon>add</mat-icon>
-          Create Channel
-        </button>
+        <div class="header-actions">
+          <div class="quota-info" *ngIf="quotaStatus">
+            <span class="quota-text">
+              {{ quotaStatus.channelsCreated }}/{{ quotaStatus.channelLimit }} channels
+            </span>
+            <div class="quota-bar">
+              <div class="quota-fill" [style.width.%]="quotaStatus.channelUsagePercentage"></div>
+            </div>
+          </div>
+          <button mat-raised-button color="primary" routerLink="/channel/create"
+                  [disabled]="quotaStatus && quotaStatus.channelUsagePercentage >= 100">
+            <mat-icon>add</mat-icon>
+            Create Channel
+          </button>
+        </div>
       </div>
 
       <div class="content" *ngIf="!isLoading; else loading">
@@ -90,6 +102,38 @@ import { Subscription } from 'rxjs';
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .quota-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .quota-text {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .quota-bar {
+      width: 120px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quota-fill {
+      height: 100%;
+      background: #4caf50;
+      transition: width 0.3s ease;
     }
     
     .header h1 {
@@ -212,16 +256,19 @@ import { Subscription } from 'rxjs';
 export class MyChannelsComponent implements OnInit, OnDestroy {
   channels: Channel[] = [];
   isLoading = false;
+  quotaStatus: QuotaStatus | null = null;
   private subscriptions: Subscription[] = [];
 
   constructor(
     private channelService: ChannelService,
+    private quotaService: QuotaService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
     this.loadMyChannels();
+    this.loadQuotaStatus();
   }
 
   ngOnDestroy() {
@@ -242,6 +289,28 @@ export class MyChannelsComponent implements OnInit, OnDestroy {
         this.channels = [];
         this.isLoading = false;
         this.snackBar.open('Error loading channels', 'Close', { duration: 3000 });
+      }
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  loadQuotaStatus() {
+    const sub = this.quotaService.getQuotaStatus().subscribe({
+      next: (status) => {
+        this.quotaStatus = status;
+        
+        // Show warning if quota is high
+        if (status.channelUsagePercentage >= 90) {
+          this.snackBar.open(
+            `Channel quota: ${status.channelUsagePercentage.toFixed(1)}% used. Consider upgrading your plan.`,
+            'Upgrade',
+            { duration: 5000 }
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error loading quota status:', error);
       }
     });
 

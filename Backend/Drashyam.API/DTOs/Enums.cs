@@ -36,7 +36,6 @@ public enum ChannelType
 public enum SubscriptionType
 {
     Free,
-    Basic,
     Premium,
     Pro
 }

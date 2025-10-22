@@ -17,7 +17,7 @@
               type="file" 
               id="videoFile" 
               accept="video/*"
-              (change)="onVideoFileSelected($event)"
+              (change)="onFileSelected($event)"
               #videoFileInput>
             <label for="videoFile" class="file-input-label">
               <mat-icon>videocam</mat-icon>
@@ -104,7 +104,7 @@
           </mat-form-field>
 
           <!-- Quota Warning -->
-          @if (quotaWarning && quotaCheck?.warnings) {
+          @if (quotaWarning) {
             <mat-card class="quota-warning-card">
               <div class="quota-warning-header">
                 <mat-icon color="warn">warning</mat-icon>
@@ -113,7 +113,7 @@
               <div class="quota-warning-content">
                 <p>{{ getQuotaWarningMessage() }}</p>
                 <p class="recommendation">{{ getQuotaRecommendation() }}</p>
-                <button mat-stroked-button color="primary" (click)="router.navigate(['/quota'])">
+                <button mat-stroked-button color="primary" (click)="navigateToQuota()">
                   <mat-icon>storage</mat-icon>
                   View Quota Details
                 </button>
@@ -214,7 +214,7 @@
           <button 
             mat-button 
             type="button" 
-            (click)="router.navigateByUrl('/')"
+            (click)="navigateToHome()"
             [disabled]="isUploading">
             Cancel
           </button>

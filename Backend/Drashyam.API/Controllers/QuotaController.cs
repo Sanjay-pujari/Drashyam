@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Drashyam.API.Services;
-using Drashyam.API.DTOs;
 using System.Security.Claims;
+using Drashyam.API.DTOs;
+using Drashyam.API.Services;
 
 namespace Drashyam.API.Controllers;
 
@@ -29,14 +29,10 @@ public class QuotaController : ControllerBase
             var quotaStatus = await _quotaService.GetUserQuotaStatusAsync(userId);
             return Ok(quotaStatus);
         }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting quota status");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error getting quota status for user");
+            return StatusCode(500, "Error retrieving quota status");
         }
     }
 
@@ -49,14 +45,10 @@ public class QuotaController : ControllerBase
             var warnings = await _quotaService.GetQuotaWarningsAsync(userId);
             return Ok(warnings);
         }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting quota warnings");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error getting quota warnings for user");
+            return StatusCode(500, "Error retrieving quota warnings");
         }
     }
 
@@ -69,87 +61,47 @@ public class QuotaController : ControllerBase
             var benefits = await _quotaService.GetSubscriptionBenefitsAsync(userId);
             return Ok(benefits);
         }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting subscription benefits");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error getting subscription benefits for user");
+            return StatusCode(500, "Error retrieving subscription benefits");
         }
     }
 
-    [HttpPost("check-upload")]
-    public async Task<ActionResult<QuotaCheckDto>> CheckVideoUpload([FromBody] VideoUploadCheckDto checkDto)
+    [HttpPost("can-upload")]
+    public async Task<ActionResult<bool>> CanUploadVideo([FromBody] CanUploadRequest request)
     {
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var canUpload = await _quotaService.CanUploadVideoAsync(userId, checkDto.ChannelId, checkDto.FileSize);
-            var canCreateChannel = await _quotaService.CanCreateChannelAsync(userId);
-            var warnings = await _quotaService.GetQuotaWarningsAsync(userId);
-
-            return Ok(new QuotaCheckDto
-            {
-                CanUpload = canUpload,
-                CanCreateChannel = canCreateChannel,
-                CanUseFeature = true,
-                Reason = canUpload ? null : "Quota exceeded",
-                Warnings = warnings.HasWarnings ? warnings : null
-            });
+            var canUpload = await _quotaService.CheckStorageQuotaAsync(userId, request.FileSize);
+            return Ok(canUpload);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking video upload quota");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error checking upload quota for user");
+            return StatusCode(500, "Error checking upload quota");
         }
     }
 
-    [HttpPost("check-channel")]
-    public async Task<ActionResult<QuotaCheckDto>> CheckChannelCreation()
+    [HttpGet("can-create-channel")]
+    public async Task<ActionResult<bool>> CanCreateChannel()
     {
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var canCreateChannel = await _quotaService.CanCreateChannelAsync(userId);
-            var warnings = await _quotaService.GetQuotaWarningsAsync(userId);
-
-            return Ok(new QuotaCheckDto
-            {
-                CanUpload = true,
-                CanCreateChannel = canCreateChannel,
-                CanUseFeature = canCreateChannel,
-                Reason = canCreateChannel ? null : "Channel quota exceeded",
-                Warnings = warnings.HasWarnings ? warnings : null
-            });
+            var canCreate = await _quotaService.CheckChannelQuotaAsync(userId);
+            return Ok(canCreate);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking channel creation quota");
-            return StatusCode(500, "Internal server error");
-        }
-    }
-
-    [HttpGet("feature/{feature}")]
-    public async Task<ActionResult<bool>> CheckFeatureAccess(string feature)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var hasAccess = await _quotaService.CheckSubscriptionFeaturesAsync(userId, feature);
-            return Ok(hasAccess);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking feature access");
-            return StatusCode(500, "Internal server error");
+            _logger.LogError(ex, "Error checking channel quota for user");
+            return StatusCode(500, "Error checking channel quota");
         }
     }
 }
 
-public class VideoUploadCheckDto
+public class CanUploadRequest
 {
-    public int ChannelId { get; set; }
     public long FileSize { get; set; }
 }

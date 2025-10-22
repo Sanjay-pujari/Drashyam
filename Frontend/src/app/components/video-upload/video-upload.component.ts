@@ -14,7 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
-import { QuotaService, QuotaCheck } from '../../services/quota.service';
+import { QuotaService, QuotaStatus } from '../../services/quota.service';
 import { VideoProcessingService } from '../../services/video-processing.service';
 import { Channel } from '../../models/channel.model';
 import { VideoProcessingProgress } from '../../models/video-processing-progress.model';
@@ -43,7 +43,7 @@ export class VideoUploadComponent implements OnInit {
   isLoadingChannels = false;
   maxFileSize = environment.maxVideoSize;
   supportedFormats = environment.supportedVideoFormats;
-  quotaCheck: QuotaCheck | null = null;
+  quotaStatus: QuotaStatus | null = null;
   quotaWarning = false;
   uploadedVideoId: number | null = null;
   processingProgress: VideoProcessingProgress | null = null;
@@ -55,18 +55,15 @@ export class VideoUploadComponent implements OnInit {
     private quotaService: QuotaService,
     private videoProcessingService: VideoProcessingService,
     private snackBar: MatSnackBar,
-    public router: Router
+    private router: Router
   ) {
     this.uploadForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
+      title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(1000)]],
-      channelId: [null],
-      visibility: [0, Validators.required], // 0 = Public, 1 = Private, 2 = Unlisted
-      category: [''],
       tags: [''],
+      channelId: ['', Validators.required],
       isPremium: [false],
-      premiumPrice: [null],
-      premiumCurrency: ['USD']
+      premiumPrice: [0, [Validators.min(0)]]
     });
   }
 
@@ -76,34 +73,35 @@ export class VideoUploadComponent implements OnInit {
 
   loadUserChannels() {
     this.isLoadingChannels = true;
-    this.uploadForm.get('channelId')?.disable();
-    this.channelService.getUserChannels('me', { page: 1, pageSize: 100 }).subscribe({
+    this.channelService.getMyChannels().subscribe({
       next: (result) => {
-        this.userChannels = result.items;
+        this.userChannels = result.items || [];
         this.isLoadingChannels = false;
-        this.uploadForm.get('channelId')?.enable();
       },
-      error: (err) => {
+      error: (error) => {
+        this.userChannels = [];
         this.isLoadingChannels = false;
-        this.uploadForm.get('channelId')?.enable();
+        this.snackBar.open('Error loading channels', 'Close', { duration: 3000 });
       }
     });
   }
 
-  onVideoFileSelected(event: any) {
+  onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      // Validate file size
       if (file.size > this.maxFileSize) {
-        alert(`File size exceeds ${this.maxFileSize / (1024 * 1024 * 1024)}GB limit`);
+        this.snackBar.open(`File size exceeds maximum limit of ${this.formatFileSize(this.maxFileSize)}`, 'Close', { duration: 5000 });
         return;
       }
-      
-      const extension = file.name.split('.').pop()?.toLowerCase();
-      if (!this.supportedFormats.includes(extension || '')) {
-        alert(`Unsupported format. Supported: ${this.supportedFormats.join(', ')}`);
+
+      // Validate file format
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (!this.supportedFormats.includes(fileExtension || '')) {
+        this.snackBar.open(`Unsupported file format. Supported formats: ${this.supportedFormats.join(', ')}`, 'Close', { duration: 5000 });
         return;
       }
-      
+
       this.selectedFile = file;
       
       // Check quota when file is selected
@@ -128,74 +126,107 @@ export class VideoUploadComponent implements OnInit {
     this.uploadForm.get('premiumPrice')?.updateValueAndValidity();
     
     if (this.uploadForm.valid && this.selectedFile) {
-      this.isUploading = true;
-      this.uploadProgress = 0;
-
-      const formData = new FormData();
-      formData.append('videoFile', this.selectedFile);
-      formData.append('title', this.uploadForm.value.title);
-      formData.append('description', this.uploadForm.value.description || '');
-      formData.append('visibility', this.uploadForm.value.visibility);
-      formData.append('category', this.uploadForm.value.category || '');
-      formData.append('tags', this.uploadForm.value.tags || '');
-      
-      // Add premium content fields
-      formData.append('isPremium', this.uploadForm.value.isPremium.toString());
-      if (this.uploadForm.value.isPremium) {
-        formData.append('premiumPrice', this.uploadForm.value.premiumPrice);
-        formData.append('premiumCurrency', this.uploadForm.value.premiumCurrency);
-      }
-      
-      if (this.uploadForm.value.channelId) {
-        formData.append('channelId', this.uploadForm.value.channelId);
-      }
-      
-      if (this.selectedThumbnail) {
-        formData.append('thumbnailFile', this.selectedThumbnail);
-      }
-
-      // Log FormData contents in a compatible way
-
-      // Simulate progress (in real app, you'd track actual upload progress)
-      const progressInterval = setInterval(() => {
-        this.uploadProgress += 10;
-        if (this.uploadProgress >= 90) {
-          clearInterval(progressInterval);
-        }
-      }, 200);
-
-      this.videoService.uploadVideo(formData).subscribe({
-        next: (video) => {
-          clearInterval(progressInterval);
-          this.uploadProgress = 100;
-          this.uploadedVideoId = video.id;
-          this.snackBar.open('Video uploaded successfully! Processing will begin shortly.', 'Close', { duration: 5000 });
-          // Redirect immediately to the uploaded video's page; processing will continue there
-          if (this.uploadedVideoId) {
-            this.router.navigate(['/videos', this.uploadedVideoId]);
-          }
-        },
-        error: (err) => {
-          clearInterval(progressInterval);
-          this.isUploading = false;
-          alert('Upload failed. Please try again.');
-        }
-      });
-    } else {
-      if (!this.uploadForm.valid) {
-      }
+      // Check quota before uploading
+      this.checkQuotaBeforeUpload();
     }
+  }
+
+  private checkQuotaBeforeUpload() {
+    if (!this.selectedFile) return;
+
+    this.quotaService.canUploadVideo(this.selectedFile.size).subscribe({
+      next: (canUpload) => {
+        if (canUpload) {
+          this.proceedWithUpload();
+        } else {
+          this.snackBar.open('Upload quota exceeded. Please upgrade your plan or delete some videos.', 'Close', { duration: 5000 });
+          this.quotaWarning = true;
+        }
+      },
+      error: (error) => {
+        console.error('Quota check failed:', error);
+        this.snackBar.open('Unable to check quota. Please try again.', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  private proceedWithUpload() {
+    this.isUploading = true;
+    this.uploadProgress = 0;
+
+    const formData = new FormData();
+    formData.append('videoFile', this.selectedFile!);
+    formData.append('title', this.uploadForm.value.title);
+    formData.append('description', this.uploadForm.value.description);
+    formData.append('tags', this.uploadForm.value.tags);
+    formData.append('channelId', this.uploadForm.value.channelId);
+    formData.append('isPremium', this.uploadForm.value.isPremium);
+    formData.append('premiumPrice', this.uploadForm.value.premiumPrice);
+
+    if (this.selectedThumbnail) {
+      formData.append('thumbnailFile', this.selectedThumbnail);
+    }
+
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      this.uploadProgress += Math.random() * 15;
+      if (this.uploadProgress >= 90) {
+        clearInterval(progressInterval);
+      }
+    }, 200);
+
+    this.videoService.uploadVideo(formData).subscribe({
+      next: (video) => {
+        clearInterval(progressInterval);
+        this.uploadProgress = 100;
+        this.uploadedVideoId = video.id;
+        this.snackBar.open('Video uploaded successfully! Processing will begin shortly.', 'Close', { duration: 5000 });
+        // Redirect immediately to the uploaded video's page; processing will continue there
+        if (this.uploadedVideoId) {
+          this.router.navigate(['/videos', this.uploadedVideoId]);
+        }
+      },
+      error: (error) => {
+        clearInterval(progressInterval);
+        this.isUploading = false;
+        this.uploadProgress = 0;
+        this.snackBar.open('Upload failed. Please try again.', 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  onChannelChange() {
+    // Re-check quota when channel changes
+    if (this.selectedFile) {
+      this.checkQuotaForUpload();
+    }
+  }
+
+  private checkQuotaForUpload() {
+    if (!this.selectedFile) return;
+
+    this.quotaService.canUploadVideo(this.selectedFile.size).subscribe({
+      next: (canUpload) => {
+        this.quotaWarning = !canUpload;
+      },
+      error: (error) => {
+        console.error('Error checking quota:', error);
+        this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   onProcessingCompleted(status: 'Completed' | 'Failed') {
     this.isUploading = false;
+    
     if (status === 'Completed') {
-      // Navigate to the uploaded video's page
       if (this.uploadedVideoId) {
         this.router.navigate(['/videos', this.uploadedVideoId]);
       } else {
         this.router.navigate(['/videos']);
       }
+    } else {
+      this.snackBar.open('Video processing failed. Please try uploading again.', 'Close', { duration: 5000 });
     }
   }
 
@@ -220,97 +251,63 @@ export class VideoUploadComponent implements OnInit {
 
   generateThumbnail(file: File) {
     const video = document.createElement('video');
-    video.preload = 'metadata';
-    
-    video.onloadedmetadata = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    video.addEventListener('loadedmetadata', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       video.currentTime = 1; // Seek to 1 second
-    };
-    
-    video.onseeked = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
+    });
+
+    video.addEventListener('seeked', () => {
       if (ctx) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
         canvas.toBlob((blob) => {
           if (blob) {
-            // Convert Blob to File
-            const thumbnailFile = new File([blob], 'thumbnail.jpg', {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            });
+            const thumbnailFile = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' });
             this.selectedThumbnail = thumbnailFile;
           }
         }, 'image/jpeg', 0.8);
       }
-    };
-    
+    });
+
     video.src = URL.createObjectURL(file);
   }
 
   setRecordedVideo(file: File) {
     this.selectedFile = file;
     
-    // Update the file input display
-    const fileInput = document.getElementById('videoFile') as HTMLInputElement;
+    // Create a new file input event to trigger the form
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
-      // Create a new FileList with the recorded file
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
       fileInput.files = dataTransfer.files;
     }
-    
-    // Generate thumbnail for recorded video
+
     this.generateThumbnail(file);
-    
-    // Show success message
     this.snackBar.open('Recorded video loaded successfully!', 'Close', { duration: 3000 });
     
     // Check quota for recorded video
     this.checkQuotaForUpload();
   }
 
-  private checkQuotaForUpload() {
-    if (!this.selectedFile || !this.uploadForm.get('channelId')?.value) return;
-
-    const channelId = this.uploadForm.get('channelId')?.value;
-    const fileSize = this.selectedFile.size;
-
-    this.quotaService.checkVideoUpload(channelId, fileSize).subscribe({
-      next: (quotaCheck) => {
-        this.quotaCheck = quotaCheck;
-        this.quotaWarning = quotaCheck.warnings?.hasWarnings || false;
-
-        if (!quotaCheck.canUpload) {
-          this.snackBar.open(quotaCheck.reason || 'Upload quota exceeded', 'Close', { duration: 5000 });
-        } else if (quotaCheck.warnings?.hasWarnings) {
-          this.snackBar.open('Quota warning: ' + quotaCheck.warnings.warnings.join(', '), 'Close', { duration: 5000 });
-        }
-      },
-      error: (error) => {
-        console.error('Error checking quota:', error);
-        this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
-      }
-    });
-  }
-
-  onChannelChange() {
-    // Re-check quota when channel changes
-    if (this.selectedFile) {
-      this.checkQuotaForUpload();
-    }
-  }
-
   getQuotaWarningMessage(): string {
-    if (!this.quotaCheck?.warnings) return '';
-    return this.quotaCheck.warnings.warnings.join(', ');
+    if (!this.quotaStatus) return '';
+    return 'Upload quota exceeded. Please upgrade your plan or delete some videos.';
   }
 
   getQuotaRecommendation(): string {
-    if (!this.quotaCheck?.warnings) return '';
-    return this.quotaCheck.warnings.recommendedAction;
+    if (!this.quotaStatus) return '';
+    return 'Consider upgrading your subscription plan to increase your upload quota.';
+  }
+
+  navigateToQuota() {
+    this.router.navigate(['/quota']);
+  }
+
+  navigateToHome() {
+    this.router.navigateByUrl('/');
   }
 }
