@@ -132,15 +132,15 @@ import { Subscription } from 'rxjs';
             <div class="table-row" *ngFor="let c of campaigns">
               <div>{{ c.name }}</div>
               <div>{{ c.type }}</div>
-              <div><span class="status" [class.active]="c.status===AdStatus.Active" [class.paused]="c.status===AdStatus.Paused">{{ getStatusText(c.status) }}</span></div>
+              <div><span class="status" [class.active]="c.status==='Active' || c.status===AdStatus.Active" [class.paused]="c.status==='Paused' || c.status===AdStatus.Paused">{{ getStatusText(c.status) }}</span></div>
               <div>{{ c.budget | number:'1.2-2' }}</div>
               <div>{{ c.costPerView | number:'1.2-4' }}</div>
               <div>{{ c.costPerClick | number:'1.2-4' }}</div>
               <div class="row-actions">
-                <button mat-icon-button color="primary" aria-label="Activate" (click)="activate(c)" [disabled]="c.status===AdStatus.Active">
+                <button mat-icon-button color="primary" aria-label="Activate" (click)="activate(c)" [disabled]="c.status==='Active' || c.status===AdStatus.Active">
                   <mat-icon>play_circle</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" aria-label="Pause" (click)="pause(c)" [disabled]="c.status===AdStatus.Paused">
+                <button mat-icon-button color="warn" aria-label="Pause" (click)="pause(c)" [disabled]="c.status==='Paused' || c.status===AdStatus.Paused">
                   <mat-icon>pause_circle</mat-icon>
                 </button>
                 <button mat-icon-button aria-label="Edit" (click)="startEdit(c)">
@@ -390,16 +390,43 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
   }
 
   activate(c: AdCampaign): void {
-    this.subs.add(this.adService.activateCampaign(c.id).subscribe({ next: _ => this.load(), error: _ => {} }));
+    this.subs.add(this.adService.activateCampaign(c.id).subscribe({ 
+      next: _ => {
+        console.log('Campaign activated successfully');
+        this.load();
+      }, 
+      error: err => {
+        console.error('Failed to activate campaign:', err);
+        alert('Failed to activate campaign. Please try again.');
+      }
+    }));
   }
 
   pause(c: AdCampaign): void {
-    this.subs.add(this.adService.pauseCampaign(c.id).subscribe({ next: _ => this.load(), error: _ => {} }));
+    this.subs.add(this.adService.pauseCampaign(c.id).subscribe({ 
+      next: _ => {
+        console.log('Campaign paused successfully');
+        this.load();
+      }, 
+      error: err => {
+        console.error('Failed to pause campaign:', err);
+        alert('Failed to pause campaign. Please try again.');
+      }
+    }));
   }
 
   remove(c: AdCampaign): void {
     if (!confirm(`Delete campaign "${c.name}"?`)) return;
-    this.subs.add(this.adService.deleteCampaign(c.id).subscribe({ next: _ => this.load(), error: _ => {} }));
+    this.subs.add(this.adService.deleteCampaign(c.id).subscribe({ 
+      next: _ => {
+        console.log('Campaign deleted successfully');
+        this.load();
+      }, 
+      error: err => {
+        console.error('Failed to delete campaign:', err);
+        alert('Failed to delete campaign. Please try again.');
+      }
+    }));
   }
 
   openAnalytics(c: AdCampaign): void {
@@ -431,7 +458,12 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
     return d.toISOString().slice(0, 10);
   }
 
-  getStatusText(status: AdStatus): string {
+  getStatusText(status: AdStatus | string): string {
+    // Handle both numeric enum values and string values from backend
+    if (typeof status === 'string') {
+      return status; // Backend sends string values directly
+    }
+    
     switch (status) {
       case AdStatus.Draft: return 'Draft';
       case AdStatus.Active: return 'Active';

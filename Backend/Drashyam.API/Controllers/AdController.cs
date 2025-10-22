@@ -25,6 +25,32 @@ public class AdController : ControllerBase
     {
         try
         {
+            // Validate model state
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+                _logger.LogWarning("Model validation failed for ad campaign creation: {Errors}", string.Join(", ", errors.SelectMany(e => e.Value)));
+                return BadRequest(new { message = "Validation failed", errors });
+            }
+
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(createDto.Name))
+                return BadRequest(new { message = "Campaign name is required" });
+
+            if (createDto.Budget <= 0)
+                return BadRequest(new { message = "Budget must be greater than 0" });
+
+            if (createDto.StartDate >= createDto.EndDate)
+                return BadRequest(new { message = "End date must be after start date" });
+
+            if (createDto.StartDate < DateTime.UtcNow.Date)
+                return BadRequest(new { message = "Start date cannot be in the past" });
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
@@ -32,10 +58,20 @@ public class AdController : ControllerBase
             var campaign = await _adService.CreateAdCampaignAsync(createDto, userId);
             return CreatedAtAction(nameof(GetCampaign), new { id = campaign.Id }, campaign);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid argument when creating ad campaign");
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation when creating ad campaign");
+            return BadRequest(new { message = ex.Message });
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating ad campaign");
-            return BadRequest("Failed to create ad campaign");
+            _logger.LogError(ex, "Unexpected error creating ad campaign");
+            return StatusCode(500, new { message = "An unexpected error occurred while creating the ad campaign" });
         }
     }
 

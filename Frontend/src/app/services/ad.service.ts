@@ -24,7 +24,7 @@ export interface AdCampaign {
   costPerView: number;
   startDate: string;
   endDate: string;
-  status: AdStatus;
+  status: AdStatus | string;
   targetAudience?: string;
   adContent?: string;
   adUrl?: string;

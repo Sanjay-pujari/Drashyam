@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Drashyam.API.DTOs;
 
 public class AdDto
@@ -36,14 +38,34 @@ public class AdCampaignDto
 
 public class AdCampaignCreateDto
 {
+    [Required(ErrorMessage = "Campaign name is required")]
+    [MaxLength(200, ErrorMessage = "Campaign name cannot exceed 200 characters")]
     public string Name { get; set; } = string.Empty;
+
+    [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
     public string? Description { get; set; }
+
+    [Required(ErrorMessage = "Ad type is required")]
     public AdType Type { get; set; }
+
+    [Required(ErrorMessage = "Budget is required")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Budget must be greater than 0")]
     public decimal Budget { get; set; }
+
+    [Required(ErrorMessage = "Cost per click is required")]
+    [Range(0, double.MaxValue, ErrorMessage = "Cost per click must be 0 or greater")]
     public decimal CostPerClick { get; set; }
+
+    [Required(ErrorMessage = "Cost per view is required")]
+    [Range(0, double.MaxValue, ErrorMessage = "Cost per view must be 0 or greater")]
     public decimal CostPerView { get; set; }
+
+    [Required(ErrorMessage = "Start date is required")]
     public DateTime StartDate { get; set; }
+
+    [Required(ErrorMessage = "End date is required")]
     public DateTime EndDate { get; set; }
+
     public string? TargetAudience { get; set; }
     public string? AdContent { get; set; }
     public string? AdUrl { get; set; }

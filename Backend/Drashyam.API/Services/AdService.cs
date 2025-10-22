@@ -27,6 +27,10 @@ public class AdService : IAdService
         campaign.AdvertiserId = advertiserId;
         campaign.Status = AdStatus.Draft;
         campaign.CreatedAt = DateTime.UtcNow;
+        
+        // Ensure DateTime values are in UTC for PostgreSQL compatibility
+        campaign.StartDate = DateTime.SpecifyKind(campaign.StartDate, DateTimeKind.Utc);
+        campaign.EndDate = DateTime.SpecifyKind(campaign.EndDate, DateTimeKind.Utc);
 
         _context.AdCampaigns.Add(campaign);
         await _context.SaveChangesAsync();
@@ -80,6 +84,12 @@ public class AdService : IAdService
 
         _mapper.Map(updateDto, campaign);
         campaign.UpdatedAt = DateTime.UtcNow;
+        
+        // Ensure DateTime values are in UTC for PostgreSQL compatibility
+        if (campaign.StartDate != default)
+            campaign.StartDate = DateTime.SpecifyKind(campaign.StartDate, DateTimeKind.Utc);
+        if (campaign.EndDate != default)
+            campaign.EndDate = DateTime.SpecifyKind(campaign.EndDate, DateTimeKind.Utc);
 
         await _context.SaveChangesAsync();
         return _mapper.Map<AdCampaignDto>(campaign);
