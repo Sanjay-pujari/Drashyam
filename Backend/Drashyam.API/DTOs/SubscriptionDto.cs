@@ -87,3 +87,14 @@ public class SubscriptionPlanAnalyticsDto
     public decimal Revenue { get; set; }
     public decimal AverageRevenuePerUser { get; set; }
 }
+
+public class ChannelSubscriptionDto
+{
+    public int Id { get; set; }
+    public int ChannelId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? ProfilePictureUrl { get; set; }
+    public int SubscriberCount { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; }
+}

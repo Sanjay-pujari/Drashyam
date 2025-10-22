@@ -21,4 +21,5 @@ public interface ISubscriptionService
     Task<SubscriptionAnalyticsDto> GetSubscriptionAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null);
     Task<bool> SuspendSubscriptionAsync(int subscriptionId, string userId);
     Task<bool> ReactivateSubscriptionAsync(int subscriptionId, string userId);
+    Task<PagedResult<ChannelSubscriptionDto>> GetSubscribedChannelsAsync(string userId, int page = 1, int pageSize = 10);
 }

@@ -140,6 +140,15 @@ public class SubscriptionController : ControllerBase
         return Ok(analytics);
     }
 
+    [HttpGet("channels")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<ChannelSubscriptionDto>>> GetSubscribedChannels([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var channels = await _subscriptionService.GetSubscribedChannelsAsync(userId, page, pageSize);
+        return Ok(channels);
+    }
+
     [HttpPost("{subscriptionId:int}/suspend")]
     [Authorize]
     public async Task<IActionResult> Suspend([FromRoute] int subscriptionId)

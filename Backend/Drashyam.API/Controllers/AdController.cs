@@ -166,8 +166,8 @@ public class AdController : ControllerBase
         }
     }
 
-    [HttpGet("serve")]
-    public async Task<ActionResult<AdDto?>> GetAd([FromQuery] int? videoId = null, [FromQuery] Models.AdType? type = null)
+    [HttpPost("serve")]
+    public async Task<ActionResult<AdDto?>> GetAd([FromBody] AdServeRequestDto request)
     {
         try
         {
@@ -175,7 +175,7 @@ public class AdController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var ad = await _adService.GetAdForUserAsync(userId, videoId, type);
+            var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, request.Type);
             return Ok(ad);
         }
         catch (Exception ex)
@@ -293,4 +293,14 @@ public class AdClickRequestDto
 {
     public int CampaignId { get; set; }
     public int? VideoId { get; set; }
+}
+
+public class AdServeRequestDto
+{
+    public string? UserId { get; set; }
+    public int? VideoId { get; set; }
+    public string? Category { get; set; }
+    public string? Location { get; set; }
+    public string? DeviceType { get; set; }
+    public Models.AdType? Type { get; set; }
 }

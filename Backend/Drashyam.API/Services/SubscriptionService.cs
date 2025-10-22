@@ -316,4 +316,37 @@ public class SubscriptionService : ISubscriptionService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<PagedResult<ChannelSubscriptionDto>> GetSubscribedChannelsAsync(string userId, int page = 1, int pageSize = 10)
+    {
+        var query = _context.ChannelSubscriptions
+            .Where(cs => cs.UserId == userId && cs.IsActive)
+            .Include(cs => cs.Channel);
+
+        var totalCount = await query.CountAsync();
+
+        var channels = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(cs => new ChannelSubscriptionDto
+            {
+                Id = cs.Id,
+                ChannelId = cs.ChannelId,
+                Name = cs.Channel.Name,
+                ProfilePictureUrl = cs.Channel.ProfilePictureUrl,
+                SubscriberCount = cs.Channel.SubscriberCount,
+                CreatedAt = cs.SubscribedAt,
+                IsActive = cs.IsActive
+            })
+            .ToListAsync();
+
+        return new PagedResult<ChannelSubscriptionDto>
+        {
+            Items = channels,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+        };
+    }
 }
