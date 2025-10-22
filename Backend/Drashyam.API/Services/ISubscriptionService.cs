@@ -22,4 +22,5 @@ public interface ISubscriptionService
     Task<bool> SuspendSubscriptionAsync(int subscriptionId, string userId);
     Task<bool> ReactivateSubscriptionAsync(int subscriptionId, string userId);
     Task<PagedResult<ChannelSubscriptionDto>> GetSubscribedChannelsAsync(string userId, int page = 1, int pageSize = 10);
+    Task<bool> GetChannelNotificationPreferenceAsync(int channelId, string userId);
 }

@@ -348,4 +348,12 @@ public class SubscriptionService : ISubscriptionService
             PageSize = pageSize
         };
     }
+
+    public async Task<bool> GetChannelNotificationPreferenceAsync(int channelId, string userId)
+    {
+        var subscription = await _context.ChannelSubscriptions
+            .FirstOrDefaultAsync(cs => cs.ChannelId == channelId && cs.UserId == userId && cs.IsActive);
+
+        return subscription?.NotificationsEnabled ?? false;
+    }
 }

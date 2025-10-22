@@ -149,6 +149,15 @@ public class SubscriptionController : ControllerBase
         return Ok(channels);
     }
 
+    [HttpGet("channels/{channelId:int}/notifications")]
+    [Authorize]
+    public async Task<ActionResult<bool>> GetChannelNotificationPreference([FromRoute] int channelId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var preference = await _subscriptionService.GetChannelNotificationPreferenceAsync(channelId, userId);
+        return Ok(preference);
+    }
+
     [HttpPost("{subscriptionId:int}/suspend")]
     [Authorize]
     public async Task<IActionResult> Suspend([FromRoute] int subscriptionId)
