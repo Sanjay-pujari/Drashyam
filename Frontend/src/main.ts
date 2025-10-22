@@ -36,6 +36,7 @@ const routes: Routes = [
   { path: 'dashboard', redirectTo: '', pathMatch: 'full' },
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'videos/:id', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
+  { path: 'video/:id', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
   { path: 'watch/:token', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
   { path: 'embed/:token', loadComponent: () => import('./app/components/video-embed/video-embed.component').then(m => m.VideoEmbedComponent) },
   { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
