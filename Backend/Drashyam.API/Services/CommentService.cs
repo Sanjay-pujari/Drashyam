@@ -2,6 +2,7 @@ using AutoMapper;
 using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Drashyam.API.Services;
@@ -11,12 +12,14 @@ public class CommentService : ICommentService
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
     private readonly ILogger<CommentService> _logger;
+    private readonly IHubContext<VideoHub> _videoHub;
 
-    public CommentService(DrashyamDbContext context, IMapper mapper, ILogger<CommentService> logger)
+    public CommentService(DrashyamDbContext context, IMapper mapper, ILogger<CommentService> logger, IHubContext<VideoHub> videoHub)
     {
         _context = context;
         _mapper = mapper;
         _logger = logger;
+        _videoHub = videoHub;
     }
 
     public async Task<CommentDto> AddCommentAsync(CommentCreateDto createDto, string userId)
@@ -55,7 +58,11 @@ public class CommentService : ICommentService
         
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<CommentDto>(comment);
+        // Send real-time update via SignalR
+        var commentDto = _mapper.Map<CommentDto>(comment);
+        await _videoHub.Clients.Group($"Video_{comment.VideoId}").SendAsync("ReceiveComment", comment.VideoId, commentDto);
+
+        return commentDto;
     }
 
     public async Task<CommentDto> UpdateCommentAsync(int commentId, CommentUpdateDto updateDto, string userId)
@@ -173,6 +180,9 @@ public class CommentService : ICommentService
 
         await _context.SaveChangesAsync();
 
+        // Send real-time update via SignalR
+        await _videoHub.Clients.Group($"Video_{comment.VideoId}").SendAsync("ReceiveCommentLike", commentId, comment.LikeCount, comment.DislikeCount);
+
         // Return updated comment with like status
         var updatedComment = await _context.Comments
             .Include(c => c.User)
@@ -268,6 +278,9 @@ public class CommentService : ICommentService
         }
 
         await _context.SaveChangesAsync();
+
+        // Send real-time update via SignalR
+        await _videoHub.Clients.Group($"Video_{comment.VideoId}").SendAsync("ReceiveCommentDislike", commentId, comment.LikeCount, comment.DislikeCount);
 
         // Return updated comment with dislike status
         var updatedComment = await _context.Comments

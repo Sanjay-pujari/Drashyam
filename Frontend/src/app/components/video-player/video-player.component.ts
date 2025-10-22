@@ -17,6 +17,7 @@ import { WatchLaterService } from '../../services/watch-later.service';
 import { PlaylistService } from '../../services/playlist.service';
 import { PremiumContentService } from '../../services/premium-content.service';
 import { VideoAdService, VideoAd, AdRequest } from '../../services/video-ad.service';
+import { VideoSignalRService, VideoLikeUpdate } from '../../services/video-signalr.service';
 import { User } from '../../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -82,6 +83,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     private playlistService: PlaylistService,
     private premiumContentService: PremiumContentService,
     private videoAdService: VideoAdService,
+    private videoSignalRService: VideoSignalRService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
@@ -107,6 +109,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     
     // Check if video is premium content
     this.checkPremiumContent();
+
+    // Initialize SignalR connection for real-time updates
+    this.initializeSignalR();
 
     // Record view when user navigates away
     window.addEventListener('beforeunload', () => {
@@ -143,6 +148,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     if (this.watchTimer) {
       this.watchTimer.unsubscribe();
       this.watchTimer = undefined;
+    }
+    
+    // Leave video group and stop SignalR connection
+    if (this.video?.id) {
+      this.videoSignalRService.leaveVideoGroup(this.video.id);
     }
     
     // Remove event listener
@@ -384,6 +394,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
       videoId: this.video.id, 
       likeType: likeType as 'like' | 'dislike' 
     }));
+
+    // Send real-time update via SignalR
+    if (likeType === 'like') {
+      this.videoSignalRService.sendLike(this.video.id, this.video.likeCount + 1);
+    }
 
     // Show immediate feedback
     if (this.video.isLiked) {
@@ -798,5 +813,67 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     this.currentAd = null;
     this.isAdPlaying = false;
     this.resumeVideo();
+  }
+
+  // SignalR initialization and real-time update handling
+  private async initializeSignalR(): Promise<void> {
+    if (!this.video?.id) return;
+
+    try {
+      // Start SignalR connection
+      await this.videoSignalRService.startConnection();
+      
+      // Join video group for real-time updates
+      await this.videoSignalRService.joinVideoGroup(this.video.id);
+      
+      // Subscribe to real-time updates
+      this.subscribeToRealTimeUpdates();
+      
+      console.log('SignalR connection established for video:', this.video.id);
+    } catch (error) {
+      console.error('Error initializing SignalR connection:', error);
+    }
+  }
+
+  private subscribeToRealTimeUpdates(): void {
+    // Subscribe to video like updates
+    this.videoSignalRService.videoLikeUpdate$.subscribe(update => {
+      if (update && update.videoId === this.video?.id) {
+        this.handleVideoLikeUpdate(update);
+      }
+    });
+
+    // Subscribe to comment updates
+    this.videoSignalRService.commentUpdate$.subscribe(update => {
+      if (update && update.videoId === this.video?.id) {
+        this.handleCommentUpdate(update);
+      }
+    });
+  }
+
+  private handleVideoLikeUpdate(update: VideoLikeUpdate): void {
+    if (this.video && update.videoId === this.video.id) {
+      // Update video like counts
+      this.video.likeCount = update.likeCount;
+      this.video.dislikeCount = update.dislikeCount;
+      this.video.isLiked = update.isLiked;
+      this.video.isDisliked = update.isDisliked;
+      
+      // Show notification for real-time updates from other users
+      if (update.isLiked) {
+        this.snackBar.open('Someone liked this video!', 'Close', { duration: 2000 });
+      } else if (update.isDisliked) {
+        this.snackBar.open('Someone disliked this video', 'Close', { duration: 2000 });
+      }
+    }
+  }
+
+  private handleCommentUpdate(update: any): void {
+    if (this.video && update.videoId === this.video.id) {
+      // Show notification for new comments
+      if (update.action === 'added') {
+        this.snackBar.open('New comment added!', 'Close', { duration: 2000 });
+      }
+    }
   }
 }

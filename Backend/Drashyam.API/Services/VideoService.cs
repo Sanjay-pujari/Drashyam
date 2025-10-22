@@ -2,6 +2,7 @@ using AutoMapper;
 using Drashyam.API.Data;
 using Drashyam.API.DTOs;
 using Drashyam.API.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,19 +16,22 @@ public class VideoService : IVideoService
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<VideoService> _logger;
     private readonly INotificationService _notificationService;
+    private readonly IHubContext<VideoHub> _videoHub;
 
     public VideoService(
         DrashyamDbContext context,
         IMapper mapper,
         IFileStorageService fileStorage,
         ILogger<VideoService> logger,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IHubContext<VideoHub> videoHub)
     {
         _context = context;
         _mapper = mapper;
         _fileStorage = fileStorage;
         _logger = logger;
         _notificationService = notificationService;
+        _videoHub = videoHub;
     }
 
     public async Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId)
@@ -364,6 +368,16 @@ video.DislikeCount--;
         }
 
         await _context.SaveChangesAsync();
+
+        // Send real-time update via SignalR
+        if (type == DTOs.LikeType.Like)
+        {
+            await _videoHub.Clients.Group($"Video_{videoId}").SendAsync("ReceiveLike", videoId, video.LikeCount);
+        }
+        else
+        {
+            await _videoHub.Clients.Group($"Video_{videoId}").SendAsync("ReceiveDislike", videoId, video.DislikeCount);
+        }
 
         // Track interaction for recommendations
         await TrackRecommendationInteractionAsync(userId, videoId, type == DTOs.LikeType.Like ? "Like" : "Dislike", type == DTOs.LikeType.Like ? 1.0m : -0.5m);

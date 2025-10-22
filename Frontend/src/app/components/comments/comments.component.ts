@@ -17,6 +17,7 @@ import { User } from '../../models/user.model';
 import { AppState } from '../../store/app.state';
 import { selectCurrentUser } from '../../store/user/user.selectors';
 import { CommentService } from '../../services/comment.service';
+import { VideoSignalRService, CommentUpdate, CommentLikeUpdate } from '../../services/video-signalr.service';
 import { PagedResult } from '../../services/video.service';
 
 @Component({
@@ -56,6 +57,7 @@ export class CommentsComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private commentService: CommentService,
+    private videoSignalRService: VideoSignalRService,
     private snackBar: MatSnackBar
   ) {
     this.currentUser$ = this.store.select(selectCurrentUser);
@@ -70,6 +72,7 @@ export class CommentsComponent implements OnInit, OnDestroy {
     });
     
     this.loadComments();
+    this.initializeRealTimeUpdates();
   }
 
   ngOnDestroy() {
@@ -320,5 +323,54 @@ export class CommentsComponent implements OnInit, OnDestroy {
 
   canLikeComment(currentUser: User | null): boolean {
     return currentUser !== null;
+  }
+
+  // Real-time update methods
+  private initializeRealTimeUpdates(): void {
+    // Subscribe to comment updates
+    const commentUpdateSub = this.videoSignalRService.commentUpdate$.subscribe(update => {
+      if (update && update.videoId === this.videoId) {
+        this.handleCommentUpdate(update);
+      }
+    });
+
+    // Subscribe to comment like updates
+    const commentLikeUpdateSub = this.videoSignalRService.commentLikeUpdate$.subscribe(update => {
+      if (update) {
+        this.handleCommentLikeUpdate(update);
+      }
+    });
+
+    this.subscriptions.push(commentUpdateSub, commentLikeUpdateSub);
+  }
+
+  private handleCommentUpdate(update: CommentUpdate): void {
+    if (update.action === 'added') {
+      // Add new comment to the list
+      this.comments.unshift(update.comment);
+      this.commentCount++;
+      this.snackBar.open('New comment added!', 'Close', { duration: 2000 });
+    } else if (update.action === 'updated') {
+      // Update existing comment
+      const index = this.comments.findIndex(c => c.id === update.comment.id);
+      if (index !== -1) {
+        this.comments[index] = update.comment;
+      }
+    } else if (update.action === 'deleted') {
+      // Remove comment from list
+      this.comments = this.comments.filter(c => c.id !== update.comment.id);
+      this.commentCount--;
+    }
+  }
+
+  private handleCommentLikeUpdate(update: CommentLikeUpdate): void {
+    // Find and update the comment
+    const comment = this.comments.find(c => c.id === update.commentId);
+    if (comment) {
+      comment.likeCount = update.likeCount;
+      comment.dislikeCount = update.dislikeCount;
+      comment.isLiked = update.isLiked;
+      comment.isDisliked = update.isDisliked;
+    }
   }
 }
