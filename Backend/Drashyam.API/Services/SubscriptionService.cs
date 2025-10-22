@@ -334,7 +334,7 @@ public class SubscriptionService : ISubscriptionService
                 ChannelId = cs.ChannelId,
                 Name = cs.Channel.Name,
                 ProfilePictureUrl = cs.Channel.ProfilePictureUrl,
-                SubscriberCount = cs.Channel.SubscriberCount,
+                SubscriberCount = (int)cs.Channel.SubscriberCount,
                 CreatedAt = cs.SubscribedAt,
                 IsActive = cs.IsActive
             })
@@ -345,8 +345,7 @@ public class SubscriptionService : ISubscriptionService
             Items = channels,
             TotalCount = totalCount,
             Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            PageSize = pageSize
         };
     }
 }
