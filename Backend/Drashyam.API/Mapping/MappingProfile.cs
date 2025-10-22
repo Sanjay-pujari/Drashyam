@@ -106,6 +106,11 @@ public class MappingProfile : Profile
         CreateMap<TrendingVideo, TrendingVideoDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<UserInteraction, InteractionDto>();
+
+        // SuperChat mappings
+        CreateMap<SuperChat, SuperChatDto>();
+        CreateMap<SuperChatRequestDto, SuperChat>();
+        CreateMap<SuperChat, SuperChatDisplayDto>();
     }
 
     private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)
