@@ -38,7 +38,9 @@ public class AnalyticsDashboardController : ControllerBase
     {
         try
         {
-            return await _quotaService.CheckSubscriptionFeaturesAsync(userId, "analytics");
+            // For development, allow analytics for all users
+            // In production, you might want to restrict this to paid users
+            return true; // await _quotaService.CheckSubscriptionFeaturesAsync(userId, "analytics");
         }
         catch
         {
