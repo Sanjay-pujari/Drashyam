@@ -593,9 +593,11 @@ video.DislikeCount--;
             .Take(filter.PageSize)
             .ToListAsync();
 
+        var mappedVideos = _mapper.Map<List<VideoDto>>(videos);
+
         return new PagedResult<VideoDto>
         {
-            Items = _mapper.Map<List<VideoDto>>(videos),
+            Items = mappedVideos,
             TotalCount = totalCount,
             Page = filter.Page,
             PageSize = filter.PageSize

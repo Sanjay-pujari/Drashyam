@@ -8,6 +8,7 @@ export interface Video {
   userName?: string;
   userProfilePicture?: string;
   channelId?: number;
+  channelName?: string;
   status: VideoStatus;
   type: VideoType;
   visibility: VideoVisibility;

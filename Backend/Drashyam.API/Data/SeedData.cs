@@ -193,6 +193,36 @@ public static class SeedData
                 }
             );
             await context.SaveChangesAsync();
+
+            // Add some sample likes for favorites
+            var videos = await context.Videos.ToListAsync();
+            if (videos.Any())
+            {
+                context.VideoLikes.AddRange(
+                    new VideoLike
+                    {
+                        UserId = demo.Id,
+                        VideoId = videos[0].Id,
+                        Type = Models.LikeType.Like,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new VideoLike
+                    {
+                        UserId = demo.Id,
+                        VideoId = videos[1].Id,
+                        Type = Models.LikeType.Like,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new VideoLike
+                    {
+                        UserId = demo.Id,
+                        VideoId = videos[2].Id,
+                        Type = Models.LikeType.Like,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                );
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

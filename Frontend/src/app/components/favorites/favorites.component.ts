@@ -98,9 +98,19 @@ export class FavoritesComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	getChannelOrUserName(video: Video): string {
+		// First check if channel name is available directly
+		if (video.channelName) {
+			return video.channelName;
+		}
+		// Then check if channel object has name
 		if (video.channel?.name) {
 			return video.channel.name;
 		}
+		// Then check if user name is available directly
+		if (video.userName) {
+			return video.userName;
+		}
+		// Then check if user object has name
 		if (video.user?.firstName && video.user?.lastName) {
 			return `${video.user.firstName} ${video.user.lastName}`;
 		}
