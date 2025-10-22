@@ -6,10 +6,10 @@ namespace Drashyam.API.Services;
 public interface IVideoService
 {
     Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId);
-    Task<VideoDto> GetVideoByIdAsync(int id);
+    Task<VideoDto> GetVideoByIdAsync(int id, string? requestingUserId = null);
     Task<VideoDto> GetVideoByShareTokenAsync(string shareToken);
     Task<PagedResult<VideoDto>> GetVideosAsync(VideoFilterDto filter);
-    Task<PagedResult<VideoDto>> GetUserVideosAsync(string userId, VideoFilterDto filter);
+    Task<PagedResult<VideoDto>> GetUserVideosAsync(string userId, VideoFilterDto filter, string? requestingUserId = null);
     Task<PagedResult<VideoDto>> GetChannelVideosAsync(int channelId, VideoFilterDto filter);
     Task<VideoDto> UpdateVideoAsync(int id, VideoUpdateDto updateDto, string userId);
     Task DeleteVideoAsync(int id, string userId);

@@ -12,18 +12,37 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
+    private readonly IPrivacyService _privacyService;
 
-    public UserController(IUserService userService, ILogger<UserController> logger)
+    public UserController(IUserService userService, ILogger<UserController> logger, IPrivacyService privacyService)
     {
         _userService = userService;
         _logger = logger;
+        _privacyService = privacyService;
     }
 
     [HttpGet("{userId}")]
     [Authorize]
     public async Task<ActionResult<UserDto>> GetById([FromRoute] string userId)
     {
+        var requestingUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Check if user can view this profile
+        var canViewProfile = await _privacyService.CanViewUserProfileAsync(userId, requestingUserId);
+        if (!canViewProfile)
+        {
+            return Forbid("Access denied: You don't have permission to view this profile");
+        }
+
         var user = await _userService.GetUserByIdAsync(userId);
+        
+        // Check if email should be hidden
+        var canViewEmail = await _privacyService.CanViewUserEmailAsync(userId, requestingUserId);
+        if (!canViewEmail)
+        {
+            user.Email = "***@***.***"; // Hide email
+        }
+
         return Ok(user);
     }
 

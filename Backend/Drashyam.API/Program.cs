@@ -228,6 +228,7 @@ builder.Services.AddScoped<IRecommendationCacheService, RecommendationCacheServi
 builder.Services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
 builder.Services.AddScoped<IQuotaService, QuotaService>();
 builder.Services.AddScoped<IVideoProcessingService, VideoProcessingService>();
+builder.Services.AddScoped<IPrivacyService, PrivacyService>();
 
 // Background services
 builder.Services.AddHostedService<RecommendationBackgroundService>();

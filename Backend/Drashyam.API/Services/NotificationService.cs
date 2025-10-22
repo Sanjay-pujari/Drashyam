@@ -13,12 +13,14 @@ public class NotificationService : INotificationService
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
     private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly IPrivacyService _privacyService;
 
-    public NotificationService(DrashyamDbContext context, IMapper mapper, IHubContext<NotificationHub> hubContext)
+    public NotificationService(DrashyamDbContext context, IMapper mapper, IHubContext<NotificationHub> hubContext, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
         _hubContext = hubContext;
+        _privacyService = privacyService;
     }
 
     public async Task<PagedResult<VideoNotificationDto>> GetUserNotificationsAsync(string userId, int page = 1, int pageSize = 20)
@@ -124,12 +126,23 @@ public class NotificationService : INotificationService
 
         if (video == null) return;
 
-        var notifications = subscribers.Select(userId => new Notification
+        // Filter subscribers based on their notification preferences
+        var validSubscribers = new List<string>();
+        foreach (var subscriberId in subscribers)
+        {
+            var canReceiveNotification = await _privacyService.CanSendNotificationToUserAsync(subscriberId, Services.NotificationType.Video);
+            if (canReceiveNotification)
+            {
+                validSubscribers.Add(subscriberId);
+            }
+        }
+
+        var notifications = validSubscribers.Select(userId => new Notification
         {
             UserId = userId,
             Title = "New Video",
             Message = $"New video uploaded: {video.Title}",
-            Type = NotificationType.VideoUploaded,
+            Type = Models.NotificationType.VideoUploaded,
             IsRead = false,
             CreatedAt = DateTime.UtcNow,
             RelatedEntityId = videoId.ToString(),
@@ -166,7 +179,7 @@ public class NotificationService : INotificationService
             UserId = userId,
             Title = title,
             Message = message,
-            Type = Enum.Parse<NotificationType>(type),
+            Type = Enum.Parse<Models.NotificationType>(type),
             IsRead = false,
             CreatedAt = DateTime.UtcNow
         };

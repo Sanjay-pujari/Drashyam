@@ -32,7 +32,8 @@ public class VideoController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<VideoDto>> GetById([FromRoute] int id)
     {
-        var video = await _videoService.GetVideoByIdAsync(id);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var video = await _videoService.GetVideoByIdAsync(id, userId);
         return Ok(video);
     }
 
@@ -63,8 +64,9 @@ public class VideoController : ControllerBase
     [Authorize]
     public async Task<ActionResult<PagedResult<VideoDto>>> GetUserVideos([FromRoute] string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
+        var requestingUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var filter = new VideoFilterDto { Page = page, PageSize = pageSize };
-        var videos = await _videoService.GetUserVideosAsync(userId, filter);
+        var videos = await _videoService.GetUserVideosAsync(userId, filter, requestingUserId);
         return Ok(videos);
     }
 

@@ -20,6 +20,7 @@ public class VideoService : IVideoService
     private readonly IHubContext<VideoHub> _videoHub;
     private readonly IQuotaService _quotaService;
     private readonly IHostEnvironment _env;
+    private readonly IPrivacyService _privacyService;
 
     public VideoService(
         DrashyamDbContext context,
@@ -29,7 +30,8 @@ public class VideoService : IVideoService
         INotificationService notificationService,
         IHubContext<VideoHub> videoHub,
         IQuotaService quotaService,
-        IHostEnvironment env)
+        IHostEnvironment env,
+        IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
@@ -39,6 +41,7 @@ public class VideoService : IVideoService
         _videoHub = videoHub;
         _quotaService = quotaService;
         _env = env;
+        _privacyService = privacyService;
     }
 
     public async Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId)
@@ -150,7 +153,7 @@ public class VideoService : IVideoService
         }
     }
 
-    public async Task<VideoDto> GetVideoByIdAsync(int id)
+    public async Task<VideoDto> GetVideoByIdAsync(int id, string? requestingUserId = null)
     {
         var video = await _context.Videos
             .Include(v => v.User)
@@ -159,6 +162,14 @@ public class VideoService : IVideoService
 
         if (video == null)
             throw new ArgumentException("Video not found");
+
+        // Check privacy access if a requesting user is specified
+        if (!string.IsNullOrEmpty(requestingUserId))
+        {
+            var canAccess = await _privacyService.CanUserAccessVideoAsync(id, requestingUserId);
+            if (!canAccess)
+                throw new UnauthorizedAccessException("Access denied: You don't have permission to view this video");
+        }
 
         return _mapper.Map<VideoDto>(video);
     }
@@ -234,12 +245,32 @@ public class VideoService : IVideoService
         }
     }
 
-    public async Task<PagedResult<VideoDto>> GetUserVideosAsync(string userId, VideoFilterDto filter)
+    public async Task<PagedResult<VideoDto>> GetUserVideosAsync(string userId, VideoFilterDto filter, string? requestingUserId = null)
     {
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
             .Where(v => v.UserId == userId && v.Status != VideoProcessingStatus.Deleted);
+
+        // If requesting user is not the owner, filter by privacy settings
+        if (!string.IsNullOrEmpty(requestingUserId) && requestingUserId != userId)
+        {
+            var canViewUserVideos = await _privacyService.CanViewUserVideosAsync(userId, requestingUserId);
+            if (!canViewUserVideos)
+            {
+                // Return empty result if user can't view videos
+                return new PagedResult<VideoDto>
+                {
+                    Items = new List<VideoDto>(),
+                    TotalCount = 0,
+                    Page = filter.Page,
+                    PageSize = filter.PageSize
+                };
+            }
+            
+            // Only show public videos to other users
+            query = query.Where(v => v.Visibility == Models.VideoVisibility.Public);
+        }
 
         // Apply filters and sorting similar to GetVideosAsync
         var totalCount = await query.CountAsync();
