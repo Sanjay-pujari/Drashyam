@@ -198,9 +198,11 @@ builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IRecommendationCacheService, RecommendationCacheService>();
 builder.Services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
 builder.Services.AddScoped<IQuotaService, QuotaService>();
+builder.Services.AddScoped<IVideoProcessingService, VideoProcessingService>();
 
 // Background services
 builder.Services.AddHostedService<RecommendationBackgroundService>();
+builder.Services.AddHostedService<VideoProcessingBackgroundService>();
 
 var app = builder.Build();
 

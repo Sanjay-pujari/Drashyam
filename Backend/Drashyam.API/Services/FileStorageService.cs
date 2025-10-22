@@ -34,6 +34,18 @@ public class FileStorageService : IFileStorageService
         return await UploadFileAsync(thumbnailFile, fileName, _storageSettings.ImageContainerName);
     }
 
+    public async Task<string> UploadVideoAsync(Stream videoStream)
+    {
+        var fileName = $"videos/{Guid.NewGuid()}.mp4";
+        return await UploadStreamAsync(videoStream, fileName, _storageSettings.VideoContainerName, "video/mp4");
+    }
+
+    public async Task<string> UploadThumbnailAsync(Stream thumbnailStream)
+    {
+        var fileName = $"thumbnails/{Guid.NewGuid()}.jpg";
+        return await UploadStreamAsync(thumbnailStream, fileName, _storageSettings.ImageContainerName, "image/jpeg");
+    }
+
     public async Task<string> UploadProfilePictureAsync(IFormFile profilePicture)
     {
         var fileName = $"profile-pictures/{Guid.NewGuid()}_{SanitizeFileName(profilePicture.FileName)}";
@@ -170,6 +182,41 @@ public class FileStorageService : IFileStorageService
         // Remove or replace invalid characters
         var invalidChars = Path.GetInvalidFileNameChars();
         return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private async Task<string> UploadStreamAsync(Stream stream, string fileName, string containerName, string contentType)
+    {
+        try
+        {
+            // Ensure container exists
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.None);
+
+            // Get blob client
+            var blobClient = containerClient.GetBlobClient(fileName);
+
+            // Set content type
+            var headers = new BlobHttpHeaders
+            {
+                ContentType = contentType
+            };
+
+            // Upload stream
+            await blobClient.UploadAsync(stream, new BlobUploadOptions
+            {
+                HttpHeaders = headers,
+                Metadata = new Dictionary<string, string>
+                {
+                    ["UploadedAt"] = DateTime.UtcNow.ToString("O")
+                }
+            });
+
+            return blobClient.Uri.ToString();
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     private static string GetContentType(string fileName)

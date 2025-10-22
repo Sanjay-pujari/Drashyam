@@ -15,7 +15,10 @@ import { Router } from '@angular/router';
 import { VideoService } from '../../services/video.service';
 import { ChannelService } from '../../services/channel.service';
 import { QuotaService, QuotaCheck } from '../../services/quota.service';
+import { VideoProcessingService } from '../../services/video-processing.service';
 import { Channel } from '../../models/channel.model';
+import { VideoProcessingProgress } from '../../models/video-processing-progress.model';
+import { VideoProcessingStatusComponent } from '../video-processing-status/video-processing-status.component';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -24,7 +27,7 @@ import { environment } from '../../../environments/environment';
   imports: [
     CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatSelectModule, MatProgressBarModule, MatCardModule,
-    MatIconModule, MatChipsModule, MatSlideToggleModule
+    MatIconModule, MatChipsModule, MatSlideToggleModule, VideoProcessingStatusComponent
   ],
   templateUrl: './video-upload.component.html',
   styleUrls: ['./video-upload.component.scss']
@@ -41,12 +44,15 @@ export class VideoUploadComponent implements OnInit {
   supportedFormats = environment.supportedVideoFormats;
   quotaCheck: QuotaCheck | null = null;
   quotaWarning = false;
+  uploadedVideoId: number | null = null;
+  processingProgress: VideoProcessingProgress | null = null;
 
   constructor(
     private fb: FormBuilder,
     private videoService: VideoService,
     private channelService: ChannelService,
     private quotaService: QuotaService,
+    private videoProcessingService: VideoProcessingService,
     private snackBar: MatSnackBar,
     public router: Router
   ) {
@@ -158,9 +164,9 @@ export class VideoUploadComponent implements OnInit {
         next: (video) => {
           clearInterval(progressInterval);
           this.uploadProgress = 100;
-          setTimeout(() => {
-            this.router.navigate(['/videos', video.id]);
-          }, 1000);
+          this.uploadedVideoId = video.id;
+          this.snackBar.open('Video uploaded successfully! Processing will begin shortly.', 'Close', { duration: 5000 });
+          // Don't navigate immediately - show processing status
         },
         error: (err) => {
           clearInterval(progressInterval);

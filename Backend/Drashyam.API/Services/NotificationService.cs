@@ -158,4 +158,30 @@ public class NotificationService : INotificationService
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task CreateNotificationAsync(string userId, string title, string message, string type)
+    {
+        var notification = new Notification
+        {
+            UserId = userId,
+            Title = title,
+            Message = message,
+            Type = Enum.Parse<NotificationType>(type),
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Notifications.Add(notification);
+        await _context.SaveChangesAsync();
+
+        // Send real-time notification
+        await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", new
+        {
+            Id = notification.Id,
+            Title = notification.Title,
+            Message = notification.Message,
+            Type = notification.Type.ToString(),
+            CreatedAt = notification.CreatedAt
+        });
+    }
 }

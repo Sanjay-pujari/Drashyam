@@ -9,5 +9,6 @@ public interface INotificationService
     Task MarkNotificationAsReadAsync(int notificationId, string userId);
     Task MarkAllNotificationsAsReadAsync(string userId);
     Task CreateVideoNotificationAsync(int videoId, int channelId);
+    Task CreateNotificationAsync(string userId, string title, string message, string type);
     Task DeleteNotificationAsync(int notificationId, string userId);
 }

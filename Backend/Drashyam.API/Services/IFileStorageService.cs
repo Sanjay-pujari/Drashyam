@@ -3,7 +3,9 @@ namespace Drashyam.API.Services;
 public interface IFileStorageService
 {
     Task<string> UploadVideoAsync(IFormFile videoFile);
+    Task<string> UploadVideoAsync(Stream videoStream);
     Task<string> UploadThumbnailAsync(IFormFile thumbnailFile);
+    Task<string> UploadThumbnailAsync(Stream thumbnailStream);
     Task<string> UploadProfilePictureAsync(IFormFile profilePicture);
     Task<string> UploadBannerAsync(IFormFile bannerFile);
     Task<bool> DeleteFileAsync(string fileUrl);

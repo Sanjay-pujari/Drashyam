@@ -1,0 +1,77 @@
+.processing-status-card {
+  margin: 16px 0;
+}
+
+.progress-section {
+  margin: 16px 0;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.status-text {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.progress-text {
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.step-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.error-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #f44336;
+  font-size: 14px;
+}
+
+.completion-message,
+.error-message {
+  margin: 16px 0;
+}
+
+.success-message,
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.success-message {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+mat-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+}

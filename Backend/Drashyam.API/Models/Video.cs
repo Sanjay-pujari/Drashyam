@@ -76,6 +76,21 @@ public enum VideoProcessingStatus
     Deleted
 }
 
+public class VideoProcessingProgress
+{
+    public int Id { get; set; }
+    public int VideoId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public int ProgressPercentage { get; set; }
+    public string? CurrentStep { get; set; }
+    public string? ErrorMessage { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation properties
+    public virtual Video Video { get; set; } = null!;
+}
+
 public enum VideoType
 {
     Uploaded,

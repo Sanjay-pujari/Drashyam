@@ -99,7 +99,7 @@ public class VideoService : IVideoService
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
                 FileSize = uploadDto.VideoFile.Length,
-                Status = VideoProcessingStatus.Ready, // Set to Ready immediately since we're not doing processing
+                Status = VideoProcessingStatus.Processing, // Set to Processing for background service to handle
                 PublishedAt = DateTime.UtcNow
             };
 

@@ -1,0 +1,65 @@
+<div *ngIf="isProcessing && processingProgress" class="processing-status-card">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon [color]="getStatusColor()">{{ getStatusIcon() }}</mat-icon>
+        Video Processing
+      </mat-card-title>
+      <mat-card-subtitle>{{ processingProgress.currentStep }}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="progress-section">
+        <div class="progress-info">
+          <span class="status-text">{{ processingProgress.status }}</span>
+          <span class="progress-text">{{ processingProgress.progressPercentage }}%</span>
+        </div>
+        
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="processingProgress.progressPercentage"
+          [color]="getStatusColor()">
+        </mat-progress-bar>
+        
+        <div class="step-info" *ngIf="processingProgress.currentStep">
+          <mat-icon>info</mat-icon>
+          <span>{{ processingProgress.currentStep }}</span>
+        </div>
+        
+        <div class="error-info" *ngIf="processingProgress.errorMessage">
+          <mat-icon color="warn">error</mat-icon>
+          <span>{{ processingProgress.errorMessage }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button mat-button (click)="refreshStatus()">
+        <mat-icon>refresh</mat-icon>
+        Refresh Status
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div *ngIf="!isProcessing && processingProgress?.status === 'Completed'" class="completion-message">
+  <mat-card>
+    <mat-card-content>
+      <div class="success-message">
+        <mat-icon color="primary">check_circle</mat-icon>
+        <span>Video processing completed successfully!</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div *ngIf="!isProcessing && processingProgress?.status === 'Failed'" class="error-message">
+  <mat-card>
+    <mat-card-content>
+      <div class="error-message">
+        <mat-icon color="warn">error</mat-icon>
+        <span>Video processing failed. Please try uploading again.</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

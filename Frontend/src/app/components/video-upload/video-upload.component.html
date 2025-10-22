@@ -222,4 +222,10 @@
       </form>
     </mat-card-content>
   </mat-card>
+
+  <!-- Video Processing Status -->
+  <app-video-processing-status 
+    *ngIf="uploadedVideoId" 
+    [videoId]="uploadedVideoId">
+  </app-video-processing-status>
 </div>
