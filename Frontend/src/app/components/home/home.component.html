@@ -55,7 +55,7 @@
                   <div class="video-info">
                     <h3 class="video-title">{{ video.title }}</h3>
                     <p class="video-channel" (click)="onChannelClick(video.channelId!)">
-                      {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+                      {{ video.channel?.name || video.userName || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
                     </p>
                     <div class="video-stats">
                       <span>{{ video.viewCount | number }} views</span>
@@ -121,7 +121,7 @@
                   <div class="video-info">
                     <h3 class="video-title">{{ video.title }}</h3>
                     <p class="video-channel" (click)="onChannelClick(video.channelId!)">
-                      {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+                      {{ video.channel?.name || video.userName || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
                     </p>
                     <div class="video-stats">
                       <span>{{ video.viewCount | number }} views</span>
@@ -166,7 +166,7 @@
                     <div class="video-info">
                       <h3 class="video-title">{{ video.title }}</h3>
                       <p class="video-channel" (click)="onChannelClick(video.channelId!)">
-                        {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+                        {{ video.channel?.name || video.userName || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
                       </p>
                       <div class="video-stats">
                         <span>{{ video.viewCount | number }} views</span>
@@ -211,7 +211,7 @@
                       <div class="video-info">
                         <h3 class="video-title">{{ video.title }}</h3>
                         <p class="video-channel" (click)="onChannelClick(video.channelId!)">
-                          {{ video.channel?.name || video.user?.firstName + ' ' + video.user?.lastName }}
+                          {{ video.channel?.name || video.userName || (video.user?.firstName + ' ' + video.user?.lastName) }}
                         </p>
                         <div class="video-stats">
                           <span>{{ video.viewCount | number }} views</span>
@@ -286,13 +286,13 @@
                       </div>
                       <div class="video-info">
                         <div class="channel-avatar">
-                          <img [src]="video.channel?.profilePictureUrl || video.user?.profilePictureUrl || '/assets/default-avatar.svg'"
-                            [alt]="video.channel?.name || video.user?.firstName">
+                          <img [src]="video.channel?.profilePictureUrl || video.userProfilePicture || video.user?.profilePictureUrl || '/assets/default-avatar.svg'"
+                            [alt]="video.channel?.name || video.userName || (video.user?.firstName || '')">
                           </div>
                           <div class="video-details">
                             <h3 class="video-title">{{ video.title }}</h3>
                             <p class="video-channel" (click)="onChannelClick(video.channelId!)">
-                              {{ video.channel?.name || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
+                              {{ video.channel?.name || video.userName || (video.user?.firstName && video.user?.lastName ? (video.user?.firstName + ' ' + video.user?.lastName) : 'Unknown User') }}
                             </p>
                             <div class="video-stats">
                               <span>{{ video.viewCount | number }} views</span>

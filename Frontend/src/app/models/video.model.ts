@@ -5,6 +5,8 @@ export interface Video {
   videoUrl: string;
   thumbnailUrl?: string;
   userId: string;
+  userName?: string;
+  userProfilePicture?: string;
   channelId?: number;
   status: VideoStatus;
   type: VideoType;
