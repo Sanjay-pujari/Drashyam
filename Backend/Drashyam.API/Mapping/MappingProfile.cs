@@ -52,6 +52,10 @@ public class MappingProfile : Profile
         CreateMap<AudienceAnalytics, AudienceAnalyticsDto>();
         CreateMap<EngagementAnalytics, EngagementAnalyticsDto>();
 
+        // User Settings mappings
+        CreateMap<UserSettings, PrivacySettingsDto>();
+        CreateMap<UserSettings, NotificationSettingsDto>();
+
         // Invite mappings
         CreateMap<UserInvite, UserInviteDto>()
             .ForMember(dest => dest.InviterName, opt => opt.MapFrom(src => $"{src.Inviter.FirstName} {src.Inviter.LastName}"))

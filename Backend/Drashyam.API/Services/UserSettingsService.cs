@@ -19,20 +19,29 @@ public class UserSettingsService : IUserSettingsService
 
     public async Task<PrivacySettingsDto> GetPrivacySettingsAsync(string userId)
     {
-        Console.WriteLine($"UserSettingsService - Getting privacy settings for user: {userId}");
-        
-        var userSettings = await GetOrCreateUserSettingsAsync(userId);
-        Console.WriteLine($"UserSettingsService - Retrieved settings: ProfilePublic={userSettings.ProfilePublic}, ShowEmail={userSettings.ShowEmail}, AllowDataSharing={userSettings.AllowDataSharing}");
-        
-        var result = new PrivacySettingsDto
+        try
         {
-            ProfilePublic = userSettings.ProfilePublic,
-            ShowEmail = userSettings.ShowEmail,
-            AllowDataSharing = userSettings.AllowDataSharing
-        };
-        
-        Console.WriteLine($"UserSettingsService - Returning privacy settings: ProfilePublic={result.ProfilePublic}, ShowEmail={result.ShowEmail}, AllowDataSharing={result.AllowDataSharing}");
-        return result;
+            Console.WriteLine($"UserSettingsService - Getting privacy settings for user: {userId}");
+            
+            var userSettings = await GetOrCreateUserSettingsAsync(userId);
+            Console.WriteLine($"UserSettingsService - Retrieved settings: ProfilePublic={userSettings.ProfilePublic}, ShowEmail={userSettings.ShowEmail}, AllowDataSharing={userSettings.AllowDataSharing}");
+            
+            var result = new PrivacySettingsDto
+            {
+                ProfilePublic = userSettings.ProfilePublic,
+                ShowEmail = userSettings.ShowEmail,
+                AllowDataSharing = userSettings.AllowDataSharing
+            };
+            
+            Console.WriteLine($"UserSettingsService - Returning privacy settings: ProfilePublic={result.ProfilePublic}, ShowEmail={result.ShowEmail}, AllowDataSharing={result.AllowDataSharing}");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UserSettingsService - Error getting privacy settings: {ex.Message}");
+            Console.WriteLine($"UserSettingsService - Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     public async Task<PrivacySettingsDto> UpdatePrivacySettingsAsync(string userId, PrivacySettingsDto settings)
@@ -91,37 +100,46 @@ public class UserSettingsService : IUserSettingsService
 
     public async Task<UserSettings> GetOrCreateUserSettingsAsync(string userId)
     {
-        Console.WriteLine($"UserSettingsService - Getting or creating settings for user: {userId}");
-        
-        var userSettings = await _context.UserSettings
-            .FirstOrDefaultAsync(us => us.UserId == userId);
-
-        if (userSettings == null)
+        try
         {
-            Console.WriteLine($"UserSettingsService - No existing settings found, creating new ones for user: {userId}");
-            userSettings = new UserSettings
+            Console.WriteLine($"UserSettingsService - Getting or creating settings for user: {userId}");
+            
+            var userSettings = await _context.UserSettings
+                .FirstOrDefaultAsync(us => us.UserId == userId);
+
+            if (userSettings == null)
             {
-                UserId = userId,
-                ProfilePublic = true,
-                ShowEmail = false,
-                AllowDataSharing = true,
-                EmailNotifications = true,
-                PushNotifications = true,
-                NewVideoNotifications = true,
-                CommentNotifications = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                Console.WriteLine($"UserSettingsService - No existing settings found, creating new ones for user: {userId}");
+                userSettings = new UserSettings
+                {
+                    UserId = userId,
+                    ProfilePublic = true,
+                    ShowEmail = false,
+                    AllowDataSharing = true,
+                    EmailNotifications = true,
+                    PushNotifications = true,
+                    NewVideoNotifications = true,
+                    CommentNotifications = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
 
-            _context.UserSettings.Add(userSettings);
-            var createResult = await _context.SaveChangesAsync();
-            Console.WriteLine($"UserSettingsService - Created new settings, SaveChangesAsync returned: {createResult}");
+                _context.UserSettings.Add(userSettings);
+                var createResult = await _context.SaveChangesAsync();
+                Console.WriteLine($"UserSettingsService - Created new settings, SaveChangesAsync returned: {createResult}");
+            }
+            else
+            {
+                Console.WriteLine($"UserSettingsService - Found existing settings for user: {userId}");
+            }
+
+            return userSettings;
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine($"UserSettingsService - Found existing settings for user: {userId}");
+            Console.WriteLine($"UserSettingsService - Error in GetOrCreateUserSettingsAsync: {ex.Message}");
+            Console.WriteLine($"UserSettingsService - Stack trace: {ex.StackTrace}");
+            throw;
         }
-
-        return userSettings;
     }
 }
