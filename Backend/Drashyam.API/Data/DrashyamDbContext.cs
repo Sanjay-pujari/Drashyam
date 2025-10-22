@@ -47,6 +47,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Recommendation> Recommendations { get; set; }
     public DbSet<TrendingVideo> TrendingVideos { get; set; }
     public DbSet<VideoProcessingProgress> VideoProcessingProgress { get; set; }
+    public DbSet<SuperChat> SuperChats { get; set; }
     
     // Analytics Dashboard
     public DbSet<AnalyticsDashboard> AnalyticsDashboards { get; set; }

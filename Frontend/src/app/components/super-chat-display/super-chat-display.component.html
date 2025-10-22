@@ -1,0 +1,35 @@
+<div class="super-chat-container">
+  <div class="super-chat-header">
+    <h3>
+      <mat-icon>favorite</mat-icon>
+      Super Chats
+    </h3>
+    <button mat-icon-button (click)="toggleDisplay()" class="toggle-button">
+      <mat-icon>{{ isExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+  </div>
+  
+  <div class="super-chat-list" *ngIf="isExpanded">
+    <div 
+      *ngFor="let superChat of displayedSuperChats; trackBy: trackBySuperChatId"
+      class="super-chat-item"
+      [style.background-color]="getTierColor(superChat.amount)">
+      <div class="super-chat-header">
+        <div class="donor-info">
+          <span class="donor-name">{{ superChat.donorName }}</span>
+          <span class="donor-amount">${{ superChat.amount }}</span>
+        </div>
+        <div class="super-chat-time">{{ formatTime(superChat.createdAt) }}</div>
+      </div>
+      <div class="super-chat-message" *ngIf="superChat.donorMessage">
+        {{ superChat.donorMessage }}
+      </div>
+    </div>
+    
+    <div class="empty-state" *ngIf="displayedSuperChats.length === 0">
+      <mat-icon>favorite_border</mat-icon>
+      <p>No Super Chats yet</p>
+      <p>Be the first to support this streamer!</p>
+    </div>
+  </div>
+</div>

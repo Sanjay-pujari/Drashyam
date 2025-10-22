@@ -1,0 +1,122 @@
+.super-chat-dialog {
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.super-chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.amount-selection h3,
+.donor-info h3,
+.message-section h3,
+.preview-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.tier-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tier-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  font-weight: 500;
+}
+
+.tier-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.tier-button.selected {
+  border-color: #333;
+  transform: scale(1.05);
+}
+
+.tier-amount {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.tier-label {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.tier-duration {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.custom-amount {
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.anonymous-checkbox {
+  margin-top: 16px;
+}
+
+.preview-section {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.super-chat-preview {
+  padding: 16px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.preview-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.preview-amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.preview-message {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+mat-dialog-content {
+  padding: 24px;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+}

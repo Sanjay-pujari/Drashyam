@@ -23,4 +23,9 @@ public class LiveStreamHub : Hub
     {
         await Clients.Group($"LiveStream_{streamId}").SendAsync("UpdateViewerCount", viewerCount);
     }
+
+    public async Task SendSuperChat(int streamId, object superChat)
+    {
+        await Clients.Group($"LiveStream_{streamId}").SendAsync("ReceiveSuperChat", superChat);
+    }
 }

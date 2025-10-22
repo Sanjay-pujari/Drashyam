@@ -64,6 +64,7 @@ const routes: Routes = [
   }, canActivate: [authGuard] },
   { path: 'watch-later', loadComponent: () => import('./app/components/watch-later/watch-later.component').then(m => m.WatchLaterComponent), canActivate: [authGuard] },
   { path: 'playlists', loadComponent: () => import('./app/components/playlists/playlists.component').then(m => m.PlaylistsComponent), canActivate: [authGuard] },
+  { path: 'live/:id', loadComponent: () => import('./app/components/live-stream-viewer/live-stream-viewer.component').then(m => m.LiveStreamViewerComponent) },
   { path: 'playlists/:id', loadComponent: () => import('./app/components/playlist-details/playlist-details.component').then(m => m.PlaylistDetailsComponent), canActivate: [authGuard] },
   { path: 'my-channels', loadComponent: () => import('./app/components/my-channels/my-channels.component').then(m => m.MyChannelsComponent), canActivate: [authGuard] },
   { path: 'subscriptions', loadComponent: () => import('./app/components/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent), canActivate: [authGuard] },

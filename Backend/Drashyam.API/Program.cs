@@ -201,6 +201,7 @@ builder.Services.AddScoped<IChannelBrandingService, ChannelBrandingService>();
 builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
 builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
 builder.Services.AddScoped<IMonetizationService, MonetizationService>();
+builder.Services.AddScoped<ISuperChatService, SuperChatService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IRecommendationCacheService, RecommendationCacheService>();
 builder.Services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
