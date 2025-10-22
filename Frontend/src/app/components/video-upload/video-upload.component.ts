@@ -170,7 +170,10 @@ export class VideoUploadComponent implements OnInit {
           this.uploadProgress = 100;
           this.uploadedVideoId = video.id;
           this.snackBar.open('Video uploaded successfully! Processing will begin shortly.', 'Close', { duration: 5000 });
-          // Don't navigate immediately - show processing status
+          // Redirect immediately to the uploaded video's page; processing will continue there
+          if (this.uploadedVideoId) {
+            this.router.navigate(['/videos', this.uploadedVideoId]);
+          }
         },
         error: (err) => {
           clearInterval(progressInterval);
@@ -189,7 +192,7 @@ export class VideoUploadComponent implements OnInit {
     if (status === 'Completed') {
       // Navigate to the uploaded video's page
       if (this.uploadedVideoId) {
-        this.router.navigate(['/video', this.uploadedVideoId]);
+        this.router.navigate(['/videos', this.uploadedVideoId]);
       } else {
         this.router.navigate(['/videos']);
       }
