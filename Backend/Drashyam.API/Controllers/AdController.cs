@@ -8,7 +8,6 @@ namespace Drashyam.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class AdController : ControllerBase
 {
     private readonly IAdService _adService;
@@ -21,6 +20,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost("campaigns")]
+    [Authorize]
     public async Task<ActionResult<AdCampaignDto>> CreateCampaign([FromBody] AdCampaignCreateDto createDto)
     {
         try
@@ -40,6 +40,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("campaigns/{id}")]
+    [Authorize]
     public async Task<ActionResult<AdCampaignDto>> GetCampaign(int id)
     {
         try
@@ -59,6 +60,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("campaigns")]
+    [Authorize]
     public async Task<ActionResult<PagedResult<AdCampaignDto>>> GetCampaigns([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         try
@@ -78,6 +80,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPut("campaigns/{id}")]
+    [Authorize]
     public async Task<ActionResult<AdCampaignDto>> UpdateCampaign(int id, [FromBody] AdCampaignUpdateDto updateDto)
     {
         try
@@ -101,6 +104,7 @@ public class AdController : ControllerBase
     }
 
     [HttpDelete("campaigns/{id}")]
+    [Authorize]
     public async Task<ActionResult> DeleteCampaign(int id)
     {
         try
@@ -123,6 +127,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost("campaigns/{id}/activate")]
+    [Authorize]
     public async Task<ActionResult> ActivateCampaign(int id)
     {
         try
@@ -145,6 +150,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost("campaigns/{id}/pause")]
+    [Authorize]
     public async Task<ActionResult> PauseCampaign(int id)
     {
         try
@@ -171,10 +177,9 @@ public class AdController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
+            // Get user ID from token if available, otherwise use the one from request
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? request.UserId;
+            
             var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, request.Type);
             return Ok(ad);
         }
@@ -230,6 +235,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("revenue")]
+    [Authorize]
     public async Task<ActionResult<AdRevenueDto>> GetAdRevenue([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         try
@@ -249,6 +255,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("campaigns/{id}/analytics")]
+    [Authorize]
     public async Task<ActionResult<AdAnalyticsDto>> GetCampaignAnalytics(int id, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         try
@@ -264,6 +271,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("analytics")]
+    [Authorize]
     public async Task<ActionResult<AdAnalyticsDto>> GetAdvertiserAnalytics([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         try

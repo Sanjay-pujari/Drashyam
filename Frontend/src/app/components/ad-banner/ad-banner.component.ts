@@ -21,8 +21,8 @@ export interface AdServe {
   template: `
     <div class="ad-banner" *ngIf="ad && ad.hasAd">
       <div class="ad-content" (click)="onAdClick()">
-        <img *ngIf="ad.thumbnailUrl" [src]="ad.thumbnailUrl" [alt]="'Advertisement'" class="ad-image">
-        <div class="ad-text" *ngIf="ad.adContent" [innerHTML]="ad.adContent"></div>
+        <img *ngIf="ad?.thumbnailUrl" [src]="ad.thumbnailUrl" [alt]="'Advertisement'" class="ad-image">
+        <div class="ad-text" *ngIf="ad?.adContent" [innerHTML]="ad.adContent"></div>
         <div class="ad-label">Advertisement</div>
       </div>
     </div>
@@ -104,12 +104,13 @@ export class AdBannerComponent implements OnInit, OnDestroy {
     this.http.post<AdServe>(`${environment.apiUrl}/api/ad/serve`, request).subscribe({
       next: (ad) => {
         this.ad = ad;
-        if (ad.hasAd) {
+        if (ad && ad.hasAd) {
           this.recordImpression();
         }
       },
       error: (error) => {
         console.error('Error loading ad:', error);
+        this.ad = null; // Set ad to null on error
       }
     });
   }

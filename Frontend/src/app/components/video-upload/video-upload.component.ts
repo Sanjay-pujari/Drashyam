@@ -76,13 +76,16 @@ export class VideoUploadComponent implements OnInit {
 
   loadUserChannels() {
     this.isLoadingChannels = true;
+    this.uploadForm.get('channelId')?.disable();
     this.channelService.getUserChannels('me', { page: 1, pageSize: 100 }).subscribe({
       next: (result) => {
         this.userChannels = result.items;
         this.isLoadingChannels = false;
+        this.uploadForm.get('channelId')?.enable();
       },
       error: (err) => {
         this.isLoadingChannels = false;
+        this.uploadForm.get('channelId')?.enable();
       }
     });
   }

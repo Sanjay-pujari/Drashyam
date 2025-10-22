@@ -82,7 +82,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Channel (Optional)</mat-label>
-            <mat-select formControlName="channelId" [disabled]="isLoadingChannels" (selectionChange)="onChannelChange()">
+            <mat-select formControlName="channelId" (selectionChange)="onChannelChange()">
               <mat-option [value]="null">No Channel (Upload without channel)</mat-option>
               @for (channel of userChannels; track channel.id) {
                 <mat-option [value]="channel.id">{{ channel.name }}</mat-option>
