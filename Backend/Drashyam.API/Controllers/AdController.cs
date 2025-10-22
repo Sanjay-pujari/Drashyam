@@ -1,13 +1,13 @@
+using Drashyam.API.DTOs;
+using Drashyam.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Drashyam.API.DTOs;
-using Drashyam.API.Services;
 
 namespace Drashyam.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
+[ApiController]
 [Authorize]
 public class AdController : ControllerBase
 {
@@ -21,7 +21,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost("campaigns")]
-    public async Task<ActionResult<AdCampaignDto>> CreateCampaign([FromBody] AdCampaignCreateDto campaignDto)
+    public async Task<ActionResult<AdCampaignDto>> CreateCampaign([FromBody] AdCampaignCreateDto createDto)
     {
         try
         {
@@ -29,80 +29,32 @@ public class AdController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            // Basic validations to avoid 500s from EF or mapping issues
-            if (string.IsNullOrWhiteSpace(campaignDto.Name))
-                return BadRequest("Name is required");
-
-            if (campaignDto.Budget < 0 || campaignDto.CostPerView < 0 || campaignDto.CostPerClick < 0)
-                return BadRequest("Budget/CPV/CPC must be non-negative");
-
-            if (campaignDto.EndDate < campaignDto.StartDate)
-                return BadRequest("EndDate must be greater than or equal to StartDate");
-
-            campaignDto.AdvertiserId = userId;
-            var campaign = await _adService.CreateCampaignAsync(campaignDto);
-            return Ok(campaign);
+            var campaign = await _adService.CreateAdCampaignAsync(createDto, userId);
+            return CreatedAtAction(nameof(GetCampaign), new { id = campaign.Id }, campaign);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating ad campaign");
-            return StatusCode(500, ex.Message);
+            return BadRequest("Failed to create ad campaign");
         }
     }
 
-    [HttpPut("campaigns/{campaignId}")]
-    public async Task<ActionResult<AdCampaignDto>> UpdateCampaign(int campaignId, [FromBody] AdCampaignUpdateDto campaignDto)
+    [HttpGet("campaigns/{id}")]
+    public async Task<ActionResult<AdCampaignDto>> GetCampaign(int id)
     {
         try
         {
-            var campaign = await _adService.UpdateCampaignAsync(campaignId, campaignDto);
+            var campaign = await _adService.GetAdCampaignByIdAsync(id);
             return Ok(campaign);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
-            return NotFound(ex.Message);
+            return NotFound();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating ad campaign {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while updating the campaign");
-        }
-    }
-
-    [HttpDelete("campaigns/{campaignId}")]
-    public async Task<IActionResult> DeleteCampaign(int campaignId)
-    {
-        try
-        {
-            var result = await _adService.DeleteCampaignAsync(campaignId);
-            if (!result)
-                return NotFound();
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting ad campaign {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while deleting the campaign");
-        }
-    }
-
-    [HttpGet("campaigns/{campaignId}")]
-    public async Task<ActionResult<AdCampaignDto>> GetCampaign(int campaignId)
-    {
-        try
-        {
-            var campaign = await _adService.GetCampaignAsync(campaignId);
-            return Ok(campaign);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting ad campaign {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while retrieving the campaign");
+            _logger.LogError(ex, "Error retrieving ad campaign {CampaignId}", id);
+            return BadRequest("Failed to retrieve ad campaign");
         }
     }
 
@@ -115,123 +67,18 @@ public class AdController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var campaigns = await _adService.GetCampaignsAsync(userId, page, pageSize);
+            var campaigns = await _adService.GetAdCampaignsAsync(userId, page, pageSize);
             return Ok(campaigns);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting ad campaigns");
-            return StatusCode(500, "An error occurred while retrieving campaigns");
+            _logger.LogError(ex, "Error retrieving ad campaigns");
+            return BadRequest("Failed to retrieve ad campaigns");
         }
     }
 
-    [HttpPost("campaigns/{campaignId}/activate")]
-    public async Task<IActionResult> ActivateCampaign(int campaignId)
-    {
-        try
-        {
-            var result = await _adService.ActivateCampaignAsync(campaignId);
-            if (!result)
-                return NotFound();
-
-            return Ok(new { message = "Campaign activated successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error activating ad campaign {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while activating the campaign");
-        }
-    }
-
-    [HttpPost("campaigns/{campaignId}/pause")]
-    public async Task<IActionResult> PauseCampaign(int campaignId)
-    {
-        try
-        {
-            var result = await _adService.PauseCampaignAsync(campaignId);
-            if (!result)
-                return NotFound();
-
-            return Ok(new { message = "Campaign paused successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error pausing ad campaign {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while pausing the campaign");
-        }
-    }
-
-    [HttpPost("serve")]
-    [AllowAnonymous]
-    public async Task<ActionResult<AdServeDto>> ServeAd([FromBody] AdRequestDto request)
-    {
-        try
-        {
-            var ad = await _adService.ServeAdAsync(request);
-            return Ok(ad);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error serving ad");
-            return StatusCode(500, "An error occurred while serving the ad");
-        }
-    }
-
-    [HttpPost("impressions")]
-    [AllowAnonymous]
-    public async Task<IActionResult> RecordImpression([FromBody] AdImpressionRequestDto request)
-    {
-        try
-        {
-            var result = await _adService.RecordImpressionAsync(request.CampaignId, request.UserId, request.VideoId);
-            if (!result)
-                return BadRequest("Failed to record impression");
-
-            return Ok(new { message = "Impression recorded successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error recording ad impression");
-            return StatusCode(500, "An error occurred while recording the impression");
-        }
-    }
-
-    [HttpPost("clicks")]
-    [AllowAnonymous]
-    public async Task<IActionResult> RecordClick([FromBody] AdClickRequestDto request)
-    {
-        try
-        {
-            var result = await _adService.RecordClickAsync(request.CampaignId, request.UserId, request.VideoId);
-            if (!result)
-                return BadRequest("Failed to record click");
-
-            return Ok(new { message = "Click recorded successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error recording ad click");
-            return StatusCode(500, "An error occurred while recording the click");
-        }
-    }
-
-    [HttpGet("campaigns/{campaignId}/analytics")]
-    public async Task<ActionResult<AdAnalyticsDto>> GetCampaignAnalytics(int campaignId, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
-    {
-        try
-        {
-            var analytics = await _adService.GetCampaignAnalyticsAsync(campaignId, startDate, endDate);
-            return Ok(analytics);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting campaign analytics for {CampaignId}", campaignId);
-            return StatusCode(500, "An error occurred while retrieving analytics");
-        }
-    }
-
-    [HttpGet("revenue")]
-    public async Task<ActionResult<decimal>> GetRevenue([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
+    [HttpPut("campaigns/{id}")]
+    public async Task<ActionResult<AdCampaignDto>> UpdateCampaign(int id, [FromBody] AdCampaignUpdateDto updateDto)
     {
         try
         {
@@ -239,48 +86,199 @@ public class AdController : ControllerBase
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var revenue = await _adService.CalculateRevenueAsync(userId, startDate, endDate);
+            var campaign = await _adService.UpdateAdCampaignAsync(id, updateDto, userId);
+            return Ok(campaign);
+        }
+        catch (ArgumentException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating ad campaign {CampaignId}", id);
+            return BadRequest("Failed to update ad campaign");
+        }
+    }
+
+    [HttpDelete("campaigns/{id}")]
+    public async Task<ActionResult> DeleteCampaign(int id)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _adService.DeleteAdCampaignAsync(id, userId);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting ad campaign {CampaignId}", id);
+            return BadRequest("Failed to delete ad campaign");
+        }
+    }
+
+    [HttpPost("campaigns/{id}/activate")]
+    public async Task<ActionResult> ActivateCampaign(int id)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _adService.ActivateAdCampaignAsync(id, userId);
+            if (!success)
+                return NotFound();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error activating ad campaign {CampaignId}", id);
+            return BadRequest("Failed to activate ad campaign");
+        }
+    }
+
+    [HttpPost("campaigns/{id}/pause")]
+    public async Task<ActionResult> PauseCampaign(int id)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _adService.PauseAdCampaignAsync(id, userId);
+            if (!success)
+                return NotFound();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error pausing ad campaign {CampaignId}", id);
+            return BadRequest("Failed to pause ad campaign");
+        }
+    }
+
+    [HttpGet("serve")]
+    public async Task<ActionResult<AdDto?>> GetAd([FromQuery] int? videoId = null, [FromQuery] Models.AdType? type = null)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var ad = await _adService.GetAdForUserAsync(userId, videoId, type);
+            return Ok(ad);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error serving ad");
+            return BadRequest("Failed to serve ad");
+        }
+    }
+
+    [HttpPost("impressions")]
+    public async Task<ActionResult> RecordImpression([FromBody] AdImpressionRequestDto request)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _adService.RecordAdImpressionAsync(request.CampaignId, userId, request.VideoId);
+            if (!success)
+                return BadRequest("Failed to record impression");
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error recording ad impression");
+            return BadRequest("Failed to record impression");
+        }
+    }
+
+    [HttpPost("clicks")]
+    public async Task<ActionResult> RecordClick([FromBody] AdClickRequestDto request)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var success = await _adService.RecordAdClickAsync(request.CampaignId, userId, request.VideoId);
+            if (!success)
+                return BadRequest("Failed to record click");
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error recording ad click");
+            return BadRequest("Failed to record click");
+        }
+    }
+
+    [HttpGet("revenue")]
+    public async Task<ActionResult<AdRevenueDto>> GetAdRevenue([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var revenue = await _adService.GetAdRevenueBreakdownAsync(userId, startDate, endDate);
             return Ok(revenue);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error calculating ad revenue");
-            return StatusCode(500, "An error occurred while calculating revenue");
+            _logger.LogError(ex, "Error retrieving ad revenue");
+            return BadRequest("Failed to retrieve ad revenue");
         }
     }
 
-    [HttpPost("video-ad")]
-    [AllowAnonymous]
-    public async Task<ActionResult<VideoAdResponseDto>> GetVideoAd([FromBody] VideoAdRequestDto request)
+    [HttpGet("campaigns/{id}/analytics")]
+    public async Task<ActionResult<AdAnalyticsDto>> GetCampaignAnalytics(int id, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         try
         {
-            var adResponse = await _adService.ServeVideoAdAsync(request);
-            return Ok(adResponse);
+            var analytics = await _adService.GetAdCampaignAnalyticsAsync(id, startDate, endDate);
+            return Ok(analytics);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error serving video ad");
-            return StatusCode(500, "An error occurred while serving the video ad");
+            _logger.LogError(ex, "Error retrieving campaign analytics for {CampaignId}", id);
+            return BadRequest("Failed to retrieve campaign analytics");
         }
     }
 
-    [HttpPost("completion")]
-    [AllowAnonymous]
-    public async Task<IActionResult> RecordAdCompletion([FromBody] AdCompletionRequestDto request)
+    [HttpGet("analytics")]
+    public async Task<ActionResult<AdAnalyticsDto>> GetAdvertiserAnalytics([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
     {
         try
         {
-            var result = await _adService.RecordAdCompletionAsync(request.CampaignId, request.UserId, request.VideoId, request.WatchedDuration);
-            if (!result)
-                return BadRequest("Failed to record ad completion");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-            return Ok(new { message = "Ad completion recorded successfully" });
+            var analytics = await _adService.GetAdvertiserAnalyticsAsync(userId, startDate, endDate);
+            return Ok(analytics);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error recording ad completion");
-            return StatusCode(500, "An error occurred while recording ad completion");
+            _logger.LogError(ex, "Error retrieving advertiser analytics");
+            return BadRequest("Failed to retrieve advertiser analytics");
         }
     }
 }
@@ -288,14 +286,11 @@ public class AdController : ControllerBase
 public class AdImpressionRequestDto
 {
     public int CampaignId { get; set; }
-    public string? UserId { get; set; }
     public int? VideoId { get; set; }
 }
 
 public class AdClickRequestDto
 {
     public int CampaignId { get; set; }
-    public string? UserId { get; set; }
     public int? VideoId { get; set; }
 }
-

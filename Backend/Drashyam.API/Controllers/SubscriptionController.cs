@@ -122,6 +122,43 @@ public class SubscriptionController : ControllerBase
         var list = await _subscriptionService.GetExpiringSubscriptionsAsync(daysAhead, page, pageSize);
         return Ok(list);
     }
+
+    [HttpGet("history")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<SubscriptionHistoryDto>>> GetHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var history = await _subscriptionService.GetUserSubscriptionHistoryAsync(userId, page, pageSize);
+        return Ok(history);
+    }
+
+    [HttpGet("analytics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<SubscriptionAnalyticsDto>> GetAnalytics([FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null)
+    {
+        var analytics = await _subscriptionService.GetSubscriptionAnalyticsAsync(startDate, endDate);
+        return Ok(analytics);
+    }
+
+    [HttpPost("{subscriptionId:int}/suspend")]
+    [Authorize]
+    public async Task<IActionResult> Suspend([FromRoute] int subscriptionId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var result = await _subscriptionService.SuspendSubscriptionAsync(subscriptionId, userId);
+        if (!result) return BadRequest();
+        return NoContent();
+    }
+
+    [HttpPost("{subscriptionId:int}/reactivate")]
+    [Authorize]
+    public async Task<IActionResult> Reactivate([FromRoute] int subscriptionId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var result = await _subscriptionService.ReactivateSubscriptionAsync(subscriptionId, userId);
+        if (!result) return BadRequest();
+        return NoContent();
+    }
 }
 
 

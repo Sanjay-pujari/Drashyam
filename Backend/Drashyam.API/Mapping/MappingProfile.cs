@@ -80,8 +80,7 @@ public class MappingProfile : Profile
         CreateMap<PlaylistVideoCreateDto, PlaylistVideo>();
 
         // Ad Campaign mappings
-        CreateMap<AdCampaign, AdCampaignDto>()
-            .ForMember(dest => dest.AdvertiserName, opt => opt.MapFrom(src => src.Advertiser != null ? $"{src.Advertiser.FirstName} {src.Advertiser.LastName}" : string.Empty));
+        CreateMap<AdCampaign, AdCampaignDto>();
         CreateMap<AdCampaignCreateDto, AdCampaign>();
         CreateMap<AdCampaignUpdateDto, AdCampaign>();
         CreateMap<AdImpression, AdImpressionDto>();

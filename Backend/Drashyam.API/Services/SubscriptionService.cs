@@ -200,4 +200,120 @@ public class SubscriptionService : ISubscriptionService
             PageSize = pageSize
         };
     }
+
+    public async Task<PagedResult<SubscriptionHistoryDto>> GetUserSubscriptionHistoryAsync(string userId, int page = 1, int pageSize = 20)
+    {
+        var subscriptions = await _context.Subscriptions
+            .Where(s => s.UserId == userId)
+            .Include(s => s.Plan)
+            .OrderByDescending(s => s.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var totalCount = await _context.Subscriptions
+            .Where(s => s.UserId == userId)
+            .CountAsync();
+
+        var historyItems = subscriptions.Select(s => new SubscriptionHistoryDto
+        {
+            Id = s.Id,
+            UserId = s.UserId,
+            SubscriptionPlanId = s.SubscriptionPlanId,
+            PlanName = s.Plan.Name,
+            StartDate = s.StartDate,
+            EndDate = s.EndDate,
+            Status = s.Status,
+            Amount = s.Amount,
+            CreatedAt = s.CreatedAt,
+            CancelledAt = s.CancelledAt
+        }).ToList();
+
+        return new PagedResult<SubscriptionHistoryDto>
+        {
+            Items = historyItems,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<SubscriptionAnalyticsDto> GetSubscriptionAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var query = _context.Subscriptions.AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(s => s.CreatedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(s => s.CreatedAt <= endDate.Value);
+
+        var subscriptions = await query
+            .Include(s => s.Plan)
+            .ToListAsync();
+
+        var totalSubscriptions = subscriptions.Count;
+        var activeSubscriptions = subscriptions.Count(s => s.Status == SubscriptionStatus.Active);
+        var expiredSubscriptions = subscriptions.Count(s => s.Status == SubscriptionStatus.Expired);
+        var cancelledSubscriptions = subscriptions.Count(s => s.Status == SubscriptionStatus.Cancelled);
+
+        var totalRevenue = subscriptions.Sum(s => s.Amount);
+        var monthlyRecurringRevenue = subscriptions
+            .Where(s => s.Status == SubscriptionStatus.Active)
+            .Sum(s => s.Amount);
+
+        var averageRevenuePerUser = activeSubscriptions > 0 ? monthlyRecurringRevenue / activeSubscriptions : 0;
+
+        var planAnalytics = subscriptions
+            .GroupBy(s => new { s.Plan.Id, s.Plan.Name })
+            .Select(g => new SubscriptionPlanAnalyticsDto
+            {
+                PlanId = g.Key.Id,
+                PlanName = g.Key.Name,
+                SubscriberCount = g.Count(),
+                Revenue = g.Sum(s => s.Amount),
+                AverageRevenuePerUser = g.Count() > 0 ? g.Sum(s => s.Amount) / g.Count() : 0
+            })
+            .ToList();
+
+        return new SubscriptionAnalyticsDto
+        {
+            TotalSubscriptions = totalSubscriptions,
+            ActiveSubscriptions = activeSubscriptions,
+            ExpiredSubscriptions = expiredSubscriptions,
+            CancelledSubscriptions = cancelledSubscriptions,
+            TotalRevenue = totalRevenue,
+            MonthlyRecurringRevenue = monthlyRecurringRevenue,
+            AverageRevenuePerUser = averageRevenuePerUser,
+            PlanAnalytics = planAnalytics
+        };
+    }
+
+    public async Task<bool> SuspendSubscriptionAsync(int subscriptionId, string userId)
+    {
+        var subscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(s => s.Id == subscriptionId && s.UserId == userId);
+
+        if (subscription == null)
+            return false;
+
+        subscription.Status = SubscriptionStatus.Suspended;
+        subscription.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ReactivateSubscriptionAsync(int subscriptionId, string userId)
+    {
+        var subscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(s => s.Id == subscriptionId && s.UserId == userId);
+
+        if (subscription == null)
+            return false;
+
+        subscription.Status = SubscriptionStatus.Active;
+        subscription.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

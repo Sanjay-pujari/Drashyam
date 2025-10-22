@@ -1,0 +1,141 @@
+<div class="subscription-management-container">
+  <div class="header">
+    <h1>Subscription Management</h1>
+    <p>Manage your subscription and billing</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading subscription details...</p>
+  </div>
+  <div *ngIf="!isLoading && subscription" class="subscription-details">
+    <mat-card class="main-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>subscriptions</mat-icon>
+          Current Subscription
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="subscription-info">
+          <div class="plan-details">
+            <h2>{{ subscription.plan?.name }}</h2>
+            <p class="plan-description">{{ subscription.plan?.description }}</p>
+            <div class="plan-features">
+              <div class="feature">
+                <mat-icon>storage</mat-icon>
+                <span>{{ subscription.plan?.maxStorageGB }}GB Storage</span>
+              </div>
+              <div class="feature">
+                <mat-icon>video_library</mat-icon>
+                <span>{{ subscription.plan?.maxVideosPerChannel }} Videos per Channel</span>
+              </div>
+              <div class="feature">
+                <mat-icon>account_balance</mat-icon>
+                <span>{{ subscription.plan?.maxChannels }} Channels</span>
+              </div>
+              <div class="feature" [class.included]="!subscription.plan?.hasAds">
+                <mat-icon>{{ subscription.plan?.hasAds ? 'block' : 'check' }}</mat-icon>
+                <span>{{ subscription.plan?.hasAds ? 'Ads Included' : 'No Ads' }}</span>
+              </div>
+              <div class="feature" [class.included]="subscription.plan?.hasAnalytics">
+                <mat-icon>{{ subscription.plan?.hasAnalytics ? 'check' : 'block' }}</mat-icon>
+                <span>{{ subscription.plan?.hasAnalytics ? 'Advanced Analytics' : 'Basic Analytics' }}</span>
+              </div>
+              <div class="feature" [class.included]="subscription.plan?.hasMonetization">
+                <mat-icon>{{ subscription.plan?.hasMonetization ? 'check' : 'block' }}</mat-icon>
+                <span>{{ subscription.plan?.hasMonetization ? 'Monetization Tools' : 'No Monetization' }}</span>
+              </div>
+              <div class="feature" [class.included]="subscription.plan?.hasLiveStreaming">
+                <mat-icon>{{ subscription.plan?.hasLiveStreaming ? 'check' : 'block' }}</mat-icon>
+                <span>{{ subscription.plan?.hasLiveStreaming ? 'Live Streaming' : 'No Live Streaming' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="billing-info">
+            <div class="billing-details">
+              <h3>Billing Information</h3>
+              <div class="billing-item">
+                <span class="label">Status:</span>
+                <span [class]="getStatusClass(subscription.status)">{{ getStatusText(subscription.status) }}</span>
+              </div>
+              <div class="billing-item">
+                <span class="label">Amount:</span>
+                <span>${{ subscription.amount }}/{{ getBillingCycleText(subscription.plan?.billingCycle || 0) }}</span>
+              </div>
+              <div class="billing-item">
+                <span class="label">Start Date:</span>
+                <span>{{ formatDate(subscription.startDate) }}</span>
+              </div>
+              <div class="billing-item">
+                <span class="label">End Date:</span>
+                <span>{{ formatDate(subscription.endDate) }}</span>
+              </div>
+              <div class="billing-item">
+                <span class="label">Auto Renew:</span>
+                <span>{{ subscription.autoRenew ? 'Enabled' : 'Disabled' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="changePlan()">
+          <mat-icon>swap_horiz</mat-icon>
+          Change Plan
+        </button>
+        <button mat-stroked-button (click)="updatePaymentMethod()">
+          <mat-icon>payment</mat-icon>
+          Update Payment Method
+        </button>
+        <button *ngIf="subscription.status === SubscriptionStatus.Active" mat-stroked-button color="warn" (click)="cancelSubscription()">
+          <mat-icon>cancel</mat-icon>
+          Cancel Subscription
+        </button>
+        <button *ngIf="subscription.status === SubscriptionStatus.Cancelled" mat-raised-button color="primary" (click)="reactivateSubscription()">
+          <mat-icon>refresh</mat-icon>
+          Reactivate Subscription
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="billing-history-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>receipt</mat-icon>
+          Billing History
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="billing-history">
+          <div class="history-item">
+            <div class="history-date">{{ formatDate(subscription.startDate) }}</div>
+            <div class="history-description">Subscription Started</div>
+            <div class="history-amount">${{ subscription.amount }}</div>
+          </div>
+          <div class="history-item">
+            <div class="history-date">{{ formatDate(subscription.endDate) }}</div>
+            <div class="history-description">Next Billing Date</div>
+            <div class="history-amount">${{ subscription.amount }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div *ngIf="!isLoading && !subscription" class="no-subscription">
+    <mat-card>
+      <mat-card-content>
+        <div class="no-subscription-content">
+          <mat-icon class="no-subscription-icon">subscriptions</mat-icon>
+          <h2>No Active Subscription</h2>
+          <p>You don't have an active subscription. Choose a plan to get started.</p>
+          <button mat-raised-button color="primary" (click)="browsePlans()">
+            <mat-icon>explore</mat-icon>
+            Browse Plans
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

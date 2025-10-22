@@ -1,47 +1,113 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Subscription, SubscriptionPlan, SubscriptionCreate, SubscriptionUpdate } from '../models/subscription.model';
-import { Channel } from '../models/channel.model';
-import { PagedResult } from './video.service';
+
+export interface Subscription {
+  id: number;
+  userId: string;
+  subscriptionPlanId: number;
+  startDate: string;
+  endDate: string;
+  status: SubscriptionStatus;
+  amount: number;
+  paymentMethodId?: string;
+  createdAt: string;
+  plan?: SubscriptionPlan;
+  user?: any;
+  autoRenew?: boolean;
+}
+
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  billingCycle: BillingCycle;
+  maxChannels: number;
+  maxVideosPerChannel: number;
+  maxStorageGB: number;
+  hasAds: boolean;
+  hasAnalytics: boolean;
+  hasMonetization: boolean;
+  hasLiveStreaming: boolean;
+  isActive: boolean;
+}
+
+export interface SubscriptionCreate {
+  subscriptionPlanId: number;
+  paymentMethodId: string;
+}
+
+export interface SubscriptionUpdate {
+  subscriptionPlanId?: number;
+  paymentMethodId?: string;
+}
+
+export interface PaymentResult {
+  success: boolean;
+  paymentIntentId: string;
+  clientSecret?: string;
+  amount: number;
+  currency: string;
+  status: string;
+}
+
+export enum SubscriptionStatus {
+  Active = 0,
+  Expired = 1,
+  Cancelled = 2,
+  Suspended = 3
+}
+
+export enum BillingCycle {
+  Monthly = 0,
+  Yearly = 1
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
-  private apiUrl = `${environment.apiUrl}/api/subscriptions`;
+  private apiUrl = `${environment.apiUrl}/api/subscription`;
 
   constructor(private http: HttpClient) {}
 
-  getSubscriptionPlans(): Observable<SubscriptionPlan[]> {
-    return this.http.get<SubscriptionPlan[]>(`${this.apiUrl}/plans`);
+  // Subscription Management
+  createSubscription(subscription: SubscriptionCreate): Observable<Subscription> {
+    return this.http.post<Subscription>(`${this.apiUrl}`, subscription);
   }
 
-  getSubscriptionPlanById(id: number): Observable<SubscriptionPlan> {
-    return this.http.get<SubscriptionPlan>(`${this.apiUrl}/plans/${id}`);
+  getSubscription(id: number): Observable<Subscription> {
+    return this.http.get<Subscription>(`${this.apiUrl}/${id}`);
   }
 
   getUserSubscription(): Observable<Subscription> {
-    return this.http.get<Subscription>(`${this.apiUrl}/current`);
+    return this.http.get<Subscription>(`${this.apiUrl}/user`);
   }
 
-  createSubscription(subscriptionData: SubscriptionCreate): Observable<Subscription> {
-    return this.http.post<Subscription>(this.apiUrl, subscriptionData);
+  updateSubscription(id: number, subscription: SubscriptionUpdate): Observable<Subscription> {
+    return this.http.put<Subscription>(`${this.apiUrl}/${id}`, subscription);
   }
 
-  updateSubscription(id: number, subscriptionData: SubscriptionUpdate): Observable<Subscription> {
-    return this.http.put<Subscription>(`${this.apiUrl}/${id}`, subscriptionData);
-  }
-
-  cancelSubscription(id: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/${id}/cancel`, {});
+  cancelSubscription(id: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/cancel`, {});
   }
 
   renewSubscription(id: number): Observable<Subscription> {
     return this.http.post<Subscription>(`${this.apiUrl}/${id}/renew`, {});
   }
 
+  // Subscription Plans
+  getSubscriptionPlans(page: number = 1, pageSize: number = 20): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/plans?page=${page}&pageSize=${pageSize}`);
+  }
+
+  getSubscriptionPlan(id: number): Observable<SubscriptionPlan> {
+    return this.http.get<SubscriptionPlan>(`${this.apiUrl}/plans/${id}`);
+  }
+
+  // Subscription Changes
   upgradeSubscription(newPlanId: number): Observable<Subscription> {
     return this.http.post<Subscription>(`${this.apiUrl}/upgrade`, { newPlanId });
   }
@@ -50,44 +116,44 @@ export class SubscriptionService {
     return this.http.post<Subscription>(`${this.apiUrl}/downgrade`, { newPlanId });
   }
 
-  checkSubscriptionStatus(): Observable<{ isActive: boolean; expiresAt?: string }> {
-    return this.http.get<{ isActive: boolean; expiresAt?: string }>(`${this.apiUrl}/status`);
+  // Status Checks
+  checkSubscriptionStatus(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/status`);
   }
 
-  processPayment(paymentData: any): Observable<Subscription> {
-    return this.http.post<Subscription>(`${this.apiUrl}/payment`, paymentData);
+  // Payment Processing
+  processPayment(paymentData: any): Observable<PaymentResult> {
+    return this.http.post<PaymentResult>(`${this.apiUrl}/payment`, paymentData);
   }
 
-  // Channel subscription methods
-  getSubscribedChannels(filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<Channel>> {
-    let params = new HttpParams();
-    
-    if (filter.page) params = params.set('page', filter.page.toString());
-    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
-
-    // Use the channel service endpoint for subscribed channels
-    return this.http.get<PagedResult<Channel>>(`${environment.apiUrl}/api/channel/subscribed`, { params });
-  }
-
-  subscribeToChannel(channelId: number): Observable<Channel> {
-    return this.http.post<Channel>(`${environment.apiUrl}/api/channel/${channelId}/subscribe`, {});
-  }
-
-  unsubscribeFromChannel(channelId: number): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/api/channel/${channelId}/unsubscribe`, {});
-  }
-
-  isSubscribedToChannel(channelId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${environment.apiUrl}/api/channel/${channelId}/is-subscribed`);
-  }
-
-  updateNotificationPreference(channelId: number, notificationsEnabled: boolean): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/api/channel/${channelId}/notification-preference`, {
-      notificationsEnabled
+  createPaymentIntent(amount: number, currency: string = 'USD'): Observable<PaymentResult> {
+    return this.http.post<PaymentResult>(`${this.apiUrl}/payment-intent`, {
+      amount,
+      currency
     });
   }
 
+  // Analytics
+  getExpiringSubscriptions(daysAhead: number = 7, page: number = 1, pageSize: number = 20): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/expiring?daysAhead=${daysAhead}&page=${page}&pageSize=${pageSize}`);
+  }
+
+  // Channel Subscriptions
+  getSubscribedChannels(options?: { page?: number; pageSize?: number }): Observable<any> {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.pageSize) params.append('pageSize', options.pageSize.toString());
+    
+    const queryString = params.toString();
+    const url = queryString ? `${this.apiUrl}/channels?${queryString}` : `${this.apiUrl}/channels`;
+    return this.http.get<any>(url);
+  }
+
+  unsubscribeFromChannel(channelId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/channels/${channelId}/unsubscribe`, {});
+  }
+
   getNotificationPreference(channelId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${environment.apiUrl}/api/channel/${channelId}/notification-preference`);
+    return this.http.get<boolean>(`${this.apiUrl}/channels/${channelId}/notifications`);
   }
 }

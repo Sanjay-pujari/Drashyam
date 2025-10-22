@@ -165,6 +165,9 @@ builder.Services.AddSingleton(provider =>
     return new BlobServiceClient(settings.ConnectionString);
 });
 
+// Stripe Configuration
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
 // File upload limits
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -182,6 +185,7 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IInviteService, InviteService>();
 builder.Services.AddScoped<IReferralService, ReferralService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
@@ -191,6 +195,7 @@ builder.Services.AddScoped<IWatchLaterService, WatchLaterService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddScoped<IAdService, AdService>();
+builder.Services.AddScoped<IChannelBrandingService, ChannelBrandingService>();
 builder.Services.AddScoped<IPremiumContentService, PremiumContentService>();
 builder.Services.AddScoped<IMerchandiseService, MerchandiseService>();
 builder.Services.AddScoped<IMonetizationService, MonetizationService>();

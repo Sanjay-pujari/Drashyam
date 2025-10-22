@@ -1,6 +1,15 @@
-using Drashyam.API.Models;
-
 namespace Drashyam.API.DTOs;
+
+public class AdDto
+{
+    public int Id { get; set; }
+    public AdType Type { get; set; }
+    public string? Content { get; set; }
+    public string? Url { get; set; }
+    public string? ThumbnailUrl { get; set; }
+    public decimal CostPerClick { get; set; }
+    public decimal CostPerView { get; set; }
+}
 
 public class AdCampaignDto
 {
@@ -8,27 +17,27 @@ public class AdCampaignDto
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string AdvertiserId { get; set; } = string.Empty;
-    public string AdvertiserName { get; set; } = string.Empty;
     public AdType Type { get; set; }
     public decimal Budget { get; set; }
     public decimal CostPerClick { get; set; }
     public decimal CostPerView { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public AdStatus Status { get; set; }
+    public Models.AdStatus Status { get; set; }
     public string? TargetAudience { get; set; }
     public string? AdContent { get; set; }
     public string? AdUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public UserDto? Advertiser { get; set; }
+    public List<AdImpressionDto>? Impressions { get; set; }
 }
 
 public class AdCampaignCreateDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public string AdvertiserId { get; set; } = string.Empty;
     public AdType Type { get; set; }
     public decimal Budget { get; set; }
     public decimal CostPerClick { get; set; }
@@ -51,43 +60,11 @@ public class AdCampaignUpdateDto
     public decimal? CostPerView { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public AdStatus? Status { get; set; }
+    public Models.AdStatus? Status { get; set; }
     public string? TargetAudience { get; set; }
     public string? AdContent { get; set; }
     public string? AdUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
-}
-
-public class AdRequestDto
-{
-    public string? UserId { get; set; }
-    public int? VideoId { get; set; }
-    public string? Category { get; set; }
-    public string? Location { get; set; }
-    public string? DeviceType { get; set; }
-}
-
-public class AdServeDto
-{
-    public bool HasAd { get; set; }
-    public int? CampaignId { get; set; }
-    public AdType? AdType { get; set; }
-    public string? AdContent { get; set; }
-    public string? AdUrl { get; set; }
-    public string? ThumbnailUrl { get; set; }
-    public decimal? CostPerClick { get; set; }
-    public decimal? CostPerView { get; set; }
-}
-
-public class AdAnalyticsDto
-{
-    public int CampaignId { get; set; }
-    public int TotalImpressions { get; set; }
-    public int TotalClicks { get; set; }
-    public decimal ClickThroughRate { get; set; }
-    public decimal TotalRevenue { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
 }
 
 public class AdImpressionDto
@@ -100,39 +77,27 @@ public class AdImpressionDto
     public bool WasClicked { get; set; }
     public DateTime? ClickedAt { get; set; }
     public decimal Revenue { get; set; }
+    public UserDto? User { get; set; }
+    public VideoDto? Video { get; set; }
 }
 
-public class VideoAdRequestDto
+public class AdRevenueDto
 {
-    public int VideoId { get; set; }
-    public string? UserId { get; set; }
-    public string? Category { get; set; }
-    public string? DeviceType { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public int TotalImpressions { get; set; }
+    public int TotalClicks { get; set; }
+    public decimal ClickThroughRate { get; set; }
+    public decimal RevenuePerImpression { get; set; }
+    public decimal RevenuePerClick { get; set; }
 }
 
-public class VideoAdResponseDto
-{
-    public bool HasAd { get; set; }
-    public VideoAdDto? Ad { get; set; }
-}
-
-public class VideoAdDto
-{
-    public int Id { get; set; }
-    public int CampaignId { get; set; }
-    public string Type { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-    public string? Url { get; set; }
-    public string? ThumbnailUrl { get; set; }
-    public int Duration { get; set; }
-    public int SkipAfter { get; set; }
-    public int? Position { get; set; }
-}
-
-public class AdCompletionRequestDto
+public class AdAnalyticsDto
 {
     public int CampaignId { get; set; }
-    public string? UserId { get; set; }
-    public int? VideoId { get; set; }
-    public int? WatchedDuration { get; set; }
+    public int TotalImpressions { get; set; }
+    public int TotalClicks { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal ClickThroughRate { get; set; }
+    public decimal CostPerClick { get; set; }
+    public decimal CostPerImpression { get; set; }
 }

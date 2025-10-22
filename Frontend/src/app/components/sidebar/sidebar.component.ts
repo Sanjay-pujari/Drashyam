@@ -83,9 +83,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   private loadSubscriptions(): void {
     this.subscriptionService.getSubscribedChannels({ page: 1, pageSize: 10 }).subscribe({
-      next: (result) => {
+      next: (result: any) => {
         
-        this.subscriptions = (result.items || []).map(channel => ({
+        this.subscriptions = (result.items || []).map((channel: any) => ({
           id: channel.id.toString(),
           channelId: channel.id.toString(),
           channel: {
@@ -101,7 +101,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.loadNotificationPreferences();
         
       },
-      error: (error) => {
+      error: (error: any) => {
         this.subscriptions = [];
       }
     });
@@ -110,10 +110,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private loadNotificationPreferences(): void {
     this.subscriptions.forEach(subscription => {
       this.subscriptionService.getNotificationPreference(parseInt(subscription.channelId)).subscribe({
-        next: (enabled) => {
+        next: (enabled: boolean) => {
           subscription.isActive = enabled;
         },
-        error: (error) => {
+        error: (error: any) => {
           subscription.isActive = true; // Default to enabled
         }
       });

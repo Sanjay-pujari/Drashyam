@@ -28,6 +28,7 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AdCampaign> AdCampaigns { get; set; }
     public DbSet<AdImpression> AdImpressions { get; set; }
+    public DbSet<ChannelBranding> ChannelBrandings { get; set; }
     public DbSet<UserInvite> UserInvites { get; set; }
     public DbSet<Referral> Referrals { get; set; }
     public DbSet<ReferralReward> ReferralRewards { get; set; }

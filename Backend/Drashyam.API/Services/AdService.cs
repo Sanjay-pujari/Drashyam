@@ -11,99 +11,54 @@ public class AdService : IAdService
     private readonly DrashyamDbContext _context;
     private readonly IMapper _mapper;
     private readonly ILogger<AdService> _logger;
+    private readonly ISubscriptionService _subscriptionService;
 
-    public AdService(DrashyamDbContext context, IMapper mapper, ILogger<AdService> logger)
+    public AdService(DrashyamDbContext context, IMapper mapper, ILogger<AdService> logger, ISubscriptionService subscriptionService)
     {
         _context = context;
         _mapper = mapper;
         _logger = logger;
+        _subscriptionService = subscriptionService;
     }
 
-    public async Task<AdCampaignDto> CreateCampaignAsync(AdCampaignCreateDto campaignDto)
+    public async Task<AdCampaignDto> CreateAdCampaignAsync(AdCampaignCreateDto createDto, string advertiserId)
     {
-        // Ensure advertiser exists to satisfy FK and avoid inner exception
-        var advertiser = await _context.Users.FirstOrDefaultAsync(u => u.Id == campaignDto.AdvertiserId);
-        if (advertiser == null)
-        {
-            throw new ArgumentException("Advertiser not found for the current user");
-        }
-
-        var campaign = _mapper.Map<AdCampaign>(campaignDto);
-        // Set navigation to avoid null FK issues during save
-        campaign.Advertiser = advertiser;
-        // Also set FK explicitly
-        campaign.AdvertiserId = advertiser.Id;
-        // Normalize fields
+        var campaign = _mapper.Map<AdCampaign>(createDto);
+        campaign.AdvertiserId = advertiserId;
         campaign.Status = AdStatus.Draft;
         campaign.CreatedAt = DateTime.UtcNow;
-        // Ensure UTC DateTimes for PostgreSQL 'timestamptz'
-        if (campaign.StartDate.Kind == DateTimeKind.Unspecified)
-            campaign.StartDate = DateTime.SpecifyKind(campaign.StartDate, DateTimeKind.Utc);
-        if (campaign.EndDate.Kind == DateTimeKind.Unspecified)
-            campaign.EndDate = DateTime.SpecifyKind(campaign.EndDate, DateTimeKind.Utc);
 
         _context.AdCampaigns.Add(campaign);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex)
-        {
-            // Surface the DB error clearly to the controller
-            var inner = ex.InnerException?.Message ?? ex.Message;
-            throw new ArgumentException($"Failed to create campaign: {inner}");
-        }
-
-        return _mapper.Map<AdCampaignDto>(campaign);
-    }
-
-    public async Task<AdCampaignDto> UpdateCampaignAsync(int campaignId, AdCampaignUpdateDto campaignDto)
-    {
-        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
-        if (campaign == null)
-            throw new ArgumentException("Campaign not found");
-
-        _mapper.Map(campaignDto, campaign);
-        campaign.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         return _mapper.Map<AdCampaignDto>(campaign);
     }
 
-    public async Task<bool> DeleteCampaignAsync(int campaignId)
-    {
-        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
-        if (campaign == null)
-            return false;
-
-        _context.AdCampaigns.Remove(campaign);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<AdCampaignDto> GetCampaignAsync(int campaignId)
+    public async Task<AdCampaignDto> GetAdCampaignByIdAsync(int campaignId)
     {
         var campaign = await _context.AdCampaigns
-            .Include(c => c.Advertiser)
-            .FirstOrDefaultAsync(c => c.Id == campaignId);
+            .Include(a => a.Advertiser)
+            .Include(a => a.Impressions)
+            .FirstOrDefaultAsync(a => a.Id == campaignId);
 
         if (campaign == null)
-            throw new ArgumentException("Campaign not found");
+            throw new ArgumentException("Ad campaign not found");
 
         return _mapper.Map<AdCampaignDto>(campaign);
     }
 
-    public async Task<PagedResult<AdCampaignDto>> GetCampaignsAsync(string advertiserId, int page = 1, int pageSize = 20)
+    public async Task<PagedResult<AdCampaignDto>> GetAdCampaignsAsync(string advertiserId, int page = 1, int pageSize = 20)
     {
         var campaigns = await _context.AdCampaigns
-            .Where(c => c.AdvertiserId == advertiserId)
-            .OrderByDescending(c => c.CreatedAt)
+            .Where(a => a.AdvertiserId == advertiserId)
+            .Include(a => a.Impressions)
+            .OrderByDescending(a => a.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
         var totalCount = await _context.AdCampaigns
-            .Where(c => c.AdvertiserId == advertiserId)
+            .Where(a => a.AdvertiserId == advertiserId)
             .CountAsync();
 
         return new PagedResult<AdCampaignDto>
@@ -115,151 +70,159 @@ public class AdService : IAdService
         };
     }
 
-    public async Task<bool> ActivateCampaignAsync(int campaignId)
+    public async Task<AdCampaignDto> UpdateAdCampaignAsync(int campaignId, AdCampaignUpdateDto updateDto, string advertiserId)
     {
-        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
+        var campaign = await _context.AdCampaigns
+            .FirstOrDefaultAsync(a => a.Id == campaignId && a.AdvertiserId == advertiserId);
+
+        if (campaign == null)
+            throw new ArgumentException("Ad campaign not found");
+
+        _mapper.Map(updateDto, campaign);
+        campaign.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return _mapper.Map<AdCampaignDto>(campaign);
+    }
+
+    public async Task<bool> DeleteAdCampaignAsync(int campaignId, string advertiserId)
+    {
+        var campaign = await _context.AdCampaigns
+            .FirstOrDefaultAsync(a => a.Id == campaignId && a.AdvertiserId == advertiserId);
+
+        if (campaign == null)
+            return false;
+
+        _context.AdCampaigns.Remove(campaign);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ActivateAdCampaignAsync(int campaignId, string advertiserId)
+    {
+        var campaign = await _context.AdCampaigns
+            .FirstOrDefaultAsync(a => a.Id == campaignId && a.AdvertiserId == advertiserId);
+
         if (campaign == null)
             return false;
 
         campaign.Status = AdStatus.Active;
         campaign.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
         return true;
     }
 
-    public async Task<bool> PauseCampaignAsync(int campaignId)
+    public async Task<bool> PauseAdCampaignAsync(int campaignId, string advertiserId)
     {
-        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
+        var campaign = await _context.AdCampaigns
+            .FirstOrDefaultAsync(a => a.Id == campaignId && a.AdvertiserId == advertiserId);
+
         if (campaign == null)
             return false;
 
         campaign.Status = AdStatus.Paused;
         campaign.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
         return true;
     }
 
-    public async Task<AdServeDto> ServeAdAsync(AdRequestDto request)
+    public async Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, Models.AdType? preferredType = null)
     {
-        // Get active campaigns that match targeting criteria
-        var campaigns = await _context.AdCampaigns
-            .Where(c => c.Status == AdStatus.Active && 
-                       c.StartDate <= DateTime.UtcNow && 
-                       c.EndDate >= DateTime.UtcNow)
-            .ToListAsync();
-
-        if (!campaigns.Any())
+        // Check if user has a paid subscription (no ads for paid users)
+        try
         {
-            return new AdServeDto { HasAd = false };
+            var subscription = await _subscriptionService.GetUserSubscriptionAsync(userId);
+            if (subscription.Plan != null && !subscription.Plan.HasAds)
+            {
+                return null; // No ads for paid users
+            }
+        }
+        catch
+        {
+            // User has no subscription, show ads
         }
 
-        // Simple random selection (can be enhanced with more sophisticated algorithms)
+        // Get active campaigns that match criteria
+        var query = _context.AdCampaigns
+            .Where(a => a.Status == AdStatus.Active && 
+                       a.StartDate <= DateTime.UtcNow && 
+                       a.EndDate >= DateTime.UtcNow);
+
+        if (preferredType.HasValue)
+        {
+            query = query.Where(a => a.Type == preferredType.Value);
+        }
+
+        var campaigns = await query.ToListAsync();
+
+        if (!campaigns.Any())
+            return null;
+
+        // Simple random selection (in production, use more sophisticated targeting)
         var random = new Random();
         var selectedCampaign = campaigns[random.Next(campaigns.Count)];
 
-        // Record impression
-        await RecordImpressionAsync(selectedCampaign.Id, request.UserId, request.VideoId);
-
-        return new AdServeDto
+        return new AdDto
         {
-            HasAd = true,
-            CampaignId = selectedCampaign.Id,
-            AdType = (DTOs.AdType?)selectedCampaign.Type,
-            AdContent = selectedCampaign.AdContent,
-            AdUrl = selectedCampaign.AdUrl,
+            Id = selectedCampaign.Id,
+            Type = (DTOs.AdType)selectedCampaign.Type,
+            Content = selectedCampaign.AdContent,
+            Url = selectedCampaign.AdUrl,
             ThumbnailUrl = selectedCampaign.ThumbnailUrl,
             CostPerClick = selectedCampaign.CostPerClick,
             CostPerView = selectedCampaign.CostPerView
         };
     }
 
-    public async Task<bool> RecordImpressionAsync(int campaignId, string? userId, int? videoId)
+    public async Task<bool> RecordAdImpressionAsync(int campaignId, string userId, int? videoId = null)
     {
-        try
-        {
-            var campaign = await _context.AdCampaigns.FindAsync(campaignId);
-            if (campaign == null)
-                return false;
-
-            var impression = new AdImpression
-            {
-                AdCampaignId = campaignId,
-                UserId = userId,
-                VideoId = videoId,
-                ViewedAt = DateTime.UtcNow,
-                Revenue = campaign.CostPerView
-            };
-
-            _context.AdImpressions.Add(impression);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error recording ad impression for campaign {CampaignId}", campaignId);
+        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
+        if (campaign == null)
             return false;
-        }
-    }
 
-    public async Task<bool> RecordClickAsync(int campaignId, string? userId, int? videoId)
-    {
-        try
+        var impression = new AdImpression
         {
-            var impression = await _context.AdImpressions
-                .FirstOrDefaultAsync(i => i.AdCampaignId == campaignId && 
-                                         i.UserId == userId && 
-                                         i.VideoId == videoId);
-
-            if (impression == null)
-                return false;
-
-            impression.WasClicked = true;
-            impression.ClickedAt = DateTime.UtcNow;
-            
-            var campaign = await _context.AdCampaigns.FindAsync(campaignId);
-            if (campaign != null)
-            {
-                impression.Revenue = campaign.CostPerClick;
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error recording ad click for campaign {CampaignId}", campaignId);
-            return false;
-        }
-    }
-
-    public async Task<AdAnalyticsDto> GetCampaignAnalyticsAsync(int campaignId, DateTime? startDate = null, DateTime? endDate = null)
-    {
-        var query = _context.AdImpressions.Where(i => i.AdCampaignId == campaignId);
-
-        if (startDate.HasValue)
-            query = query.Where(i => i.ViewedAt >= startDate.Value);
-
-        if (endDate.HasValue)
-            query = query.Where(i => i.ViewedAt <= endDate.Value);
-
-        var impressions = await query.ToListAsync();
-
-        return new AdAnalyticsDto
-        {
-            CampaignId = campaignId,
-            TotalImpressions = impressions.Count,
-            TotalClicks = impressions.Count(i => i.WasClicked),
-            ClickThroughRate = impressions.Count > 0 ? (decimal)impressions.Count(i => i.WasClicked) / impressions.Count : 0,
-            TotalRevenue = impressions.Sum(i => i.Revenue),
-            StartDate = startDate,
-            EndDate = endDate
+            AdCampaignId = campaignId,
+            UserId = userId,
+            VideoId = videoId,
+            ViewedAt = DateTime.UtcNow,
+            Revenue = campaign.CostPerView
         };
+
+        _context.AdImpressions.Add(impression);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
-    public async Task<decimal> CalculateRevenueAsync(string advertiserId, DateTime? startDate = null, DateTime? endDate = null)
+    public async Task<bool> RecordAdClickAsync(int campaignId, string userId, int? videoId = null)
+    {
+        var impression = await _context.AdImpressions
+            .FirstOrDefaultAsync(i => i.AdCampaignId == campaignId && 
+                                     i.UserId == userId && 
+                                     i.VideoId == videoId);
+
+        if (impression == null)
+            return false;
+
+        impression.WasClicked = true;
+        impression.ClickedAt = DateTime.UtcNow;
+
+        var campaign = await _context.AdCampaigns.FindAsync(campaignId);
+        if (campaign != null)
+        {
+            impression.Revenue = campaign.CostPerClick;
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<decimal> GetAdRevenueAsync(string userId, DateTime? startDate = null, DateTime? endDate = null)
     {
         var query = _context.AdImpressions
-            .Where(i => i.AdCampaign.AdvertiserId == advertiserId);
+            .Where(i => i.UserId == userId);
 
         if (startDate.HasValue)
             query = query.Where(i => i.ViewedAt >= startDate.Value);
@@ -270,100 +233,114 @@ public class AdService : IAdService
         return await query.SumAsync(i => i.Revenue);
     }
 
-    public async Task<VideoAdResponseDto> ServeVideoAdAsync(VideoAdRequestDto request)
+    public async Task<AdRevenueDto> GetAdRevenueBreakdownAsync(string userId, DateTime? startDate = null, DateTime? endDate = null)
     {
-        // Get active campaigns that match targeting criteria
-        var campaigns = await _context.AdCampaigns
-            .Where(c => c.Status == AdStatus.Active && 
-                       c.StartDate <= DateTime.UtcNow && 
-                       c.EndDate >= DateTime.UtcNow)
+        var query = _context.AdImpressions
+            .Where(i => i.UserId == userId);
+
+        if (startDate.HasValue)
+            query = query.Where(i => i.ViewedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(i => i.ViewedAt <= endDate.Value);
+
+        var impressions = await query.Include(i => i.AdCampaign).ToListAsync();
+
+        var totalRevenue = impressions.Sum(i => i.Revenue);
+        var totalImpressions = impressions.Count;
+        var totalClicks = impressions.Count(i => i.WasClicked);
+
+        return new AdRevenueDto
+        {
+            TotalRevenue = totalRevenue,
+            TotalImpressions = totalImpressions,
+            TotalClicks = totalClicks,
+            ClickThroughRate = totalImpressions > 0 ? (decimal)totalClicks / totalImpressions : 0,
+            RevenuePerImpression = totalImpressions > 0 ? totalRevenue / totalImpressions : 0,
+            RevenuePerClick = totalClicks > 0 ? totalRevenue / totalClicks : 0
+        };
+    }
+
+    public async Task<PagedResult<AdImpressionDto>> GetAdImpressionsAsync(int campaignId, int page = 1, int pageSize = 20)
+    {
+        var impressions = await _context.AdImpressions
+            .Where(i => i.AdCampaignId == campaignId)
+            .Include(i => i.User)
+            .Include(i => i.Video)
+            .OrderByDescending(i => i.ViewedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        if (!campaigns.Any())
+        var totalCount = await _context.AdImpressions
+            .Where(i => i.AdCampaignId == campaignId)
+            .CountAsync();
+
+        return new PagedResult<AdImpressionDto>
         {
-            return new VideoAdResponseDto { HasAd = false };
-        }
-
-        // Simple random selection (can be enhanced with more sophisticated algorithms)
-        var random = new Random();
-        var selectedCampaign = campaigns[random.Next(campaigns.Count)];
-
-        // Record impression
-        await RecordImpressionAsync(selectedCampaign.Id, request.UserId, request.VideoId);
-
-        return new VideoAdResponseDto
-        {
-            HasAd = true,
-            Ad = new VideoAdDto
-            {
-                Id = selectedCampaign.Id,
-                CampaignId = selectedCampaign.Id,
-                Type = selectedCampaign.Type.ToString().ToLower(),
-                Content = selectedCampaign.AdContent ?? "Advertisement",
-                Url = selectedCampaign.AdUrl,
-                ThumbnailUrl = selectedCampaign.ThumbnailUrl,
-                Duration = GetAdDuration(selectedCampaign.Type),
-                SkipAfter = GetSkipAfterTime(selectedCampaign.Type),
-                Position = null // Will be set by frontend for mid-roll ads
-            }
+            Items = _mapper.Map<List<AdImpressionDto>>(impressions),
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
         };
     }
 
-    public async Task<bool> RecordAdCompletionAsync(int campaignId, string? userId, int? videoId, int? watchedDuration)
+    public async Task<AdAnalyticsDto> GetAdCampaignAnalyticsAsync(int campaignId, DateTime? startDate = null, DateTime? endDate = null)
     {
-        try
+        var query = _context.AdImpressions
+            .Where(i => i.AdCampaignId == campaignId);
+
+        if (startDate.HasValue)
+            query = query.Where(i => i.ViewedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(i => i.ViewedAt <= endDate.Value);
+
+        var impressions = await query.ToListAsync();
+
+        var totalImpressions = impressions.Count;
+        var totalClicks = impressions.Count(i => i.WasClicked);
+        var totalRevenue = impressions.Sum(i => i.Revenue);
+
+        return new AdAnalyticsDto
         {
-            var impression = await _context.AdImpressions
-                .FirstOrDefaultAsync(i => i.AdCampaignId == campaignId && 
-                                         i.UserId == userId && 
-                                         i.VideoId == videoId);
-
-            if (impression == null)
-                return false;
-
-            // Update impression with completion data
-            impression.WasClicked = true; // Mark as completed
-            impression.ClickedAt = DateTime.UtcNow;
-            
-            // Calculate revenue based on watched duration
-            var campaign = await _context.AdCampaigns.FindAsync(campaignId);
-            if (campaign != null && watchedDuration.HasValue)
-            {
-                var completionRate = Math.Min(1.0m, (decimal)watchedDuration.Value / GetAdDuration(campaign.Type));
-                impression.Revenue = campaign.CostPerView * completionRate;
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error recording ad completion for campaign {CampaignId}", campaignId);
-            return false;
-        }
-    }
-
-    private int GetAdDuration(Models.AdType adType)
-    {
-        return adType switch
-        {
-            Models.AdType.Video => 30, // 30 seconds for video ads
-            Models.AdType.Banner => 15, // 15 seconds for banner ads
-            Models.AdType.Overlay => 10, // 10 seconds for overlay ads
-            Models.AdType.Sponsored => 20, // 20 seconds for sponsored content
-            _ => 15
+            CampaignId = campaignId,
+            TotalImpressions = totalImpressions,
+            TotalClicks = totalClicks,
+            TotalRevenue = totalRevenue,
+            ClickThroughRate = totalImpressions > 0 ? (decimal)totalClicks / totalImpressions : 0,
+            CostPerClick = totalClicks > 0 ? totalRevenue / totalClicks : 0,
+            CostPerImpression = totalImpressions > 0 ? totalRevenue / totalImpressions : 0
         };
     }
 
-    private int GetSkipAfterTime(Models.AdType adType)
+    public async Task<AdAnalyticsDto> GetAdvertiserAnalyticsAsync(string advertiserId, DateTime? startDate = null, DateTime? endDate = null)
     {
-        return adType switch
+        var baseQuery = _context.AdImpressions
+            .Include(i => i.AdCampaign)
+            .Where(i => i.AdCampaign.AdvertiserId == advertiserId);
+
+        if (startDate.HasValue)
+            baseQuery = baseQuery.Where(i => i.ViewedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            baseQuery = baseQuery.Where(i => i.ViewedAt <= endDate.Value);
+
+        var impressions = await baseQuery.ToListAsync();
+
+        var totalImpressions = impressions.Count;
+        var totalClicks = impressions.Count(i => i.WasClicked);
+        var totalRevenue = impressions.Sum(i => i.Revenue);
+
+        return new AdAnalyticsDto
         {
-            Models.AdType.Video => 5, // Can skip after 5 seconds
-            Models.AdType.Banner => 0, // Can skip immediately
-            Models.AdType.Overlay => 0, // Can skip immediately
-            Models.AdType.Sponsored => 3, // Can skip after 3 seconds
-            _ => 5
+            CampaignId = 0, // Not applicable for advertiser analytics
+            TotalImpressions = totalImpressions,
+            TotalClicks = totalClicks,
+            TotalRevenue = totalRevenue,
+            ClickThroughRate = totalImpressions > 0 ? (decimal)totalClicks / totalImpressions : 0,
+            CostPerClick = totalClicks > 0 ? totalRevenue / totalClicks : 0,
+            CostPerImpression = totalImpressions > 0 ? totalRevenue / totalImpressions : 0
         };
     }
 }

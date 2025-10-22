@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AdService, AdCampaign, AdCampaignCreate, AdCampaignUpdate, AdAnalytics } from '../../services/ad.service';
+import { AdService, AdCampaign, AdCampaignCreate, AdCampaignUpdate, AdAnalytics, AdStatus } from '../../services/ad.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -132,15 +132,15 @@ import { Subscription } from 'rxjs';
             <div class="table-row" *ngFor="let c of campaigns">
               <div>{{ c.name }}</div>
               <div>{{ c.type }}</div>
-              <div><span class="status" [class.active]="c.status==='Active'" [class.paused]="c.status==='Paused'">{{ c.status }}</span></div>
+              <div><span class="status" [class.active]="c.status===AdStatus.Active" [class.paused]="c.status===AdStatus.Paused">{{ getStatusText(c.status) }}</span></div>
               <div>{{ c.budget | number:'1.2-2' }}</div>
               <div>{{ c.costPerView | number:'1.2-4' }}</div>
               <div>{{ c.costPerClick | number:'1.2-4' }}</div>
               <div class="row-actions">
-                <button mat-icon-button color="primary" aria-label="Activate" (click)="activate(c)" [disabled]="c.status==='Active'">
+                <button mat-icon-button color="primary" aria-label="Activate" (click)="activate(c)" [disabled]="c.status===AdStatus.Active">
                   <mat-icon>play_circle</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" aria-label="Pause" (click)="pause(c)" [disabled]="c.status==='Paused'">
+                <button mat-icon-button color="warn" aria-label="Pause" (click)="pause(c)" [disabled]="c.status===AdStatus.Paused">
                   <mat-icon>pause_circle</mat-icon>
                 </button>
                 <button mat-icon-button aria-label="Edit" (click)="startEdit(c)">
@@ -289,6 +289,9 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
   analyticsCampaign: AdCampaign | null = null;
   analytics: AdAnalytics | null = null;
   analyticsLoading = false;
+  
+  // Make AdStatus enum available in template
+  AdStatus = AdStatus;
 
   createForm!: FormGroup;
   editForm!: FormGroup;
@@ -426,6 +429,17 @@ export class ManageCampaignsComponent implements OnInit, OnDestroy {
     const d = new Date();
     d.setDate(d.getDate() + days);
     return d.toISOString().slice(0, 10);
+  }
+
+  getStatusText(status: AdStatus): string {
+    switch (status) {
+      case AdStatus.Draft: return 'Draft';
+      case AdStatus.Active: return 'Active';
+      case AdStatus.Paused: return 'Paused';
+      case AdStatus.Completed: return 'Completed';
+      case AdStatus.Cancelled: return 'Cancelled';
+      default: return 'Unknown';
+    }
   }
 }
 

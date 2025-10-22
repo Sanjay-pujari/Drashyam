@@ -27,7 +27,8 @@ import { environment } from '../../../environments/environment';
   imports: [
     CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatSelectModule, MatProgressBarModule, MatCardModule,
-    MatIconModule, MatChipsModule, MatSlideToggleModule, VideoProcessingStatusComponent
+    MatIconModule, MatChipsModule, MatSlideToggleModule,
+    VideoProcessingStatusComponent
   ],
   templateUrl: './video-upload.component.html',
   styleUrls: ['./video-upload.component.scss']

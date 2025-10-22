@@ -32,9 +32,12 @@ public class Subscription
 
     public DateTime? CancelledAt { get; set; }
 
+    public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Active;
+
+    public DateTime? UpdatedAt { get; set; }
+
     // Navigation properties
     [ForeignKey("UserId")]
     public virtual ApplicationUser User { get; set; } = null!;
-    public SubscriptionStatus Status { get; internal set; }
 }
 

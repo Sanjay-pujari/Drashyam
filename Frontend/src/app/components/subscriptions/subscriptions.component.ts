@@ -365,10 +365,10 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
 
     // Load subscribed channels
     const channelsSub = this.subscriptionService.getSubscribedChannels().subscribe({
-      next: (result) => {
+      next: (result: any) => {
         this.subscribedChannels = result.items || [];
       },
-      error: (error) => {
+      error: (error: any) => {
         this.snackBar.open('Error loading subscriptions', 'Close', { duration: 3000 });
       }
     });
@@ -403,7 +403,7 @@ export class SubscriptionsComponent implements OnInit, OnDestroy {
           this.subscribedChannels = this.subscribedChannels.filter(channel => channel.id !== channelId);
           this.snackBar.open('Unsubscribed from channel', 'Close', { duration: 3000 });
         },
-        error: (error) => {
+        error: (error: any) => {
           this.snackBar.open('Error unsubscribing from channel', 'Close', { duration: 3000 });
         }
       });

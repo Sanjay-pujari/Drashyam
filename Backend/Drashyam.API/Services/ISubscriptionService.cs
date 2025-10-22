@@ -17,4 +17,8 @@ public interface ISubscriptionService
     Task<bool> CheckSubscriptionStatusAsync(string userId);
     Task<SubscriptionDto> ProcessPaymentAsync(string userId, PaymentDto paymentDto);
     Task<PagedResult<SubscriptionDto>> GetExpiringSubscriptionsAsync(int daysAhead = 7, int page = 1, int pageSize = 20);
+    Task<PagedResult<SubscriptionHistoryDto>> GetUserSubscriptionHistoryAsync(string userId, int page = 1, int pageSize = 20);
+    Task<SubscriptionAnalyticsDto> GetSubscriptionAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null);
+    Task<bool> SuspendSubscriptionAsync(int subscriptionId, string userId);
+    Task<bool> ReactivateSubscriptionAsync(int subscriptionId, string userId);
 }

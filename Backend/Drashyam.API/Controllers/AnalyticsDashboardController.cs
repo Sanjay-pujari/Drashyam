@@ -12,13 +12,16 @@ namespace Drashyam.API.Controllers;
 public class AnalyticsDashboardController : ControllerBase
 {
     private readonly IAnalyticsDashboardService _analyticsService;
+    private readonly IQuotaService _quotaService;
     private readonly ILogger<AnalyticsDashboardController> _logger;
 
     public AnalyticsDashboardController(
         IAnalyticsDashboardService analyticsService,
+        IQuotaService quotaService,
         ILogger<AnalyticsDashboardController> logger)
     {
         _analyticsService = analyticsService;
+        _quotaService = quotaService;
         _logger = logger;
     }
 
@@ -30,6 +33,19 @@ public class AnalyticsDashboardController : ControllerBase
         return (utcStartDate, utcEndDate);
     }
 
+    // Helper method to check if user has analytics access
+    private async Task<bool> HasAnalyticsAccessAsync(string userId)
+    {
+        try
+        {
+            return await _quotaService.CheckSubscriptionFeaturesAsync(userId, "analytics");
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     [HttpGet("summary")]
     public async Task<ActionResult<AnalyticsSummaryDto>> GetSummary(
         [FromQuery] DateTime? startDate = null,
@@ -38,6 +54,13 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            
+            // Check if user has analytics access
+            if (!await HasAnalyticsAccessAsync(userId))
+            {
+                return Forbid("Analytics access requires a paid subscription");
+            }
+            
             var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
             
             var summary = await _analyticsService.GetAnalyticsSummaryAsync(userId, utcStartDate, utcEndDate);
@@ -58,6 +81,13 @@ public class AnalyticsDashboardController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            
+            // Check if user has analytics access
+            if (!await HasAnalyticsAccessAsync(userId))
+            {
+                return Forbid("Analytics access requires a paid subscription");
+            }
+            
             var (utcStartDate, utcEndDate) = ConvertToUtc(startDate, endDate);
             var timeSeries = await _analyticsService.GetTimeSeriesDataAsync(userId, utcStartDate, utcEndDate);
             return Ok(timeSeries);
