@@ -61,7 +61,7 @@ import { Subscription } from 'rxjs';
         <div class="videos-list" *ngIf="playlistVideos.length > 0">
           <div class="video-item" *ngFor="let video of playlistVideos; let i = index" (click)="playVideo(video.videoId)">
             <div class="video-thumbnail">
-              <img [src]="video.videoThumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.videoTitle">
+              <img [src]="video.videoThumbnailUrl || '/assets/default-video-thumbnail.svg'" [alt]="video.videoTitle">
               <div class="duration">{{ formatDuration(video.videoDuration) }}</div>
               <div class="play-overlay">
                 <mat-icon>play_arrow</mat-icon>

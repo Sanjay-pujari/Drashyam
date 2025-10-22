@@ -16,6 +16,7 @@ using Drashyam.API.Middleware;
 using Microsoft.AspNetCore.Http.Features;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -219,6 +220,21 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 
 // CORS
 app.UseCors("AllowFrontend");
+
+// Static files for uploaded content
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot")),
+    RequestPath = "/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        // Add CORS headers for static files
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+    }
+});
 
 // Only redirect to HTTPS in production
 if (!app.Environment.IsDevelopment())

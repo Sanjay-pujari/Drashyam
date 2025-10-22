@@ -37,7 +37,7 @@ import { Subscription } from 'rxjs';
         <div class="videos-grid" *ngIf="likedVideos.length > 0">
           <mat-card class="video-card" *ngFor="let video of likedVideos" (click)="onVideoClick(video)">
             <div class="video-thumbnail">
-              <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.title">
+              <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'" [alt]="video.title">
               <div class="duration">{{ formatDuration(video.duration) }}</div>
               <button mat-icon-button class="like-button liked" (click)="$event.stopPropagation(); unlikeVideo(video.id)">
                 <mat-icon>thumb_up</mat-icon>

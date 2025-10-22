@@ -37,7 +37,7 @@ import { Subscription } from 'rxjs';
         <div class="watch-later-list" *ngIf="watchLaterItems.length > 0">
           <mat-card class="watch-later-item" *ngFor="let item of watchLaterItems">
             <div class="video-thumbnail">
-              <img [src]="item.videoThumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="item.videoTitle">
+              <img [src]="item.videoThumbnailUrl || '/assets/default-video-thumbnail.svg'" [alt]="item.videoTitle">
               <div class="duration">{{ formatDuration(item.videoDuration) }}</div>
               <button mat-icon-button class="remove-button" (click)="removeFromWatchLater(item.videoId)">
                 <mat-icon>close</mat-icon>

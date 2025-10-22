@@ -86,7 +86,7 @@ import { Subscription } from 'rxjs';
               <div class="videos-grid" *ngIf="latestVideos.length > 0">
                 <mat-card class="video-card" *ngFor="let video of latestVideos" (click)="playVideo(video.id)" style="cursor: pointer;">
                   <div class="video-thumbnail">
-                    <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'" [alt]="video.title">
+                    <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'" [alt]="video.title">
                     <div class="duration">{{ formatDuration(video.duration) }}</div>
                     <div class="play-overlay">
                       <mat-icon>play_arrow</mat-icon>

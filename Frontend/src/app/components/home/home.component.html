@@ -48,7 +48,7 @@
                 class="video-card search-card"
                 (click)="onVideoClick(video)">
                 <div class="video-thumbnail">
-                  <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                  <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'"
                     [alt]="video.title">
                     <div class="video-duration">{{ formatDuration(video.duration) }}</div>
                   </div>
@@ -114,7 +114,7 @@
                 class="video-card trending-card"
                 (click)="onVideoClick(video)">
                 <div class="video-thumbnail">
-                  <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                  <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'"
                     [alt]="video.title">
                     <div class="video-duration">{{ formatDuration(video.duration) }}</div>
                   </div>
@@ -159,7 +159,7 @@
                   class="video-card recommended-card"
                   (click)="onVideoClick(video)">
                   <div class="video-thumbnail">
-                    <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                    <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'"
                       [alt]="video.title">
                       <div class="video-duration">{{ formatDuration(video.duration) }}</div>
                     </div>
@@ -204,7 +204,7 @@
                     class="video-card subscribed-card"
                     (click)="onVideoClick(video)">
                     <div class="video-thumbnail">
-                      <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                      <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'"
                         [alt]="video.title">
                         <div class="video-duration">{{ formatDuration(video.duration) }}</div>
                       </div>
@@ -275,7 +275,7 @@
                     class="video-card main-card"
                     (click)="onVideoClick(video)">
                     <div class="video-thumbnail">
-                      <img [src]="video.thumbnailUrl || '/assets/default-thumbnail.jpg'"
+                      <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'"
                         [alt]="video.title">
                         <div class="video-duration">{{ formatDuration(video.duration) }}</div>
                         <div class="video-overlay">
