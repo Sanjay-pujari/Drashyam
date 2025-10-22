@@ -91,14 +91,15 @@ public class UserService : IUserService
 
     public async Task<PagedResult<UserDto>> SearchUsersAsync(string query, int page = 1, int pageSize = 20)
     {
+        var searchTerm = query.ToLower();
         var users = await _context.Users
-            .Where(u => u.IsActive && (u.FirstName.Contains(query) || u.LastName.Contains(query) || u.Email.Contains(query)))
+            .Where(u => u.IsActive && (u.FirstName.ToLower().Contains(searchTerm) || u.LastName.ToLower().Contains(searchTerm) || u.Email.ToLower().Contains(searchTerm)))
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
         var totalCount = await _context.Users
-            .Where(u => u.IsActive && (u.FirstName.Contains(query) || u.LastName.Contains(query) || u.Email.Contains(query)))
+            .Where(u => u.IsActive && (u.FirstName.ToLower().Contains(searchTerm) || u.LastName.ToLower().Contains(searchTerm) || u.Email.ToLower().Contains(searchTerm)))
             .CountAsync();
 
         return new PagedResult<UserDto>

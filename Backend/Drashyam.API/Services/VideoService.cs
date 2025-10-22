@@ -188,9 +188,10 @@ public class VideoService : IVideoService
         // Apply filters
         if (!string.IsNullOrEmpty(filter.Search))
         {
-            query = query.Where(v => v.Title.Contains(filter.Search) || 
-                                   (v.Description != null && v.Description.Contains(filter.Search)) ||
-                                   (v.Tags != null && v.Tags.Contains(filter.Search)));
+            var searchTerm = filter.Search.ToLower();
+            query = query.Where(v => v.Title.ToLower().Contains(searchTerm) || 
+                                   (v.Description != null && v.Description.ToLower().Contains(searchTerm)) ||
+                                   (v.Tags != null && v.Tags.ToLower().Contains(searchTerm)));
         }
 
         if (!string.IsNullOrEmpty(filter.Category))

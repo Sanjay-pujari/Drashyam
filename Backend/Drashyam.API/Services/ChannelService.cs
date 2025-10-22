@@ -157,14 +157,15 @@ public class ChannelService : IChannelService
 
     public async Task<PagedResult<ChannelDto>> SearchChannelsAsync(string query, int page = 1, int pageSize = 20)
     {
+        var searchTerm = query.ToLower();
         var channels = await _context.Channels
-            .Where(c => c.Name.Contains(query) || c.Description.Contains(query))
+            .Where(c => c.Name.ToLower().Contains(searchTerm) || c.Description.ToLower().Contains(searchTerm))
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
         var totalCount = await _context.Channels
-            .Where(c => c.Name.Contains(query) || c.Description.Contains(query))
+            .Where(c => c.Name.ToLower().Contains(searchTerm) || c.Description.ToLower().Contains(searchTerm))
             .CountAsync();
 
         return new PagedResult<ChannelDto>
