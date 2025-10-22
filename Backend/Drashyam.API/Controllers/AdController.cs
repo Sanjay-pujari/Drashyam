@@ -190,6 +190,24 @@ public class AdController : ControllerBase
         }
     }
 
+    [HttpPost("video-ad")]
+    public async Task<ActionResult<AdDto?>> GetVideoAd([FromBody] AdServeRequestDto request)
+    {
+        try
+        {
+            // Get user ID from token if available, otherwise use the one from request
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? request.UserId;
+            
+            var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, Models.AdType.Video);
+            return Ok(ad);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error serving video ad");
+            return BadRequest("Failed to serve video ad");
+        }
+    }
+
     [HttpPost("impressions")]
     public async Task<ActionResult> RecordImpression([FromBody] AdImpressionRequestDto request)
     {

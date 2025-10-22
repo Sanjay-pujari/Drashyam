@@ -19,6 +19,7 @@ public class VideoService : IVideoService
     private readonly INotificationService _notificationService;
     private readonly IHubContext<VideoHub> _videoHub;
     private readonly IQuotaService _quotaService;
+    private readonly IHostEnvironment _env;
 
     public VideoService(
         DrashyamDbContext context,
@@ -27,7 +28,8 @@ public class VideoService : IVideoService
         ILogger<VideoService> logger,
         INotificationService notificationService,
         IHubContext<VideoHub> videoHub,
-        IQuotaService quotaService)
+        IQuotaService quotaService,
+        IHostEnvironment env)
     {
         _context = context;
         _mapper = mapper;
@@ -36,6 +38,7 @@ public class VideoService : IVideoService
         _notificationService = notificationService;
         _videoHub = videoHub;
         _quotaService = quotaService;
+        _env = env;
     }
 
     public async Task<VideoDto> UploadVideoAsync(VideoUploadDto uploadDto, string userId)
@@ -99,7 +102,7 @@ public class VideoService : IVideoService
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
                 FileSize = uploadDto.VideoFile.Length,
-                Status = VideoProcessingStatus.Processing, // Set to Processing for background service to handle
+                Status = _env.IsDevelopment() ? VideoProcessingStatus.Ready : VideoProcessingStatus.Processing,
                 PublishedAt = DateTime.UtcNow
             };
 

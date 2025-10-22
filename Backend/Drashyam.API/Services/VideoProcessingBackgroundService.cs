@@ -11,15 +11,18 @@ namespace Drashyam.API.Services;
 public class VideoProcessingBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IHostEnvironment _env;
     private readonly ILogger<VideoProcessingBackgroundService> _logger;
     private readonly TimeSpan _processingInterval = TimeSpan.FromSeconds(30);
 
     public VideoProcessingBackgroundService(
         IServiceProvider serviceProvider,
-        ILogger<VideoProcessingBackgroundService> logger)
+        ILogger<VideoProcessingBackgroundService> logger,
+        IHostEnvironment env)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _env = env;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -95,30 +98,36 @@ public class VideoProcessingBackgroundService : BackgroundService
                 }
                 else
                 {
-                    // Mark as failed
-                    video.Status = VideoProcessingStatus.Failed;
+                    // In development, keep video in Processing on errors to avoid hiding uploads
+                    var statusForError = _env.IsDevelopment() ? VideoProcessingStatus.Processing : VideoProcessingStatus.Failed;
+                    video.Status = statusForError;
                     await context.SaveChangesAsync();
-                    
-                    // Update progress to failed
-                    await processingService.UpdateProcessingProgressAsync(video.Id, "Failed", 0, "Video processing failed", processingResult.Error);
-                    
-                    _logger.LogError("Failed to process video {VideoId}: {Error}", video.Id, processingResult.Error);
-                    
-                    // Send failure notification
-                    await notificationService.CreateNotificationAsync(
-                        video.UserId,
-                        "Video Processing Failed",
-                        $"Sorry, we couldn't process your video '{video.Title}'. Please try uploading again.",
-                        "VideoProcessingFailed"
-                    );
+
+                    var progressStatus = _env.IsDevelopment() ? "Processing" : "Failed";
+                    var progressStep = _env.IsDevelopment() ? "Encountered an error, will retry soon" : "Video processing failed";
+                    await processingService.UpdateProcessingProgressAsync(video.Id, progressStatus, 0, progressStep, processingResult.Error);
+
+                    _logger.LogError("Processing error for video {VideoId}: {Error}", video.Id, processingResult.Error);
+
+                    if (!_env.IsDevelopment())
+                    {
+                        // Send failure notification only in non-dev
+                        await notificationService.CreateNotificationAsync(
+                            video.UserId,
+                            "Video Processing Failed",
+                            $"Sorry, we couldn't process your video '{video.Title}'. Please try uploading again.",
+                            "VideoProcessingFailed"
+                        );
+                    }
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing video {VideoId}", video.Id);
                 
-                // Mark as failed
-                video.Status = VideoProcessingStatus.Failed;
+                // In development, keep video in Processing on unexpected errors
+                var statusForException = _env.IsDevelopment() ? VideoProcessingStatus.Processing : VideoProcessingStatus.Failed;
+                video.Status = statusForException;
                 await context.SaveChangesAsync();
             }
         }
