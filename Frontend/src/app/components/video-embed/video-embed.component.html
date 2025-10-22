@@ -1,0 +1,69 @@
+<div class="video-embed-container">
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+    <p>Loading video...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="!isLoading && error">
+    <mat-icon>error</mat-icon>
+    <h3>Video not available</h3>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Video Content -->
+  <div class="video-content" *ngIf="!isLoading && !error && video">
+    <!-- Video Player -->
+    <div class="video-player-section">
+      <app-video-player [video]="video" [autoplay]="true"></app-video-player>
+    </div>
+
+    <!-- Video Information -->
+    <div class="video-info">
+      <div class="video-header">
+        <h1 class="video-title">{{ video.title }}</h1>
+        
+        <div class="video-stats">
+          <span class="view-count">
+            <mat-icon>visibility</mat-icon>
+            {{ formatViewCount(video.viewCount) }} views
+          </span>
+          <span class="video-date">
+            <mat-icon>schedule</mat-icon>
+            {{ video.createdAt | date:'MMM d, y' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Channel Information -->
+      <div class="channel-section" *ngIf="video.channel || video.user">
+        <div class="channel-info">
+          <div class="channel-avatar">
+            <img [src]="getChannelAvatar()" [alt]="getChannelName()">
+          </div>
+          <div class="channel-details">
+            <h3 class="channel-name" (click)="goToChannel()" style="cursor: pointer;">
+              {{ getChannelName() }}
+            </h3>
+            <p class="channel-subscribers" *ngIf="video.channel">
+              {{ formatSubscriberCount(video.channel.subscriberCount) }} subscribers
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="embed-actions">
+        <button mat-raised-button color="primary" (click)="openInNewTab()">
+          <mat-icon>open_in_new</mat-icon>
+          Watch on Drashyam
+        </button>
+        <button mat-button (click)="goToChannel()" *ngIf="video.channel">
+          <mat-icon>account_circle</mat-icon>
+          View Channel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

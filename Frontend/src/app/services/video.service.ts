@@ -141,6 +141,10 @@ export class VideoService {
     return this.http.get<Video>(`${this.apiUrl}/shared/${token}`);
   }
 
+  getEmbedCode(id: number): Observable<{ embedUrl: string; embedCode: string; width: number; height: number; videoId: number; title: string }> {
+    return this.http.get<{ embedUrl: string; embedCode: string; width: number; height: number; videoId: number; title: string }>(`${environment.apiUrl}/api/embed/${id}/embed`);
+  }
+
   // New endpoints
   getFavoriteVideos(filter: VideoFilter = {}): Observable<PagedResult<Video>> {
     let params = new HttpParams();

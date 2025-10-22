@@ -439,6 +439,20 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     });
   }
 
+  embedVideo() {
+    if (!this.video) return;
+
+    this.videoService.getEmbedCode(this.video.id).subscribe({
+      next: (response) => {
+        this.copyToClipboard(response.embedCode);
+        this.snackBar.open('Embed code copied to clipboard!', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to generate embed code', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
   private copyToClipboard(text: string) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {

@@ -75,6 +75,10 @@
           <mat-icon>share</mat-icon>
           <span>Share</span>
         </button>
+        <button class="action-btn embed-btn" (click)="embedVideo()">
+          <mat-icon>code</mat-icon>
+          <span>Embed</span>
+        </button>
         <button class="action-btn save-btn" (click)="toggleWatchLater()" [class.active]="isInWatchLater">
           <mat-icon>{{ isInWatchLater ? 'watch_later' : 'watch_later_outlined' }}</mat-icon>
           <span>{{ isInWatchLater ? 'Saved' : 'Watch Later' }}</span>

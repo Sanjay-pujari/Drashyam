@@ -37,6 +37,7 @@ const routes: Routes = [
   { path: 'videos', loadComponent: () => import('./app/components/videos/videos.component').then(m => m.VideosComponent) },
   { path: 'videos/:id', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
   { path: 'watch/:token', loadComponent: () => import('./app/components/video-detail/video-detail.component').then(m => m.VideoDetailComponent) },
+  { path: 'embed/:token', loadComponent: () => import('./app/components/video-embed/video-embed.component').then(m => m.VideoEmbedComponent) },
   { path: 'channels', loadComponent: () => import('./app/components/channels/channels.component').then(m => m.ChannelsComponent) },
   { path: 'channels/:id', loadComponent: () => import('./app/components/channel-detail/channel-detail.component').then(m => m.ChannelDetailComponent) },
   { path: 'channel/edit/:id', loadComponent: () => import('./app/components/channel-create/channel-create.component').then(m => m.ChannelCreateComponent), canActivate: [authGuard] },

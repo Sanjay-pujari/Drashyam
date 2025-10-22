@@ -142,6 +142,14 @@ builder.Services.AddCors(options =>
             .AllowCredentials()
             .SetPreflightMaxAge(TimeSpan.FromSeconds(86400)); // Cache preflight for 24 hours
     });
+    
+    // Allow embedding from any origin for iframe content
+    options.AddPolicy("AllowEmbedding", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 // SignalR
@@ -236,6 +244,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Request logging
 app.UseMiddleware<RequestLoggingMiddleware>();
+
+// Embed security middleware
+app.UseMiddleware<EmbedSecurityMiddleware>();
 
 // CORS
 app.UseCors("AllowFrontend");
