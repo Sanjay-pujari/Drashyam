@@ -64,7 +64,7 @@
                     @if (currentUser$ | async) {
                       <div class="video-actions">
                         <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
-                          <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                          <mat-icon [color]="video.isLiked ? 'warn' : undefined">{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
                           {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
                         </button>
                         <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
@@ -130,7 +130,7 @@
                     @if (currentUser$ | async) {
                       <div class="video-actions">
                         <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
-                          <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                          <mat-icon [color]="video.isLiked ? 'warn' : undefined">{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
                           {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
                         </button>
                         <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
@@ -175,7 +175,7 @@
                       @if (currentUser$ | async) {
                         <div class="video-actions">
                           <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
-                            <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                            <mat-icon [color]="video.isLiked ? 'warn' : undefined">{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
                             {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
                           </button>
                           <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">
@@ -301,7 +301,7 @@
                             @if (currentUser$ | async) {
                               <div class="video-actions">
                                 <button mat-button color="primary" (click)="$event.stopPropagation(); toggleFavorite(video)">
-                                  <mat-icon>{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+                                  <mat-icon [color]="video.isLiked ? 'warn' : undefined">{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
                                   {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
                                 </button>
                                 <button mat-button (click)="$event.stopPropagation(); toggleSubscribe(video)">

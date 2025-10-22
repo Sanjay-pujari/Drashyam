@@ -128,7 +128,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   toggleFavorite(video: Video) {
-    const likeType = video.isLiked ? 'dislike' : 'like';
+    // Optimistic UI update
+    const wasLiked = !!video.isLiked;
+    video.isLiked = !wasLiked;
+    const currentLikes = Number(video.likeCount || 0);
+    video.likeCount = Math.max(0, currentLikes + (wasLiked ? -1 : 1));
+
+    const likeType = wasLiked ? 'dislike' : 'like';
     this.store.dispatch(likeVideo({ videoId: video.id, likeType }));
   }
 
