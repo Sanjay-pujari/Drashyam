@@ -135,9 +135,15 @@ export class VideoDetailComponent implements OnInit {
   toggleFavorite() {
     if (!this.video) return;
     const wasLiked = !!this.video.isLiked;
-    this.video.isLiked = !wasLiked;
     const currentLikes = Number(this.video.likeCount || 0);
-    this.video.likeCount = Math.max(0, currentLikes + (wasLiked ? -1 : 1));
+    
+    // Create a new video object with updated like counts to avoid readonly error
+    this.video = {
+      ...this.video,
+      isLiked: !wasLiked,
+      likeCount: Math.max(0, currentLikes + (wasLiked ? -1 : 1))
+    };
+    
     this.store.dispatch(likeVideo({ videoId: this.video.id, likeType: wasLiked ? 'dislike' : 'like' }));
   }
 

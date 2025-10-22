@@ -853,11 +853,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
 
   private handleVideoLikeUpdate(update: VideoLikeUpdate): void {
     if (this.video && update.videoId === this.video.id) {
-      // Update video like counts
-      this.video.likeCount = update.likeCount;
-      this.video.dislikeCount = update.dislikeCount;
-      this.video.isLiked = update.isLiked;
-      this.video.isDisliked = update.isDisliked;
+      // Create a new video object with updated like counts to avoid readonly error
+      this.video = {
+        ...this.video,
+        likeCount: update.likeCount,
+        dislikeCount: update.dislikeCount,
+        isLiked: update.isLiked,
+        isDisliked: update.isDisliked
+      };
       
       // Show notification for real-time updates from other users
       if (update.isLiked) {

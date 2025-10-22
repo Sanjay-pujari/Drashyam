@@ -128,14 +128,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   toggleFavorite(video: Video) {
-    // Optimistic UI update
+    // Optimistic UI update - create new object to avoid readonly error
     const wasLiked = !!video.isLiked;
-    video.isLiked = !wasLiked;
     const currentLikes = Number(video.likeCount || 0);
-    video.likeCount = Math.max(0, currentLikes + (wasLiked ? -1 : 1));
+    
+    // Update video in all relevant arrays
+    this.updateVideoInArray(this.trendingVideos, video, wasLiked, currentLikes);
+    this.updateVideoInArray(this.recommendedVideos, video, wasLiked, currentLikes);
+    this.updateVideoInArray(this.subscribedVideos, video, wasLiked, currentLikes);
+    this.updateVideoInArray(this.searchResults, video, wasLiked, currentLikes);
 
     const likeType = wasLiked ? 'dislike' : 'like';
     this.store.dispatch(likeVideo({ videoId: video.id, likeType }));
+  }
+
+  private updateVideoInArray(videoArray: Video[], video: Video, wasLiked: boolean, currentLikes: number): void {
+    const videoIndex = videoArray.findIndex(v => v.id === video.id);
+    if (videoIndex !== -1) {
+      videoArray[videoIndex] = {
+        ...video,
+        isLiked: !wasLiked,
+        likeCount: Math.max(0, currentLikes + (wasLiked ? -1 : 1))
+      };
+    }
   }
 
   toggleSubscribe(video: Video) {

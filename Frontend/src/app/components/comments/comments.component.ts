@@ -224,11 +224,17 @@ export class CommentsComponent implements OnInit, OnDestroy {
     const sub = this.commentService.likeComment(comment.id)
       .subscribe({
         next: (updatedComment: Comment) => {
-          // Update the comment with new like count
-          comment.likeCount = updatedComment.likeCount;
-          comment.dislikeCount = updatedComment.dislikeCount;
-          comment.isLiked = updatedComment.isLiked;
-          comment.isDisliked = updatedComment.isDisliked;
+          // Update the comment with new like count - create new object to avoid readonly error
+          const commentIndex = this.comments.findIndex(c => c.id === comment.id);
+          if (commentIndex !== -1) {
+            this.comments[commentIndex] = {
+              ...comment,
+              likeCount: updatedComment.likeCount,
+              dislikeCount: updatedComment.dislikeCount,
+              isLiked: updatedComment.isLiked,
+              isDisliked: updatedComment.isDisliked
+            };
+          }
           this.snackBar.open('Comment liked!', 'Close', { duration: 2000 });
         },
         error: (err) => {
@@ -244,11 +250,17 @@ export class CommentsComponent implements OnInit, OnDestroy {
     const sub = this.commentService.unlikeComment(comment.id)
       .subscribe({
         next: (updatedComment: Comment) => {
-          // Update the comment with new like count
-          comment.likeCount = updatedComment.likeCount;
-          comment.dislikeCount = updatedComment.dislikeCount;
-          comment.isLiked = updatedComment.isLiked;
-          comment.isDisliked = updatedComment.isDisliked;
+          // Update the comment with new like count - create new object to avoid readonly error
+          const commentIndex = this.comments.findIndex(c => c.id === comment.id);
+          if (commentIndex !== -1) {
+            this.comments[commentIndex] = {
+              ...comment,
+              likeCount: updatedComment.likeCount,
+              dislikeCount: updatedComment.dislikeCount,
+              isLiked: updatedComment.isLiked,
+              isDisliked: updatedComment.isDisliked
+            };
+          }
           this.snackBar.open('Comment unliked!', 'Close', { duration: 2000 });
         },
         error: (err) => {
@@ -264,11 +276,17 @@ export class CommentsComponent implements OnInit, OnDestroy {
     const sub = this.commentService.dislikeComment(comment.id)
       .subscribe({
         next: (updatedComment: Comment) => {
-          // Update the comment with new dislike count
-          comment.likeCount = updatedComment.likeCount;
-          comment.dislikeCount = updatedComment.dislikeCount;
-          comment.isLiked = updatedComment.isLiked;
-          comment.isDisliked = updatedComment.isDisliked;
+          // Update the comment with new dislike count - create new object to avoid readonly error
+          const commentIndex = this.comments.findIndex(c => c.id === comment.id);
+          if (commentIndex !== -1) {
+            this.comments[commentIndex] = {
+              ...comment,
+              likeCount: updatedComment.likeCount,
+              dislikeCount: updatedComment.dislikeCount,
+              isLiked: updatedComment.isLiked,
+              isDisliked: updatedComment.isDisliked
+            };
+          }
           this.snackBar.open('Comment disliked!', 'Close', { duration: 2000 });
         },
         error: (err) => {
@@ -364,13 +382,16 @@ export class CommentsComponent implements OnInit, OnDestroy {
   }
 
   private handleCommentLikeUpdate(update: CommentLikeUpdate): void {
-    // Find and update the comment
-    const comment = this.comments.find(c => c.id === update.commentId);
-    if (comment) {
-      comment.likeCount = update.likeCount;
-      comment.dislikeCount = update.dislikeCount;
-      comment.isLiked = update.isLiked;
-      comment.isDisliked = update.isDisliked;
+    // Find and update the comment - create new object to avoid readonly error
+    const commentIndex = this.comments.findIndex(c => c.id === update.commentId);
+    if (commentIndex !== -1) {
+      this.comments[commentIndex] = {
+        ...this.comments[commentIndex],
+        likeCount: update.likeCount,
+        dislikeCount: update.dislikeCount,
+        isLiked: update.isLiked,
+        isDisliked: update.isDisliked
+      };
     }
   }
 }
