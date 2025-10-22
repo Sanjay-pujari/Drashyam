@@ -83,7 +83,7 @@ export class SubscriptionService {
   }
 
   getUserSubscription(): Observable<Subscription> {
-    return this.http.get<Subscription>(`${this.apiUrl}/user`);
+    return this.http.get<Subscription>(`${this.apiUrl}/me`);
   }
 
   updateSubscription(id: number, subscription: SubscriptionUpdate): Observable<Subscription> {
@@ -109,11 +109,11 @@ export class SubscriptionService {
 
   // Subscription Changes
   upgradeSubscription(newPlanId: number): Observable<Subscription> {
-    return this.http.post<Subscription>(`${this.apiUrl}/upgrade`, { newPlanId });
+    return this.http.post<Subscription>(`${this.apiUrl}/upgrade?newPlanId=${newPlanId}`, {});
   }
 
   downgradeSubscription(newPlanId: number): Observable<Subscription> {
-    return this.http.post<Subscription>(`${this.apiUrl}/downgrade`, { newPlanId });
+    return this.http.post<Subscription>(`${this.apiUrl}/downgrade?newPlanId=${newPlanId}`, {});
   }
 
   // Status Checks
