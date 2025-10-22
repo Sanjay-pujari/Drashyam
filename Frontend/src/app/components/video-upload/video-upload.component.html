@@ -226,6 +226,7 @@
   <!-- Video Processing Status -->
   <app-video-processing-status 
     *ngIf="uploadedVideoId" 
-    [videoId]="uploadedVideoId">
+    [videoId]="uploadedVideoId"
+    (completed)="onProcessingCompleted($event)">
   </app-video-processing-status>
 </div>

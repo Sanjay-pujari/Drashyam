@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -209,6 +210,10 @@ builder.Services.AddScoped<IVideoProcessingService, VideoProcessingService>();
 // Background services
 builder.Services.AddHostedService<RecommendationBackgroundService>();
 builder.Services.AddHostedService<VideoProcessingBackgroundService>();
+
+// Ensure wwwroot exists for static file hosting
+var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(wwwrootPath);
 
 var app = builder.Build();
 

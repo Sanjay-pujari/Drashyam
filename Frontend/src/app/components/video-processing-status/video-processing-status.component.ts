@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -24,6 +24,7 @@ import { Subscription, interval } from 'rxjs';
 })
 export class VideoProcessingStatusComponent implements OnInit, OnDestroy {
   @Input() videoId!: number;
+  @Output() completed = new EventEmitter<'Completed' | 'Failed'>();
   
   processingProgress: VideoProcessingProgress | null = null;
   isProcessing = false;
@@ -89,8 +90,10 @@ export class VideoProcessingStatusComponent implements OnInit, OnDestroy {
           
           if (progress.status === 'Completed') {
             this.snackBar.open('Video processing completed!', 'Close', { duration: 5000 });
+            this.completed.emit('Completed');
           } else if (progress.status === 'Failed') {
             this.snackBar.open('Video processing failed. Please try again.', 'Close', { duration: 5000 });
+            this.completed.emit('Failed');
           }
         }
       },

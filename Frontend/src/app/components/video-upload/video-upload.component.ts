@@ -184,6 +184,18 @@ export class VideoUploadComponent implements OnInit {
     }
   }
 
+  onProcessingCompleted(status: 'Completed' | 'Failed') {
+    this.isUploading = false;
+    if (status === 'Completed') {
+      // Navigate to the uploaded video's page
+      if (this.uploadedVideoId) {
+        this.router.navigate(['/video', this.uploadedVideoId]);
+      } else {
+        this.router.navigate(['/videos']);
+      }
+    }
+  }
+
   getFormValidationErrors() {
     const errors: any = {};
     Object.keys(this.uploadForm.controls).forEach(key => {
