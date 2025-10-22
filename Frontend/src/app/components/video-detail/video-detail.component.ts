@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
+import { likeVideo } from '../../store/video/video.actions';
 import { VideoService } from '../../services/video.service';
 import { Video } from '../../models/video.model';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
@@ -129,6 +130,15 @@ export class VideoDetailComponent implements OnInit {
       return this.video.user.profilePictureUrl;
     }
     return '/assets/default-avatar.svg';
+  }
+
+  toggleFavorite() {
+    if (!this.video) return;
+    const wasLiked = !!this.video.isLiked;
+    this.video.isLiked = !wasLiked;
+    const currentLikes = Number(this.video.likeCount || 0);
+    this.video.likeCount = Math.max(0, currentLikes + (wasLiked ? -1 : 1));
+    this.store.dispatch(likeVideo({ videoId: this.video.id, likeType: wasLiked ? 'dislike' : 'like' }));
   }
 
   navigateToChannel() {

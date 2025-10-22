@@ -63,7 +63,7 @@ import { Subscription } from 'rxjs';
             <div class="video-thumbnail">
               <img [src]="video.thumbnailUrl || '/assets/default-video-thumbnail.svg'" [alt]="video.title">
               <div class="video-duration">{{ formatDuration(video.duration) }}</div>
-              <div class="video-status" [class]="getStatusClass(video.status)">
+            <div class="video-status" [ngClass]="'video-status ' + getStatusClass(video.status)">
                 {{ getStatusText(video.status) }}
               </div>
             </div>
@@ -541,7 +541,7 @@ export class VideoManagementComponent implements OnInit, OnDestroy {
   loadVideos() {
     this.isLoading = true;
     this.subscriptions.add(
-      this.videoService.getUserVideos('me', { page: 1, pageSize: 50 }).subscribe({
+      this.videoService.getMyVideos({ page: 1, pageSize: 50 }).subscribe({
         next: (result) => {
           this.videos = result.items;
           this.isLoading = false;
@@ -707,20 +707,36 @@ export class VideoManagementComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: VideoStatus): string {
-    switch (status) {
-      case VideoStatus.Published: return 'ready';
-      case VideoStatus.Processing: return 'processing';
-      case VideoStatus.Draft: return 'processing';
-      case VideoStatus.Deleted: return 'failed';
-      default: return 'processing';
-    }
+    const s = this.normalizeStatus(status);
+    if (s === 'Published') return 'ready';
+    if (s === 'Deleted') return 'failed';
+    return 'processing';
   }
 
   getStatusText(status: VideoStatus): string {
-    switch (status) {
-      case VideoStatus.Published: return 'Ready';
-      case VideoStatus.Processing: return 'Processing';
+    const s = this.normalizeStatus(status);
+    if (s === 'Published') return 'Ready';
+    if (s === 'Processing') return 'Processing';
+    if (s === 'Draft') return 'Draft';
+    if (s === 'Private') return 'Private';
+    if (s === 'Unlisted') return 'Unlisted';
+    if (s === 'Deleted') return 'Deleted';
+    return 'Processing';
+  }
+
+  // Backend sends enums as strings (e.g., "Published") due to JsonStringEnumConverter.
+  // Normalize both numeric enum and string values.
+  private normalizeStatus(status: VideoStatus | string | any): 'Draft' | 'Processing' | 'Published' | 'Private' | 'Unlisted' | 'Deleted' {
+    if (typeof status === 'string') {
+      // Ensure first letter capitalized to match server strings
+      const s = status.charAt(0).toUpperCase() + status.slice(1);
+      const allowed = ['Draft','Processing','Published','Private','Unlisted','Deleted'] as const;
+      return (allowed as readonly string[]).includes(s) ? (s as any) : 'Processing';
+    }
+    switch (status as VideoStatus) {
       case VideoStatus.Draft: return 'Draft';
+      case VideoStatus.Processing: return 'Processing';
+      case VideoStatus.Published: return 'Published';
       case VideoStatus.Private: return 'Private';
       case VideoStatus.Unlisted: return 'Unlisted';
       case VideoStatus.Deleted: return 'Deleted';

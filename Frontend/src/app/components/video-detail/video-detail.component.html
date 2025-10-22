@@ -14,10 +14,10 @@
           <mat-icon>visibility</mat-icon>
           {{ formatViewCount(video.viewCount) }} views
         </span>
-        <span class="like-count">
-          <mat-icon>thumb_up</mat-icon>
-          {{ formatViewCount(video.likeCount) }}
-        </span>
+        <button mat-button class="favorite-toggle" (click)="toggleFavorite()">
+          <mat-icon [color]="video.isLiked ? 'warn' : undefined">{{ video.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+          {{ video.isLiked ? 'Unfavorite' : 'Favorite' }}
+        </button>
         <span class="comment-count">
           <mat-icon>comment</mat-icon>
           {{ formatViewCount(video.commentCount) }}
