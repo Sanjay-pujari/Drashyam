@@ -5,6 +5,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { AuthService } from './services/auth.service';
 import { SidebarService } from './services/sidebar.service';
 import { ThemeService } from './services/theme.service';
+import { AccessibilityService } from './services/accessibility.service';
 import { Subscription } from 'rxjs';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
@@ -24,12 +25,16 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     public sidebarService: SidebarService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private accessibilityService: AccessibilityService
   ) {}
 
   ngOnInit() {
     // Initialize authentication state first
     this.authService.initializeAuth().subscribe();
+    
+    // Initialize accessibility service
+    this.accessibilityService.settings$.subscribe();
     
     // Subscribe to authentication state
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
