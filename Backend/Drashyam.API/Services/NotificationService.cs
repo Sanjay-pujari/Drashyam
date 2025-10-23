@@ -197,4 +197,19 @@ public class NotificationService : INotificationService
             CreatedAt = notification.CreatedAt
         });
     }
+
+    public async Task<int> GetUnreadCountAsync(string userId)
+    {
+        return await GetUnreadNotificationCountAsync(userId);
+    }
+
+    public async Task MarkAsReadAsync(int notificationId, string userId)
+    {
+        await MarkNotificationAsReadAsync(notificationId, userId);
+    }
+
+    public async Task MarkAllAsReadAsync(string userId)
+    {
+        await MarkAllNotificationsAsReadAsync(userId);
+    }
 }

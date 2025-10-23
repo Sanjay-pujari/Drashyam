@@ -39,6 +39,8 @@ public class LiveStream
 
     public long PeakViewerCount { get; set; } = 0;
 
+    public DateTime? LastViewerCountUpdate { get; set; }
+
     public bool IsRecording { get; set; } = false;
 
     public string? RecordingUrl { get; set; }

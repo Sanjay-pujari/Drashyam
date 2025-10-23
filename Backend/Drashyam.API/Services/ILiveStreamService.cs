@@ -19,4 +19,5 @@ public interface ILiveStreamService
     Task<LiveStreamDto> JoinLiveStreamAsync(int streamId, string userId);
     Task<LiveStreamDto> LeaveLiveStreamAsync(int streamId, string userId);
     Task<int> GetLiveStreamViewerCountAsync(int streamId);
+    Task UpdateViewerCountAsync(int streamId, long viewerCount, string userId);
 }

@@ -119,7 +119,11 @@ builder.Services.AddAuthentication(options =>
         {
             var accessToken = context.Request.Query["access_token"].ToString();
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            if (!string.IsNullOrEmpty(accessToken) && 
+                (path.StartsWithSegments("/notificationHub") || 
+                 path.StartsWithSegments("/liveStreamHub") || 
+                 path.StartsWithSegments("/chatHub") || 
+                 path.StartsWithSegments("/videoHub")))
             {
                 context.Token = accessToken;
             }
@@ -335,6 +339,7 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapHub<VideoHub>("/videoHub");
 app.MapHub<LiveStreamHub>("/liveStreamHub");
+app.MapHub<ChatHub>("/chatHub");
 app.MapHub<NotificationHub>("/notificationHub");
 
 // Seed database only in development and only if database is empty

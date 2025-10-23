@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Drashyam.API.DTOs;
 using Drashyam.API.Services;
+using Drashyam.API.Hubs;
 
 namespace Drashyam.API.Controllers;
 
@@ -11,11 +13,13 @@ namespace Drashyam.API.Controllers;
 public class LiveStreamChatController : ControllerBase
 {
     private readonly ILiveStreamChatService _chatService;
+    private readonly IHubContext<ChatHub> _chatHub;
     private readonly ILogger<LiveStreamChatController> _logger;
 
-    public LiveStreamChatController(ILiveStreamChatService chatService, ILogger<LiveStreamChatController> logger)
+    public LiveStreamChatController(ILiveStreamChatService chatService, IHubContext<ChatHub> chatHub, ILogger<LiveStreamChatController> logger)
     {
         _chatService = chatService;
+        _chatHub = chatHub;
         _logger = logger;
     }
 
@@ -29,6 +33,10 @@ public class LiveStreamChatController : ControllerBase
                 return Unauthorized();
 
             var message = await _chatService.SendMessageAsync(dto, userId);
+            
+            // Broadcast message to all chat participants
+            await _chatHub.Clients.Group($"chat_{dto.LiveStreamId}").SendAsync("MessageReceived", message);
+            
             return Ok(message);
         }
         catch (Exception ex)

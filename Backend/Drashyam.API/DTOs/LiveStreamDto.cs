@@ -9,6 +9,7 @@ public class LiveStreamDto
     public int? ChannelId { get; set; }
     public string StreamKey { get; set; } = string.Empty;
     public string StreamUrl { get; set; } = string.Empty;
+    public string? HlsUrl { get; set; }
     public LiveStreamStatus Status { get; set; }
     public DateTime ScheduledStartTime { get; set; }
     public DateTime? ActualStartTime { get; set; }

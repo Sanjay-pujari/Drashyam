@@ -234,6 +234,24 @@ public class LiveStreamService : ILiveStreamService
         return 0;
     }
 
+    public async Task UpdateViewerCountAsync(int streamId, long viewerCount, string userId)
+    {
+        var stream = await _context.LiveStreams
+            .FirstOrDefaultAsync(s => s.Id == streamId);
+
+        if (stream == null)
+            throw new ArgumentException("Live stream not found");
+
+        // Only allow stream owner to update viewer count
+        if (stream.UserId != userId)
+            throw new UnauthorizedAccessException("Only stream owner can update viewer count");
+
+        stream.ViewerCount = viewerCount;
+        stream.LastViewerCountUpdate = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+    }
+
     private string GenerateStreamKey()
     {
         return Guid.NewGuid().ToString("N");

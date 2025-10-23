@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using Drashyam.API.DTOs;
 using Drashyam.API.Services;
+using Drashyam.API.Hubs;
 
 namespace Drashyam.API.Controllers;
 
@@ -11,11 +13,22 @@ namespace Drashyam.API.Controllers;
 public class LiveStreamController : ControllerBase
 {
     private readonly ILiveStreamService _liveStreamService;
+    private readonly IHubContext<LiveStreamHub> _liveStreamHub;
+    private readonly IHubContext<ChatHub> _chatHub;
+    private readonly IHubContext<NotificationHub> _notificationHub;
     private readonly ILogger<LiveStreamController> _logger;
 
-    public LiveStreamController(ILiveStreamService liveStreamService, ILogger<LiveStreamController> logger)
+    public LiveStreamController(
+        ILiveStreamService liveStreamService, 
+        IHubContext<LiveStreamHub> liveStreamHub,
+        IHubContext<ChatHub> chatHub,
+        IHubContext<NotificationHub> notificationHub,
+        ILogger<LiveStreamController> logger)
     {
         _liveStreamService = liveStreamService;
+        _liveStreamHub = liveStreamHub;
+        _chatHub = chatHub;
+        _notificationHub = notificationHub;
         _logger = logger;
     }
 
@@ -90,6 +103,17 @@ public class LiveStreamController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var stream = await _liveStreamService.StartLiveStreamAsync(streamId, userId);
+        
+        // Notify all viewers that stream started
+        await _liveStreamHub.Clients.Group($"stream_{streamId}").SendAsync("StreamStarted", new
+        {
+            StreamId = streamId,
+            StartedBy = userId,
+            StartTime = DateTime.UtcNow,
+            StreamUrl = stream.StreamUrl,
+            HlsUrl = stream.HlsUrl
+        });
+        
         return Ok(stream);
     }
 
@@ -99,6 +123,15 @@ public class LiveStreamController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         var stream = await _liveStreamService.StopLiveStreamAsync(streamId, userId);
+        
+        // Notify all viewers that stream ended
+        await _liveStreamHub.Clients.Group($"stream_{streamId}").SendAsync("StreamEnded", new
+        {
+            StreamId = streamId,
+            EndedBy = userId,
+            EndTime = DateTime.UtcNow
+        });
+        
         return Ok(stream);
     }
 
@@ -141,6 +174,26 @@ public class LiveStreamController : ControllerBase
     {
         var count = await _liveStreamService.GetLiveStreamViewerCountAsync(streamId);
         return Ok(count);
+    }
+
+    [HttpPost("{streamId:int}/viewers/update")]
+    [Authorize]
+    public async Task<ActionResult> UpdateViewerCount([FromRoute] int streamId, [FromBody] long viewerCount)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        
+        // Update viewer count in database
+        await _liveStreamService.UpdateViewerCountAsync(streamId, viewerCount, userId);
+        
+        // Broadcast viewer count update to all stream viewers
+        await _liveStreamHub.Clients.Group($"stream_{streamId}").SendAsync("ViewerCountUpdated", new
+        {
+            StreamId = streamId,
+            ViewerCount = viewerCount,
+            Timestamp = DateTime.UtcNow
+        });
+        
+        return Ok();
     }
 }
 
