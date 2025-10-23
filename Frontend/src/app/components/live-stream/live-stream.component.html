@@ -1,0 +1,264 @@
+<div class="live-stream-container" *ngIf="!isLoading && !isError">
+  <!-- Stream Header -->
+  <div class="stream-header">
+    <div class="stream-info">
+      <h1 class="stream-title">{{ stream?.title }}</h1>
+      <div class="stream-meta">
+        <span class="viewer-count">
+          <i class="fas fa-eye"></i>
+          {{ viewerCount | number }} viewers
+        </span>
+        <span class="stream-duration" *ngIf="isStreamLive()">
+          <i class="fas fa-clock"></i>
+          {{ getStreamDuration() }}
+        </span>
+        <span class="stream-status" [class.live]="isStreamLive()">
+          {{ stream?.status }}
+        </span>
+      </div>
+    </div>
+    <div class="stream-actions">
+      <button class="btn btn-secondary" (click)="shareStream()">
+        <i class="fas fa-share"></i>
+        Share
+      </button>
+      <button class="btn btn-secondary" (click)="refreshStream()">
+        <i class="fas fa-refresh"></i>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Stream Content -->
+  <div class="stream-content">
+    <!-- Video Player -->
+    <div class="video-container">
+      <div class="video-player" *ngIf="stream">
+        <!-- HLS Video Player -->
+        <video 
+          *ngIf="isStreamLive() && stream.hlsUrl"
+          [src]="getHlsUrl()"
+          controls
+          autoplay
+          muted
+          class="stream-video">
+          Your browser does not support the video tag.
+        </video>
+        
+        <!-- Offline Message -->
+        <div class="offline-message" *ngIf="!isStreamLive()">
+          <i class="fas fa-broadcast-tower"></i>
+          <h3>Stream is Offline</h3>
+          <p>This stream is not currently live.</p>
+        </div>
+      </div>
+
+      <!-- Stream Controls (for stream owner) -->
+      <div class="stream-controls" *ngIf="isStreamOwner">
+        <div class="control-group">
+          <button 
+            class="btn btn-primary" 
+            [disabled]="!canStartStream"
+            (click)="startStream()"
+            *ngIf="canStartStream">
+            <i class="fas fa-play"></i>
+            Start Stream
+          </button>
+          
+          <button 
+            class="btn btn-danger" 
+            [disabled]="!canStopStream"
+            (click)="stopStream()"
+            *ngIf="canStopStream">
+            <i class="fas fa-stop"></i>
+            Stop Stream
+          </button>
+          
+          <button 
+            class="btn btn-warning" 
+            [disabled]="!canPauseStream"
+            (click)="pauseStream()"
+            *ngIf="canPauseStream">
+            <i class="fas fa-pause"></i>
+            Pause
+          </button>
+          
+          <button 
+            class="btn btn-success" 
+            [disabled]="!canResumeStream"
+            (click)="resumeStream()"
+            *ngIf="canResumeStream">
+            <i class="fas fa-play"></i>
+            Resume
+          </button>
+        </div>
+
+        <div class="control-group">
+          <button 
+            class="btn btn-secondary" 
+            [class.recording]="isRecording"
+            [disabled]="!isStreaming"
+            (click)="isRecording ? stopRecording() : startRecording()">
+            <i class="fas fa-circle" [class.recording]="isRecording"></i>
+            {{ isRecording ? 'Stop Recording' : 'Start Recording' }}
+          </button>
+        </div>
+
+        <div class="control-group">
+          <select 
+            class="quality-selector"
+            [value]="currentQuality"
+            [disabled]="isQualityChanging"
+            (change)="changeQuality($event.target.value)">
+            <option *ngFor="let quality of availableQualities" [value]="quality.name">
+              {{ quality.name }} ({{ quality.width }}x{{ quality.height }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Sidebar -->
+    <div class="chat-sidebar" *ngIf="chatEnabled">
+      <div class="chat-header">
+        <h3>Live Chat</h3>
+        <button class="btn btn-sm btn-secondary" (click)="toggleChat()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="chat-messages" #chatMessages>
+        <div 
+          class="chat-message" 
+          *ngFor="let message of chatMessages"
+          [class.moderator]="message.isModerator"
+          [class.subscriber]="message.isSubscriber">
+          <div class="message-header">
+            <span class="username">{{ message.userName }}</span>
+            <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
+          </div>
+          <div class="message-content">{{ message.message }}</div>
+          <div class="message-reactions" *ngIf="message.reactions.length > 0">
+            <span 
+              class="reaction" 
+              *ngFor="let reaction of message.reactions">
+              {{ reaction.reactionType }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chat-input">
+        <input 
+          type="text" 
+          [(ngModel)]="newMessage"
+          (keyup.enter)="sendMessage()"
+          [disabled]="isSendingMessage"
+          placeholder="Type a message...">
+        <button 
+          class="btn btn-primary btn-sm"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim() || isSendingMessage">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      
+      <div class="chat-reactions">
+        <button 
+          class="reaction-btn"
+          *ngFor="let reaction of ['👍', '👎', '❤️', '😂', '😮', '😢', '😡']"
+          (click)="sendReaction(reaction)">
+          {{ reaction }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stream Analytics (for stream owner) -->
+  <div class="stream-analytics" *ngIf="isStreamOwner && streamAnalytics">
+    <h3>Stream Analytics</h3>
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h4>Viewers</h4>
+        <div class="metric-value">{{ streamAnalytics.currentViewers | number }}</div>
+        <div class="metric-label">Current</div>
+      </div>
+      <div class="analytics-card">
+        <h4>Peak Viewers</h4>
+        <div class="metric-value">{{ streamAnalytics.peakViewers | number }}</div>
+        <div class="metric-label">Peak</div>
+      </div>
+      <div class="analytics-card">
+        <h4>Chat Messages</h4>
+        <div class="metric-value">{{ streamAnalytics.totalChatMessages | number }}</div>
+        <div class="metric-label">Total</div>
+      </div>
+      <div class="analytics-card">
+        <h4>Engagement</h4>
+        <div class="metric-value">{{ streamAnalytics.engagementRate | percent }}</div>
+        <div class="metric-label">Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stream Health (for stream owner) -->
+  <div class="stream-health" *ngIf="isStreamOwner && streamHealth">
+    <h3>Stream Health</h3>
+    <div class="health-metrics">
+      <div class="health-metric">
+        <span class="metric-label">CPU Usage:</span>
+        <span class="metric-value">{{ streamHealth.cpuUsage | percent }}</span>
+      </div>
+      <div class="health-metric">
+        <span class="metric-label">Memory Usage:</span>
+        <span class="metric-value">{{ streamHealth.memoryUsage | percent }}</span>
+      </div>
+      <div class="health-metric">
+        <span class="metric-label">Latency:</span>
+        <span class="metric-value">{{ streamHealth.networkLatency }}ms</span>
+      </div>
+      <div class="health-metric">
+        <span class="metric-label">Bitrate:</span>
+        <span class="metric-value">{{ streamHealth.bitrate }} kbps</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading stream...</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="isError">
+  <div class="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h3>Error Loading Stream</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" (click)="refreshStream()">
+      <i class="fas fa-refresh"></i>
+      Try Again
+    </button>
+  </div>
+</div>
+
+<!-- Notifications -->
+<div class="notifications-container">
+  <div 
+    class="notification" 
+    *ngFor="let notification of notifications"
+    [class]="'notification-' + notification.type">
+    <i class="fas fa-bell"></i>
+    <div class="notification-content">
+      <h4>{{ notification.title }}</h4>
+      <p>{{ notification.message }}</p>
+    </div>
+    <button class="btn btn-sm btn-secondary" (click)="notifications = notifications.filter(n => n !== notification)">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>

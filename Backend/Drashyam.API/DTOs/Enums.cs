@@ -234,6 +234,7 @@ public enum LiveStreamStatus
 {
     Scheduled,
     Live,
+    Paused,
     Ended,
     Cancelled
 }

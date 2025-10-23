@@ -1,90 +1,252 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { LiveStream, LiveStreamCreate, LiveStreamUpdate } from '../models/live-stream.model';
-import { PagedResult } from './video.service';
+
+export interface LiveStream {
+  id: number;
+  title: string;
+  description: string;
+  streamUrl: string;
+  hlsUrl: string;
+  rtmpUrl: string;
+  streamKey: string;
+  status: string;
+  viewerCount: number;
+  peakViewerCount: number;
+  startTime: Date;
+  endTime?: Date;
+  isRecording: boolean;
+  recordingUrl?: string;
+  userId: string;
+  channelId: number;
+  category: string;
+  tags: string[];
+  isPublic: boolean;
+  isMonetized: boolean;
+  thumbnailUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StreamQuality {
+  name: string;
+  width: number;
+  height: number;
+  bitrate: number;
+  framerate: number;
+  codec: string;
+  isDefault: boolean;
+  isEnabled: boolean;
+}
+
+export interface StreamAnalytics {
+  streamId: number;
+  totalViewers: number;
+  peakViewers: number;
+  currentViewers: number;
+  duration: string;
+  averageViewerCount: number;
+  totalChatMessages: number;
+  totalReactions: number;
+  engagementRate: number;
+}
+
+export interface StreamHealth {
+  streamId: number;
+  status: string;
+  cpuUsage: number;
+  memoryUsage: number;
+  networkLatency: number;
+  bitrate: number;
+  framerate: number;
+  droppedFrames: number;
+  lastUpdate: Date;
+  alerts: any[];
+}
+
+export interface RecordingInfo {
+  streamId: number;
+  isRecording: boolean;
+  startTime?: Date;
+  endTime?: Date;
+  recordingUrl?: string;
+  thumbnailUrl?: string;
+  fileSize: number;
+  duration: string;
+  status: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class LiveStreamService {
-  private apiUrl = `${environment.apiUrl}/api/livestreams`;
+  private apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 
-  getActiveLiveStreams(filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<LiveStream>> {
-    let params = new HttpParams();
-    
-    if (filter.page) params = params.set('page', filter.page.toString());
-    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
-
-    return this.http.get<PagedResult<LiveStream>>(`${this.apiUrl}/active`, { params });
+  // Stream Management
+  getStreams(page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/livestream?page=${page}&pageSize=${pageSize}`);
   }
 
-  getLiveStreamById(id: number): Observable<LiveStream> {
-    return this.http.get<LiveStream>(`${this.apiUrl}/${id}`);
+  getStream(streamId: number): Observable<LiveStream> {
+    return this.http.get<LiveStream>(`${this.apiUrl}/livestream/${streamId}`);
   }
 
-  getLiveStreamByStreamKey(streamKey: string): Observable<LiveStream> {
-    return this.http.get<LiveStream>(`${this.apiUrl}/stream-key/${streamKey}`);
+  createStream(stream: Partial<LiveStream>): Observable<LiveStream> {
+    return this.http.post<LiveStream>(`${this.apiUrl}/livestream`, stream);
   }
 
-  createLiveStream(streamData: LiveStreamCreate): Observable<LiveStream> {
-    return this.http.post<LiveStream>(this.apiUrl, streamData);
+  updateStream(streamId: number, stream: Partial<LiveStream>): Observable<LiveStream> {
+    return this.http.put<LiveStream>(`${this.apiUrl}/livestream/${streamId}`, stream);
   }
 
-  updateLiveStream(id: number, streamData: LiveStreamUpdate): Observable<LiveStream> {
-    return this.http.put<LiveStream>(`${this.apiUrl}/${id}`, streamData);
+  deleteStream(streamId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/livestream/${streamId}`);
   }
 
-  deleteLiveStream(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  // Stream Control
+  startStream(streamId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/streaming/${streamId}/start`, {});
   }
 
-  getUserLiveStreams(userId: string, filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<LiveStream>> {
-    let params = new HttpParams();
-    
-    if (filter.page) params = params.set('page', filter.page.toString());
-    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
-
-    return this.http.get<PagedResult<LiveStream>>(`${this.apiUrl}/user/${userId}`, { params });
+  stopStream(streamId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/streaming/${streamId}/stop`, {});
   }
 
-  startLiveStream(id: number): Observable<LiveStream> {
-    return this.http.post<LiveStream>(`${this.apiUrl}/${id}/start`, {});
+  pauseStream(streamId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/streaming/${streamId}/pause`, {});
   }
 
-  stopLiveStream(id: number): Observable<LiveStream> {
-    return this.http.post<LiveStream>(`${this.apiUrl}/${id}/stop`, {});
+  resumeStream(streamId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/streaming/${streamId}/resume`, {});
   }
 
-  generateStreamKey(id: number): Observable<{ streamKey: string }> {
-    return this.http.post<{ streamKey: string }>(`${this.apiUrl}/${id}/generate-key`, {});
+  // Stream Quality
+  getStreamQuality(streamId: number): Observable<StreamQuality> {
+    return this.http.get<StreamQuality>(`${this.apiUrl}/streaming/${streamId}/quality`);
   }
 
-  validateStreamKey(streamKey: string): Observable<{ isValid: boolean }> {
-    return this.http.post<{ isValid: boolean }>(`${this.apiUrl}/validate-key`, { streamKey });
+  updateStreamQuality(streamId: number, quality: Partial<StreamQuality>): Observable<StreamQuality> {
+    return this.http.put<StreamQuality>(`${this.apiUrl}/streaming/${streamId}/quality`, quality);
   }
 
-  getChannelLiveStreams(channelId: number, filter: { page?: number; pageSize?: number } = {}): Observable<PagedResult<LiveStream>> {
-    let params = new HttpParams();
-    
-    if (filter.page) params = params.set('page', filter.page.toString());
-    if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
-
-    return this.http.get<PagedResult<LiveStream>>(`${this.apiUrl}/channel/${channelId}`, { params });
+  getAvailableQualities(): Observable<StreamQuality[]> {
+    return this.http.get<StreamQuality[]>(`${this.apiUrl}/streaming/qualities`);
   }
 
-  joinLiveStream(id: number): Observable<LiveStream> {
-    return this.http.post<LiveStream>(`${this.apiUrl}/${id}/join`, {});
+  // Recording
+  startRecording(streamId: number): Observable<RecordingInfo> {
+    return this.http.post<RecordingInfo>(`${this.apiUrl}/streaming/${streamId}/recording/start`, {});
   }
 
-  leaveLiveStream(id: number): Observable<LiveStream> {
-    return this.http.post<LiveStream>(`${this.apiUrl}/${id}/leave`, {});
+  stopRecording(streamId: number): Observable<RecordingInfo> {
+    return this.http.post<RecordingInfo>(`${this.apiUrl}/streaming/${streamId}/recording/stop`, {});
   }
 
-  getLiveStreamViewerCount(id: number): Observable<{ viewerCount: number }> {
-    return this.http.get<{ viewerCount: number }>(`${this.apiUrl}/${id}/viewers`);
+  getRecordingStatus(streamId: number): Observable<RecordingInfo> {
+    return this.http.get<RecordingInfo>(`${this.apiUrl}/streaming/${streamId}/recording`);
+  }
+
+  // Analytics
+  getStreamAnalytics(streamId: number): Observable<StreamAnalytics> {
+    return this.http.get<StreamAnalytics>(`${this.apiUrl}/streamanalytics/stream/${streamId}/realtime`);
+  }
+
+  getStreamHealth(streamId: number): Observable<StreamHealth> {
+    return this.http.get<StreamHealth>(`${this.apiUrl}/streamanalytics/stream/${streamId}/health`);
+  }
+
+  getViewerAnalytics(streamId: number, startTime: Date, endTime: Date): Observable<any[]> {
+    const params = {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString()
+    };
+    return this.http.get<any[]>(`${this.apiUrl}/streamanalytics/stream/${streamId}/viewers`, { params });
+  }
+
+  getQualityAnalytics(streamId: number, startTime: Date, endTime: Date): Observable<any[]> {
+    const params = {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString()
+    };
+    return this.http.get<any[]>(`${this.apiUrl}/streamanalytics/stream/${streamId}/quality`, { params });
+  }
+
+  // Stream Endpoints
+  getStreamEndpoint(streamId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/streaming/${streamId}/endpoint`);
+  }
+
+  validateStreamKey(streamKey: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/streaming/validate-key/${streamKey}`);
+  }
+
+  getStreamConfiguration(streamId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/streaming/${streamId}/config`);
+  }
+
+  // User Streams
+  getUserStreams(userId: string, page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.http.get(`${this.apiUrl}/livestream/user/${userId}?page=${page}&pageSize=${pageSize}`);
+  }
+
+  getLiveStreams(): Observable<LiveStream[]> {
+    return this.http.get<LiveStream[]>(`${this.apiUrl}/livestream/live`);
+  }
+
+  getFeaturedStreams(): Observable<LiveStream[]> {
+    return this.http.get<LiveStream[]>(`${this.apiUrl}/livestream/featured`);
+  }
+
+  getTrendingStreams(): Observable<LiveStream[]> {
+    return this.http.get<LiveStream[]>(`${this.apiUrl}/livestream/trending`);
+  }
+
+  // Stream Search
+  searchStreams(query: string, category?: string, page: number = 1, pageSize: number = 10): Observable<any> {
+    let url = `${this.apiUrl}/livestream/search?query=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+    return this.http.get(url);
+  }
+
+  // Stream Categories
+  getStreamCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/livestream/categories`);
+  }
+
+  // Stream Statistics
+  getStreamStatistics(streamId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/livestream/${streamId}/statistics`);
+  }
+
+  // Stream Reports
+  generateStreamReport(streamId: number, startTime: Date, endTime: Date): Observable<any> {
+    const params = {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString()
+    };
+    return this.http.get(`${this.apiUrl}/streamanalytics/stream/${streamId}/report`, { params });
+  }
+
+  // Stream Comparison
+  compareStreams(streamIds: number[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/streamanalytics/compare`, streamIds);
+  }
+
+  // Dashboard
+  getStreamDashboard(streamId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/streamanalytics/stream/${streamId}/dashboard`);
+  }
+
+  getUserDashboard(userId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/streamanalytics/user/${userId}/dashboard`);
+  }
+
+  getGlobalDashboard(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/streamanalytics/global/dashboard`);
   }
 }
