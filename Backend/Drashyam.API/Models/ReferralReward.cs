@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -34,10 +35,3 @@ public class ReferralReward
     public virtual Referral Referral { get; set; } = null!;
 }
 
-public enum RewardStatus
-{
-    Pending,
-    Claimed,
-    Expired,
-    Cancelled
-}

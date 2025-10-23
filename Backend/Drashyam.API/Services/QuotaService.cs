@@ -142,7 +142,7 @@ public class QuotaService : IQuotaService
     public async Task<SubscriptionBenefitsDto> GetSubscriptionBenefitsAsync(string userId)
     {
         var quotaStatus = await GetUserQuotaStatusAsync(userId);
-        var subscriptionType = Enum.Parse<Models.SubscriptionType>(quotaStatus.SubscriptionType);
+        var subscriptionType = Enum.Parse<DTOs.SubscriptionType>(quotaStatus.SubscriptionType);
         var currentPlan = GetPlanBySubscriptionType(subscriptionType);
         var nextPlan = GetNextUpgradePlan(subscriptionType);
 
@@ -171,12 +171,12 @@ public class QuotaService : IQuotaService
         };
     }
 
-    private SubscriptionPlan GetPlanBySubscriptionType(Models.SubscriptionType type)
+    private SubscriptionPlan GetPlanBySubscriptionType(DTOs.SubscriptionType type)
     {
         return type switch
         {
-            Models.SubscriptionType.Free => GetDefaultFreePlan(),
-            Models.SubscriptionType.Premium => new SubscriptionPlan
+            DTOs.SubscriptionType.Free => GetDefaultFreePlan(),
+            DTOs.SubscriptionType.Premium => new SubscriptionPlan
             {
                 Name = "Premium",
                 MaxChannels = 3,
@@ -187,7 +187,7 @@ public class QuotaService : IQuotaService
                 HasMonetization = false,
                 HasLiveStreaming = true
             },
-            Models.SubscriptionType.Pro => new SubscriptionPlan
+            DTOs.SubscriptionType.Pro => new SubscriptionPlan
             {
                 Name = "Pro",
                 MaxChannels = 10,
@@ -202,12 +202,12 @@ public class QuotaService : IQuotaService
         };
     }
 
-    private SubscriptionPlan? GetNextUpgradePlan(Models.SubscriptionType currentType)
+    private SubscriptionPlan? GetNextUpgradePlan(DTOs.SubscriptionType currentType)
     {
         return currentType switch
         {
-            Models.SubscriptionType.Free => GetPlanBySubscriptionType(Models.SubscriptionType.Premium),
-            Models.SubscriptionType.Premium => GetPlanBySubscriptionType(Models.SubscriptionType.Pro),
+            DTOs.SubscriptionType.Free => GetPlanBySubscriptionType(DTOs.SubscriptionType.Premium),
+            DTOs.SubscriptionType.Premium => GetPlanBySubscriptionType(DTOs.SubscriptionType.Pro),
             _ => null
         };
     }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -134,25 +135,3 @@ public class ReferralEvent
     public virtual Referral? Referral { get; set; }
 }
 
-public enum InviteEventType
-{
-    Created,
-    Sent,
-    Opened,
-    Clicked,
-    Accepted,
-    Expired,
-    Cancelled,
-    Resent
-}
-
-public enum ReferralEventType
-{
-    Created,
-    CodeGenerated,
-    CodeUsed,
-    Completed,
-    Rewarded,
-    Claimed,
-    Expired
-}

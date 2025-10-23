@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -36,14 +37,3 @@ public class Notification
     public virtual ApplicationUser User { get; set; } = null!;
 }
 
-public enum NotificationType
-{
-    VideoUploaded,
-    NewSubscriber,
-    NewComment,
-    NewLike,
-    LiveStreamStarted,
-    SubscriptionExpiring,
-    PaymentReceived,
-    SystemUpdate
-}

@@ -204,6 +204,14 @@ builder.Services.Configure<AzureStorageSettings>(builder.Configuration.GetSectio
 builder.Services.AddSingleton(provider =>
 {
     var settings = provider.GetRequiredService<IOptions<AzureStorageSettings>>().Value;
+    
+    // Check if connection string is provided
+    if (string.IsNullOrEmpty(settings.ConnectionString))
+    {
+        // Return null for development when Azure Storage is not configured
+        return null;
+    }
+    
     return new BlobServiceClient(settings.ConnectionString);
 });
 

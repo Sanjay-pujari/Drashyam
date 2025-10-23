@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -111,13 +112,3 @@ public class MerchandiseOrder
     public virtual ApplicationUser Customer { get; set; } = null!;
 }
 
-public enum MerchandiseOrderStatus
-{
-    Pending,
-    Confirmed,
-    Processing,
-    Shipped,
-    Delivered,
-    Cancelled,
-    Refunded
-}

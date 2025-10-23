@@ -23,7 +23,7 @@ public class LiveStreamService : ILiveStreamService
     {
         var stream = _mapper.Map<LiveStream>(createDto);
         stream.UserId = userId;
-        stream.Status = Models.LiveStreamStatus.Scheduled;
+        stream.Status = DTOs.LiveStreamStatus.Scheduled;
         stream.StreamKey = GenerateStreamKey();
         stream.CreatedAt = DateTime.UtcNow;
 
@@ -89,7 +89,7 @@ public class LiveStreamService : ILiveStreamService
     public async Task<PagedResult<LiveStreamDto>> GetActiveLiveStreamsAsync(int page = 1, int pageSize = 20)
     {
         var streams = await _context.LiveStreams
-            .Where(s => s.Status == Models.LiveStreamStatus.Live)
+            .Where(s => s.Status == DTOs.LiveStreamStatus.Live)
             .Include(s => s.User)
             .Include(s => s.Channel)
             .OrderByDescending(s => s.ActualStartTime)
@@ -98,7 +98,7 @@ public class LiveStreamService : ILiveStreamService
             .ToListAsync();
 
         var totalCount = await _context.LiveStreams
-            .Where(s => s.Status == Models.LiveStreamStatus.Live)
+            .Where(s => s.Status == DTOs.LiveStreamStatus.Live)
             .CountAsync();
 
         return new PagedResult<LiveStreamDto>
@@ -142,7 +142,7 @@ public class LiveStreamService : ILiveStreamService
         if (stream == null)
             throw new ArgumentException("Live stream not found or access denied");
 
-        stream.Status = Models.LiveStreamStatus.Live;
+        stream.Status = DTOs.LiveStreamStatus.Live;
         stream.ActualStartTime = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -157,7 +157,7 @@ public class LiveStreamService : ILiveStreamService
         if (stream == null)
             throw new ArgumentException("Live stream not found or access denied");
 
-        stream.Status = Models.LiveStreamStatus.Ended;
+        stream.Status = DTOs.LiveStreamStatus.Ended;
         stream.EndTime = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

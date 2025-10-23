@@ -1,5 +1,6 @@
 using Drashyam.API.Data;
 using Drashyam.API.Models;
+using Drashyam.API.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Drashyam.API.Services;
@@ -80,6 +81,6 @@ public class VideoProcessingService : IVideoProcessingService
     public async Task<bool> IsVideoProcessingAsync(int videoId)
     {
         var video = await _context.Videos.FindAsync(videoId);
-        return video?.Status == VideoProcessingStatus.Processing;
+        return video?.Status == DTOs.VideoProcessingStatus.Processing;
     }
 }

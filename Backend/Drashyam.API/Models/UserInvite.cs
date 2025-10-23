@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -45,17 +46,3 @@ public class UserInvite
     public virtual ApplicationUser? AcceptedUser { get; set; }
 }
 
-public enum InviteStatus
-{
-    Pending,
-    Accepted,
-    Expired,
-    Cancelled
-}
-
-public enum InviteType
-{
-    Email,
-    Social,
-    DirectLink
-}

@@ -153,7 +153,7 @@ public class CommentService : ICommentService
 
         if (existingLike != null)
         {
-            if (existingLike.Type == Models.LikeType.Like)
+            if (existingLike.Type == DTOs.LikeType.Like)
             {
                 // User already liked, remove the like
                 _context.CommentLikes.Remove(existingLike);
@@ -162,7 +162,7 @@ public class CommentService : ICommentService
             else
             {
                 // User disliked, change to like
-                existingLike.Type = Models.LikeType.Like;
+                existingLike.Type = DTOs.LikeType.Like;
                 comment.DislikeCount--;
                 comment.LikeCount++;
             }
@@ -174,7 +174,7 @@ public class CommentService : ICommentService
             {
                 UserId = userId,
                 CommentId = commentId,
-                Type = Models.LikeType.Like
+                Type = DTOs.LikeType.Like
             });
             comment.LikeCount++;
         }
@@ -196,8 +196,8 @@ public class CommentService : ICommentService
         var currentLike = await _context.CommentLikes
             .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
         
-        commentDto.IsLiked = currentLike?.Type == Models.LikeType.Like;
-        commentDto.IsDisliked = currentLike?.Type == Models.LikeType.Dislike;
+        commentDto.IsLiked = currentLike?.Type == DTOs.LikeType.Like;
+        commentDto.IsDisliked = currentLike?.Type == DTOs.LikeType.Dislike;
 
         return commentDto;
     }
@@ -214,7 +214,7 @@ public class CommentService : ICommentService
 
         if (existingLike != null)
         {
-            if (existingLike.Type == Models.LikeType.Like)
+            if (existingLike.Type == DTOs.LikeType.Like)
             {
                 comment.LikeCount--;
             }
@@ -252,7 +252,7 @@ public class CommentService : ICommentService
 
         if (existingLike != null)
         {
-            if (existingLike.Type == Models.LikeType.Dislike)
+            if (existingLike.Type == DTOs.LikeType.Dislike)
             {
                 // User already disliked, remove the dislike
                 _context.CommentLikes.Remove(existingLike);
@@ -261,7 +261,7 @@ public class CommentService : ICommentService
             else
             {
                 // User liked, change to dislike
-                existingLike.Type = Models.LikeType.Dislike;
+                existingLike.Type = DTOs.LikeType.Dislike;
                 comment.LikeCount--;
                 comment.DislikeCount++;
             }
@@ -273,7 +273,7 @@ public class CommentService : ICommentService
             {
                 UserId = userId,
                 CommentId = commentId,
-                Type = Models.LikeType.Dislike
+                Type = DTOs.LikeType.Dislike
             });
             comment.DislikeCount++;
         }
@@ -295,8 +295,8 @@ public class CommentService : ICommentService
         var currentLike = await _context.CommentLikes
             .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
         
-        commentDto.IsLiked = currentLike?.Type == Models.LikeType.Like;
-        commentDto.IsDisliked = currentLike?.Type == Models.LikeType.Dislike;
+        commentDto.IsLiked = currentLike?.Type == DTOs.LikeType.Like;
+        commentDto.IsDisliked = currentLike?.Type == DTOs.LikeType.Dislike;
 
         return commentDto;
     }
@@ -304,13 +304,13 @@ public class CommentService : ICommentService
     public async Task<bool> IsCommentLikedAsync(int commentId, string userId)
     {
         return await _context.CommentLikes
-            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == Models.LikeType.Like);
+            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == DTOs.LikeType.Like);
     }
 
     public async Task<bool> IsCommentDislikedAsync(int commentId, string userId)
     {
         return await _context.CommentLikes
-            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == Models.LikeType.Dislike);
+            .AnyAsync(l => l.CommentId == commentId && l.UserId == userId && l.Type == DTOs.LikeType.Dislike);
     }
 
     public async Task<PagedResult<CommentDto>> GetUserCommentsAsync(string userId, int page = 1, int pageSize = 20)

@@ -100,7 +100,7 @@ public class VideoService : IVideoService
                 ThumbnailUrl = thumbnailUrl,
                 UserId = userId,
                 ChannelId = uploadDto.ChannelId,
-                Visibility = (Models.VideoVisibility)uploadDto.Visibility,
+                Visibility = (DTOs.VideoVisibility)uploadDto.Visibility,
                 Tags = uploadDto.Tags,
                 Category = uploadDto.Category,
                 ShareToken = shareToken,
@@ -194,7 +194,7 @@ public class VideoService : IVideoService
             var query = _context.Videos
                 .Include(v => v.User)
                 .Include(v => v.Channel)
-                .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public);
+                .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public);
 
         // Apply filters
         if (!string.IsNullOrEmpty(filter.Search))
@@ -212,7 +212,7 @@ public class VideoService : IVideoService
 
         if (filter.Type.HasValue)
         {
-            query = query.Where(v => v.Type == (Models.VideoType) filter.Type);
+            query = query.Where(v => v.Type == (DTOs.VideoType) filter.Type);
         }
 
         // Apply sorting
@@ -269,7 +269,7 @@ public class VideoService : IVideoService
             }
             
             // Only show public videos to other users
-            query = query.Where(v => v.Visibility == Models.VideoVisibility.Public);
+            query = query.Where(v => v.Visibility == DTOs.VideoVisibility.Public);
         }
 
         // Apply filters and sorting similar to GetVideosAsync
@@ -326,7 +326,7 @@ public class VideoService : IVideoService
             video.Description = updateDto.Description;
 
         if (updateDto.Visibility.HasValue)
-            video.Visibility = (Models.VideoVisibility)updateDto.Visibility.Value;
+            video.Visibility = (DTOs.VideoVisibility)updateDto.Visibility.Value;
 
         if (updateDto.Tags != null)
             video.Tags = updateDto.Tags;
@@ -371,7 +371,7 @@ public class VideoService : IVideoService
 
         if (existingLike != null)
         {
-            if (existingLike.Type != (Models.LikeType) type)
+            if (existingLike.Type != (DTOs.LikeType) type)
             {
                 // Remove like/dislike
                 _context.VideoLikes.Remove(existingLike);
@@ -383,7 +383,7 @@ public class VideoService : IVideoService
             else
             {
                 // Change like/dislike
-                if (existingLike.Type == Models.LikeType.Like)
+                if (existingLike.Type == DTOs.LikeType.Like)
                 {
                     video.LikeCount--;
                     video.DislikeCount++;
@@ -393,7 +393,7 @@ public class VideoService : IVideoService
 video.DislikeCount--;
                     video.LikeCount++;
                 }
-                existingLike.Type = (Models.LikeType)type;
+                existingLike.Type = (DTOs.LikeType)type;
             }
         }
         else
@@ -403,7 +403,7 @@ video.DislikeCount--;
             {
                 UserId = userId,
                 VideoId = videoId,
-                Type = (Models.LikeType)type
+                Type = (DTOs.LikeType)type
             });
 
             if (type == DTOs.LikeType.Like)
@@ -440,7 +440,7 @@ video.DislikeCount--;
             var video = await _context.Videos.FindAsync(videoId);
             if (video != null)
             {
-                if (existingLike.Type == Models.LikeType.Like)
+                if (existingLike.Type == DTOs.LikeType.Like)
                     video.LikeCount--;
                 else
                     video.DislikeCount--;
@@ -516,7 +516,7 @@ video.DislikeCount--;
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
             .OrderByDescending(v => v.ViewCount)
             .ThenByDescending(v => v.LikeCount);
 
@@ -539,7 +539,7 @@ video.DislikeCount--;
     {
         // Simple recommendation based on user's liked videos and subscribed channels
         var userLikes = await _context.VideoLikes
-            .Where(l => l.UserId == userId && l.Type == Models.LikeType.Like)
+            .Where(l => l.UserId == userId && l.Type == DTOs.LikeType.Like)
             .Select(l => l.VideoId)
             .ToListAsync();
 
@@ -551,7 +551,7 @@ video.DislikeCount--;
         var query = _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
             .Where(v => userSubscriptions.Contains(v.ChannelId ?? 0) || 
                        v.Category != null && _context.Videos
                            .Where(v2 => userLikes.Contains(v2.Id))
@@ -577,7 +577,7 @@ video.DislikeCount--;
     public async Task<PagedResult<VideoDto>> GetUserFavoriteVideosAsync(string userId, VideoFilterDto filter)
     {
         var favoriteVideoIds = await _context.VideoLikes
-            .Where(l => l.UserId == userId && l.Type == Models.LikeType.Like)
+            .Where(l => l.UserId == userId && l.Type == DTOs.LikeType.Like)
             .Select(l => l.VideoId)
             .ToListAsync();
 
@@ -615,7 +615,7 @@ video.DislikeCount--;
             .Include(v => v.User)
             .Include(v => v.Channel)
             .Where(v => v.ChannelId != null && subscribedChannelIds.Contains(v.ChannelId.Value))
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
             .OrderByDescending(v => v.CreatedAt);
 
         var totalCount = await query.CountAsync();

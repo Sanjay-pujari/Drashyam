@@ -13,7 +13,7 @@ public interface IAdService
     Task<bool> PauseAdCampaignAsync(int campaignId, string advertiserId);
     
     // Ad serving for free users
-    Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, Models.AdType? preferredType = null);
+    Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, DTOs.AdType? preferredType = null);
     Task<bool> RecordAdImpressionAsync(int campaignId, string userId, int? videoId = null);
     Task<bool> RecordAdClickAsync(int campaignId, string userId, int? videoId = null);
     

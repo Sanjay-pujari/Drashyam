@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 

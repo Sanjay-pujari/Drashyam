@@ -43,7 +43,7 @@ public class ChannelService : IChannelService
         
         // Set channel limits based on user's subscription
         var userQuotaStatus = await _quotaService.GetUserQuotaStatusAsync(userId);
-        var subscriptionType = Enum.Parse<Models.SubscriptionType>(userQuotaStatus.SubscriptionType);
+        var subscriptionType = Enum.Parse<DTOs.SubscriptionType>(userQuotaStatus.SubscriptionType);
         channel.MaxVideos = GetMaxVideosForSubscription(subscriptionType);
 
         _context.Channels.Add(channel);
@@ -52,13 +52,13 @@ public class ChannelService : IChannelService
         return _mapper.Map<ChannelDto>(channel);
     }
 
-    private int GetMaxVideosForSubscription(Models.SubscriptionType subscriptionType)
+    private int GetMaxVideosForSubscription(DTOs.SubscriptionType subscriptionType)
     {
         return subscriptionType switch
         {
-            Models.SubscriptionType.Free => 10,
-            Models.SubscriptionType.Premium => 100,
-            Models.SubscriptionType.Pro => 1000,
+            DTOs.SubscriptionType.Free => 10,
+            DTOs.SubscriptionType.Premium => 100,
+            DTOs.SubscriptionType.Pro => 1000,
             _ => 10
         };
     }

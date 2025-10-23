@@ -61,8 +61,3 @@ public class UpdateVideoStatusDto
     public VideoProcessingStatus Status { get; set; }
 }
 
-public enum LikeType
-{
-    Like,
-    Dislike
-}

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -61,9 +62,3 @@ public class PlaylistVideo
     public virtual Video Video { get; set; } = null!;
 }
 
-public enum PlaylistVisibility
-{
-    Public,
-    Unlisted,
-    Private
-}

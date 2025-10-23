@@ -1,4 +1,5 @@
 using Drashyam.API.Models;
+using Drashyam.API.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -102,7 +103,7 @@ public static class SeedData
                 Description = "Welcome to the demo channel",
                 UserId = demo!.Id,
                 CreatedAt = DateTime.UtcNow,
-                Type = ChannelType.Personal,
+                Type = DTOs.ChannelType.Personal,
                 IsVerified = true,
                 IsMonetized = false
             };
@@ -117,9 +118,9 @@ public static class SeedData
                     Description = "Intro video",
                     UserId = demo.Id,
                     ChannelId = channel.Id,
-                    Status = VideoProcessingStatus.Ready,
-                    Type = VideoType.Uploaded,
-                    Visibility = VideoVisibility.Public,
+                    Status = DTOs.VideoProcessingStatus.Ready,
+                    Type = DTOs.VideoType.Uploaded,
+                    Visibility = DTOs.VideoVisibility.Public,
                     VideoUrl = "https://example.com/video1.mp4",
                     ThumbnailUrl = "https://example.com/thumb1.jpg",
                     CreatedAt = DateTime.UtcNow,
@@ -133,9 +134,9 @@ public static class SeedData
                     Description = "Another video",
                     UserId = demo.Id,
                     ChannelId = channel.Id,
-                    Status = VideoProcessingStatus.Ready,
-                    Type = VideoType.Uploaded,
-                    Visibility = VideoVisibility.Public,
+                    Status = DTOs.VideoProcessingStatus.Ready,
+                    Type = DTOs.VideoType.Uploaded,
+                    Visibility = DTOs.VideoVisibility.Public,
                     VideoUrl = "https://example.com/video2.mp4",
                     ThumbnailUrl = "https://example.com/thumb2.jpg",
                     CreatedAt = DateTime.UtcNow,
@@ -149,9 +150,9 @@ public static class SeedData
                     Description = "Amazing music performance",
                     UserId = demo.Id,
                     ChannelId = channel.Id,
-                    Status = VideoProcessingStatus.Ready,
-                    Type = VideoType.Uploaded,
-                    Visibility = VideoVisibility.Public,
+                    Status = DTOs.VideoProcessingStatus.Ready,
+                    Type = DTOs.VideoType.Uploaded,
+                    Visibility = DTOs.VideoVisibility.Public,
                     VideoUrl = "https://example.com/video3.mp4",
                     ThumbnailUrl = "https://example.com/thumb3.jpg",
                     CreatedAt = DateTime.UtcNow,
@@ -165,9 +166,9 @@ public static class SeedData
                     Description = "Learn how to play this game",
                     UserId = demo.Id,
                     ChannelId = channel.Id,
-                    Status = VideoProcessingStatus.Ready,
-                    Type = VideoType.Uploaded,
-                    Visibility = VideoVisibility.Public,
+                    Status = DTOs.VideoProcessingStatus.Ready,
+                    Type = DTOs.VideoType.Uploaded,
+                    Visibility = DTOs.VideoVisibility.Public,
                     VideoUrl = "https://example.com/video4.mp4",
                     ThumbnailUrl = "https://example.com/thumb4.jpg",
                     CreatedAt = DateTime.UtcNow,
@@ -181,9 +182,9 @@ public static class SeedData
                     Description = "Latest technology review",
                     UserId = demo.Id,
                     ChannelId = channel.Id,
-                    Status = VideoProcessingStatus.Ready,
-                    Type = VideoType.Uploaded,
-                    Visibility = VideoVisibility.Public,
+                    Status = DTOs.VideoProcessingStatus.Ready,
+                    Type = DTOs.VideoType.Uploaded,
+                    Visibility = DTOs.VideoVisibility.Public,
                     VideoUrl = "https://example.com/video5.mp4",
                     ThumbnailUrl = "https://example.com/thumb5.jpg",
                     CreatedAt = DateTime.UtcNow,
@@ -203,21 +204,21 @@ public static class SeedData
                     {
                         UserId = demo.Id,
                         VideoId = videos[0].Id,
-                        Type = Models.LikeType.Like,
+                        Type = DTOs.LikeType.Like,
                         CreatedAt = DateTime.UtcNow
                     },
                     new VideoLike
                     {
                         UserId = demo.Id,
                         VideoId = videos[1].Id,
-                        Type = Models.LikeType.Like,
+                        Type = DTOs.LikeType.Like,
                         CreatedAt = DateTime.UtcNow
                     },
                     new VideoLike
                     {
                         UserId = demo.Id,
                         VideoId = videos[2].Id,
-                        Type = Models.LikeType.Like,
+                        Type = DTOs.LikeType.Like,
                         CreatedAt = DateTime.UtcNow
                     }
                 );

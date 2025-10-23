@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -39,9 +40,3 @@ public class ApplicationUser : IdentityUser
     public virtual ICollection<ChannelSubscription> ChannelSubscriptions { get; set; } = new List<ChannelSubscription>();
 }
 
-public enum SubscriptionType
-{
-    Free,
-    Premium,
-    Pro
-}

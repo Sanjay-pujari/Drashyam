@@ -1,5 +1,6 @@
 using Drashyam.API.Data;
 using Drashyam.API.Models;
+using Drashyam.API.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,7 +57,7 @@ public class VideoProcessingBackgroundService : BackgroundService
 
         // Get videos that need processing
         var videosToProcess = await context.Videos
-            .Where(v => v.Status == VideoProcessingStatus.Processing)
+            .Where(v => v.Status == DTOs.VideoProcessingStatus.Processing)
             .OrderBy(v => v.CreatedAt)
             .Take(5) // Process up to 5 videos at a time
             .ToListAsync();
@@ -76,7 +77,7 @@ public class VideoProcessingBackgroundService : BackgroundService
                 if (processingResult.Success)
                 {
                     // Update video with processed data
-                    video.Status = VideoProcessingStatus.Ready;
+                    video.Status = DTOs.VideoProcessingStatus.Ready;
                     video.Duration = processingResult.Duration;
                     video.ThumbnailUrl = processingResult.ThumbnailUrl;
                     video.PublishedAt = DateTime.UtcNow;
@@ -99,7 +100,7 @@ public class VideoProcessingBackgroundService : BackgroundService
                 else
                 {
                     // In development, keep video in Processing on errors to avoid hiding uploads
-                    var statusForError = _env.IsDevelopment() ? VideoProcessingStatus.Processing : VideoProcessingStatus.Failed;
+                    var statusForError = _env.IsDevelopment() ? DTOs.VideoProcessingStatus.Processing : DTOs.VideoProcessingStatus.Failed;
                     video.Status = statusForError;
                     await context.SaveChangesAsync();
 
@@ -126,7 +127,7 @@ public class VideoProcessingBackgroundService : BackgroundService
                 _logger.LogError(ex, "Error processing video {VideoId}", video.Id);
                 
                 // In development, keep video in Processing on unexpected errors
-                var statusForException = _env.IsDevelopment() ? VideoProcessingStatus.Processing : VideoProcessingStatus.Failed;
+                var statusForException = _env.IsDevelopment() ? DTOs.VideoProcessingStatus.Processing : DTOs.VideoProcessingStatus.Failed;
                 video.Status = statusForException;
                 await context.SaveChangesAsync();
             }

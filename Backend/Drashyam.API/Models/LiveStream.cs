@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -60,10 +61,3 @@ public class LiveStream
     public virtual Channel? Channel { get; set; }
 }
 
-public enum LiveStreamStatus
-{
-    Scheduled,
-    Live,
-    Ended,
-    Cancelled
-}

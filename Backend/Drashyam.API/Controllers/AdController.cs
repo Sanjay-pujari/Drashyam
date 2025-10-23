@@ -234,7 +234,7 @@ public class AdController : ControllerBase
             // Get user ID from token if available, otherwise use the one from request
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? request.UserId;
             
-            var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, Models.AdType.Video);
+            var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, DTOs.AdType.Video);
             return Ok(ad);
         }
         catch (Exception ex)
@@ -364,5 +364,5 @@ public class AdServeRequestDto
     public string? Category { get; set; }
     public string? Location { get; set; }
     public string? DeviceType { get; set; }
-    public Models.AdType? Type { get; set; }
+    public DTOs.AdType? Type { get; set; }
 }

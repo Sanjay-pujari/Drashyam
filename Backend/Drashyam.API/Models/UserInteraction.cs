@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -29,16 +30,3 @@ public class UserInteraction
     public virtual Video Video { get; set; } = null!;
 }
 
-public enum InteractionType
-{
-    View,
-    Like,
-    Dislike,
-    Comment,
-    Share,
-    WatchLater,
-    Subscribe,
-    Unsubscribe,
-    Skip,
-    Complete
-}

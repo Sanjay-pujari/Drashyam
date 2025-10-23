@@ -130,7 +130,7 @@ public class NotificationService : INotificationService
         var validSubscribers = new List<string>();
         foreach (var subscriberId in subscribers)
         {
-            var canReceiveNotification = await _privacyService.CanSendNotificationToUserAsync(subscriberId, Services.NotificationType.Video);
+            var canReceiveNotification = await _privacyService.CanSendNotificationToUserAsync(subscriberId, DTOs.NotificationType.Video);
             if (canReceiveNotification)
             {
                 validSubscribers.Add(subscriberId);
@@ -142,7 +142,7 @@ public class NotificationService : INotificationService
             UserId = userId,
             Title = "New Video",
             Message = $"New video uploaded: {video.Title}",
-            Type = Models.NotificationType.VideoUploaded,
+            Type = DTOs.NotificationType.VideoUploaded,
             IsRead = false,
             CreatedAt = DateTime.UtcNow,
             RelatedEntityId = videoId.ToString(),
@@ -179,7 +179,7 @@ public class NotificationService : INotificationService
             UserId = userId,
             Title = title,
             Message = message,
-            Type = Enum.Parse<Models.NotificationType>(type),
+            Type = Enum.Parse<DTOs.NotificationType>(type),
             IsRead = false,
             CreatedAt = DateTime.UtcNow
         };

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -35,13 +36,3 @@ public class Recommendation
     public virtual Video Video { get; set; } = null!;
 }
 
-public enum RecommendationType
-{
-    Trending,
-    Personalized,
-    Similar,
-    Category,
-    Channel,
-    Popular,
-    Recent
-}

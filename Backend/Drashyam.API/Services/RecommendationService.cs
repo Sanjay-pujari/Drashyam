@@ -112,7 +112,7 @@ public class RecommendationService : IRecommendationService
             var similarVideos = await _context.Videos
                 .Include(v => v.User)
                 .Include(v => v.Channel)
-                .Where(v => v.Id != videoId && v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+                .Where(v => v.Id != videoId && v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
                 .Where(v => v.Category == video.Category || 
                            (v.Tags != null && video.Tags != null && v.Tags.Contains(video.Tags)) ||
                            v.UserId == video.UserId)
@@ -147,7 +147,7 @@ public class RecommendationService : IRecommendationService
             var videos = await _context.Videos
                 .Include(v => v.User)
                 .Include(v => v.Channel)
-                .Where(v => v.Category == category && v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+                .Where(v => v.Category == category && v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
                 .OrderByDescending(v => v.ViewCount)
                 .ThenByDescending(v => v.LikeCount)
                 .Take(limit)
@@ -179,7 +179,7 @@ public class RecommendationService : IRecommendationService
             var videos = await _context.Videos
                 .Include(v => v.User)
                 .Include(v => v.Channel)
-                .Where(v => v.ChannelId == channelId && v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+                .Where(v => v.ChannelId == channelId && v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
                 .OrderByDescending(v => v.CreatedAt)
                 .Take(limit)
                 .ToListAsync();
@@ -322,7 +322,7 @@ public class RecommendationService : IRecommendationService
             // Calculate trending scores for videos from the last 7 days
             var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
             var videos = await _context.Videos
-                .Where(v => v.CreatedAt >= sevenDaysAgo && v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+                .Where(v => v.CreatedAt >= sevenDaysAgo && v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
                 .ToListAsync();
 
             var trendingVideos = new List<TrendingVideo>();
@@ -445,7 +445,7 @@ public class RecommendationService : IRecommendationService
         var videos = await _context.Videos
             .Include(v => v.User)
             .Include(v => v.Channel)
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
             .Where(v => categories.Contains(v.Category) || 
                        (v.Tags != null && tags.Any(tag => v.Tags.Contains(tag))))
             .OrderByDescending(v => v.ViewCount)
@@ -485,7 +485,7 @@ public class RecommendationService : IRecommendationService
                        i.Type == InteractionType.Like &&
                        !interactions.Any(ui => ui.VideoId == i.VideoId))
             .Select(i => i.Video)
-            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == Models.VideoVisibility.Public)
+            .Where(v => v.Status == VideoProcessingStatus.Ready && v.Visibility == DTOs.VideoVisibility.Public)
             .Distinct()
             .OrderByDescending(v => v.ViewCount)
             .Take(limit)

@@ -45,13 +45,6 @@ public class SubscriptionUpdateDto
     public string? PaymentMethodId { get; set; }
 }
 
-public enum SubscriptionStatus
-{
-    Active,
-    Expired,
-    Cancelled,
-    Suspended
-}
 
 public class SubscriptionHistoryDto
 {

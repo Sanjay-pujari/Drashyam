@@ -45,10 +45,3 @@ public class LiveStreamUpdateDto
     public bool? IsMonetized { get; set; }
 }
 
-public enum LiveStreamStatus
-{
-    Scheduled,
-    Live,
-    Ended,
-    Cancelled
-}

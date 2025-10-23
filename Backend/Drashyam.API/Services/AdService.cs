@@ -138,7 +138,7 @@ public class AdService : IAdService
         return true;
     }
 
-    public async Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, Models.AdType? preferredType = null)
+    public async Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, DTOs.AdType? preferredType = null)
     {
         // Check if user has a paid subscription (no ads for paid users)
         try

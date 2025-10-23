@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -68,14 +69,6 @@ public class Video
     public virtual ICollection<VideoView> Views { get; set; } = new List<VideoView>();
 }
 
-public enum VideoProcessingStatus
-{
-    Processing,
-    Ready,
-    Failed,
-    Deleted
-}
-
 public class VideoProcessingProgress
 {
     public int Id { get; set; }
@@ -89,18 +82,4 @@ public class VideoProcessingProgress
 
     // Navigation properties
     public virtual Video Video { get; set; } = null!;
-}
-
-public enum VideoType
-{
-    Uploaded,
-    LiveStream,
-    Short
-}
-
-public enum VideoVisibility
-{
-    Public,
-    Unlisted,
-    Private
 }

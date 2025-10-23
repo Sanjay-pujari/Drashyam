@@ -25,7 +25,7 @@ public class AdCampaignDto
     public decimal CostPerView { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public Models.AdStatus Status { get; set; }
+    public DTOs.AdStatus Status { get; set; }
     public string? TargetAudience { get; set; }
     public string? AdContent { get; set; }
     public string? AdUrl { get; set; }
@@ -82,7 +82,7 @@ public class AdCampaignUpdateDto
     public decimal? CostPerView { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public Models.AdStatus? Status { get; set; }
+    public DTOs.AdStatus? Status { get; set; }
     public string? TargetAudience { get; set; }
     public string? AdContent { get; set; }
     public string? AdUrl { get; set; }

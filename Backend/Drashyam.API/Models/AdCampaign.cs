@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -80,19 +81,3 @@ public class AdImpression
     public virtual ApplicationUser? User { get; set; }
 }
 
-public enum AdType
-{
-    Banner,
-    Video,
-    Overlay,
-    Sponsored
-}
-
-public enum AdStatus
-{
-    Draft,
-    Active,
-    Paused,
-    Completed,
-    Cancelled
-}

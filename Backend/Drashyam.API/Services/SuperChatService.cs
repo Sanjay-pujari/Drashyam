@@ -31,7 +31,7 @@ public class SuperChatService : ISuperChatService
         {
             // Verify live stream exists and is active
             var liveStream = await _context.LiveStreams
-                .FirstOrDefaultAsync(ls => ls.Id == request.LiveStreamId && ls.Status == Models.LiveStreamStatus.Live);
+                .FirstOrDefaultAsync(ls => ls.Id == request.LiveStreamId && ls.Status == DTOs.LiveStreamStatus.Live);
 
             if (liveStream == null)
             {

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -54,10 +55,3 @@ public class Channel
     public virtual ICollection<MerchandiseStore> MerchandiseStores { get; set; } = new List<MerchandiseStore>();
 }
 
-public enum ChannelType
-{
-    Personal,
-    Business,
-    Creator,
-    Brand
-}

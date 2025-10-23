@@ -37,9 +37,9 @@ public class PrivacyService : IPrivacyService
             // Check video visibility
             return video.Visibility switch
             {
-                Models.VideoVisibility.Public => true,
-                Models.VideoVisibility.Private => false,
-                Models.VideoVisibility.Unlisted => await CanUserViewUnlistedVideoAsync(videoId, userId),
+                DTOs.VideoVisibility.Public => true,
+                DTOs.VideoVisibility.Private => false,
+                DTOs.VideoVisibility.Unlisted => await CanUserViewUnlistedVideoAsync(videoId, userId),
                 _ => false
             };
         }
@@ -60,7 +60,7 @@ public class PrivacyService : IPrivacyService
         var video = await _context.Videos
             .FirstOrDefaultAsync(v => v.Id == videoId);
 
-        return video?.Visibility == Models.VideoVisibility.Public;
+        return video?.Visibility == DTOs.VideoVisibility.Public;
     }
 
     private async Task<bool> CanUserViewUnlistedVideoAsync(int videoId, string userId)

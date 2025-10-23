@@ -8,12 +8,12 @@ namespace Drashyam.API.Services;
 
 public class FileStorageService : IFileStorageService
 {
-    private readonly BlobServiceClient _blobServiceClient;
+    private readonly BlobServiceClient? _blobServiceClient;
     private readonly AzureStorageSettings _storageSettings;
     private readonly ILogger<FileStorageService> _logger;
 
     public FileStorageService(
-        BlobServiceClient blobServiceClient,
+        BlobServiceClient? blobServiceClient,
         IOptions<AzureStorageSettings> storageSettings,
         ILogger<FileStorageService> logger)
     {
@@ -22,44 +22,66 @@ public class FileStorageService : IFileStorageService
         _logger = logger;
     }
 
+    private void EnsureAzureStorageConfigured()
+    {
+        if (_blobServiceClient == null)
+        {
+            throw new InvalidOperationException("Azure Storage is not configured. Please set the AzureStorage:ConnectionString in appsettings.json");
+        }
+    }
+
     public async Task<string> UploadVideoAsync(IFormFile videoFile)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"videos/{Guid.NewGuid()}_{SanitizeFileName(videoFile.FileName)}";
         return await UploadFileAsync(videoFile, fileName, _storageSettings.VideoContainerName);
     }
 
     public async Task<string> UploadThumbnailAsync(IFormFile thumbnailFile)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"thumbnails/{Guid.NewGuid()}_{SanitizeFileName(thumbnailFile.FileName)}";
         return await UploadFileAsync(thumbnailFile, fileName, _storageSettings.ImageContainerName);
     }
 
     public async Task<string> UploadVideoAsync(Stream videoStream)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"videos/{Guid.NewGuid()}.mp4";
         return await UploadStreamAsync(videoStream, fileName, _storageSettings.VideoContainerName, "video/mp4");
     }
 
     public async Task<string> UploadThumbnailAsync(Stream thumbnailStream)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"thumbnails/{Guid.NewGuid()}.jpg";
         return await UploadStreamAsync(thumbnailStream, fileName, _storageSettings.ImageContainerName, "image/jpeg");
     }
 
     public async Task<string> UploadProfilePictureAsync(IFormFile profilePicture)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"profile-pictures/{Guid.NewGuid()}_{SanitizeFileName(profilePicture.FileName)}";
         return await UploadFileAsync(profilePicture, fileName, _storageSettings.ImageContainerName);
     }
 
     public async Task<string> UploadBannerAsync(IFormFile bannerFile)
     {
+        EnsureAzureStorageConfigured();
+        
         var fileName = $"banners/{Guid.NewGuid()}_{SanitizeFileName(bannerFile.FileName)}";
         return await UploadFileAsync(bannerFile, fileName, _storageSettings.ImageContainerName);
     }
 
     public async Task<bool> DeleteFileAsync(string fileUrl)
     {
+        EnsureAzureStorageConfigured();
+        
         try
         {
             var uri = new Uri(fileUrl);
@@ -80,6 +102,8 @@ public class FileStorageService : IFileStorageService
 
     public async Task<string> GetFileUrlAsync(string fileName)
     {
+        EnsureAzureStorageConfigured();
+        
         var containerClient = _blobServiceClient.GetBlobContainerClient(_storageSettings.ImageContainerName);
         var blobClient = containerClient.GetBlobClient(fileName);
         return blobClient.Uri.ToString();
@@ -87,6 +111,8 @@ public class FileStorageService : IFileStorageService
 
     public async Task<Stream> DownloadFileAsync(string fileName)
     {
+        EnsureAzureStorageConfigured();
+        
         var containerClient = _blobServiceClient.GetBlobContainerClient(_storageSettings.ImageContainerName);
         var blobClient = containerClient.GetBlobClient(fileName);
         var response = await blobClient.DownloadStreamingAsync();
@@ -95,6 +121,8 @@ public class FileStorageService : IFileStorageService
 
     public async Task<bool> FileExistsAsync(string fileName)
     {
+        EnsureAzureStorageConfigured();
+        
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_storageSettings.ImageContainerName);
@@ -125,6 +153,8 @@ public class FileStorageService : IFileStorageService
 
     public async Task<string> GenerateSignedUrlAsync(string fileName, TimeSpan expiration)
     {
+        EnsureAzureStorageConfigured();
+        
         var containerClient = _blobServiceClient.GetBlobContainerClient(_storageSettings.ImageContainerName);
         var blobClient = containerClient.GetBlobClient(fileName);
         
@@ -140,6 +170,8 @@ public class FileStorageService : IFileStorageService
 
     private async Task<string> UploadFileAsync(IFormFile file, string fileName, string containerName)
     {
+        EnsureAzureStorageConfigured();
+        
         try
         {
             // Ensure container exists
@@ -186,6 +218,8 @@ public class FileStorageService : IFileStorageService
 
     private async Task<string> UploadStreamAsync(Stream stream, string fileName, string containerName, string contentType)
     {
+        EnsureAzureStorageConfigured();
+        
         try
         {
             // Ensure container exists

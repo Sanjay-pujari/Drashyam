@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -68,11 +69,3 @@ public class PremiumPurchase
     public virtual ApplicationUser User { get; set; } = null!;
 }
 
-public enum PremiumPurchaseStatus
-{
-    Pending,
-    Completed,
-    Failed,
-    Refunded,
-    Cancelled
-}

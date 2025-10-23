@@ -43,7 +43,7 @@ public class PlaylistService : IPlaylistService
                 UserName = p.User.FirstName + " " + p.User.LastName,
                 ChannelId = p.ChannelId,
                 ChannelName = p.Channel != null ? p.Channel.Name : null,
-                Visibility = (Models.PlaylistVisibility)p.Visibility,
+                Visibility = (DTOs.PlaylistVisibility)p.Visibility,
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
                 VideoCount = p.VideoCount,
@@ -68,7 +68,7 @@ public class PlaylistService : IPlaylistService
             Description = createDto.Description,
             UserId = userId,
             ChannelId = createDto.ChannelId,
-            Visibility = (Models.PlaylistVisibility)createDto.Visibility,
+            Visibility = (DTOs.PlaylistVisibility)createDto.Visibility,
             CreatedAt = DateTime.UtcNow,
             VideoCount = 0
         };
@@ -91,7 +91,7 @@ public class PlaylistService : IPlaylistService
 
         playlist.Name = updateDto.Name;
         playlist.Description = updateDto.Description;
-        playlist.Visibility = (Models.PlaylistVisibility)updateDto.Visibility;
+        playlist.Visibility = (DTOs.PlaylistVisibility)updateDto.Visibility;
         playlist.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

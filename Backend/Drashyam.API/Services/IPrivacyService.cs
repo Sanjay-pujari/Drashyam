@@ -36,12 +36,3 @@ public interface IPrivacyService
     Task<PrivacySettingsDto> GetUserPrivacySettingsAsync(string userId);
 }
 
-public enum NotificationType
-{
-    Email,
-    Push,
-    Video,
-    Comment,
-    Subscription,
-    System
-}

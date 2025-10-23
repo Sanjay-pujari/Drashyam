@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Drashyam.API.DTOs;
 
 namespace Drashyam.API.Models;
 
@@ -41,15 +42,3 @@ public class MerchandiseStore
     public virtual Channel Channel { get; set; } = null!;
 }
 
-public enum StorePlatform
-{
-    Shopify,
-    Etsy,
-    Amazon,
-    Teespring,
-    Redbubble,
-    Spreadshirt,
-    Zazzle,
-    Custom,
-    Other
-}

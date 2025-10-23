@@ -231,11 +231,3 @@ public class MonthlyRevenueDto
     public int TransactionCount { get; set; }
 }
 
-public enum AdType
-{
-    PreRoll,
-    MidRoll,
-    PostRoll,
-    Banner,
-    Overlay
-}
