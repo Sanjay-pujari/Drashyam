@@ -49,6 +49,37 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<VideoProcessingProgress> VideoProcessingProgress { get; set; }
     public DbSet<SuperChat> SuperChats { get; set; }
     
+    // Collaboration System
+    public DbSet<CreatorCollaboration> CreatorCollaborations { get; set; }
+    public DbSet<CollaborationMessage> CollaborationMessages { get; set; }
+    public DbSet<CollaborationAsset> CollaborationAssets { get; set; }
+    
+    // Community Challenges System
+    public DbSet<CommunityChallenge> CommunityChallenges { get; set; }
+    public DbSet<ChallengeParticipant> ChallengeParticipants { get; set; }
+    public DbSet<ChallengeSubmission> ChallengeSubmissions { get; set; }
+    public DbSet<ChallengeVote> ChallengeVotes { get; set; }
+    public DbSet<ChallengeComment> ChallengeComments { get; set; }
+    public DbSet<ChallengeCommentLike> ChallengeCommentLikes { get; set; }
+    
+    // Enhanced Comment System
+    public DbSet<EnhancedComment> EnhancedComments { get; set; }
+    public DbSet<CommentReaction> CommentReactions { get; set; }
+    public DbSet<CommentMention> CommentMentions { get; set; }
+    public DbSet<CommentModeration> CommentModerations { get; set; }
+    
+    // Mentorship Program
+    public DbSet<MentorshipProgram> MentorshipPrograms { get; set; }
+    public DbSet<MentorshipApplication> MentorshipApplications { get; set; }
+    public DbSet<MentorshipSession> MentorshipSessions { get; set; }
+    public DbSet<MentorshipReview> MentorshipReviews { get; set; }
+    
+    // Social Sharing & Discovery
+    public DbSet<SocialShare> SocialShares { get; set; }
+    public DbSet<ViralContent> ViralContents { get; set; }
+    public DbSet<ContentPromotion> ContentPromotions { get; set; }
+    public DbSet<SocialConnection> SocialConnections { get; set; }
+    
     // Analytics Dashboard
     public DbSet<AnalyticsDashboard> AnalyticsDashboards { get; set; }
     public DbSet<VideoAnalytics> VideoAnalytics { get; set; }

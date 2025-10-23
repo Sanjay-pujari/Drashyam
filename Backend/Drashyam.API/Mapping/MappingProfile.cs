@@ -115,6 +115,73 @@ public class MappingProfile : Profile
         CreateMap<SuperChat, SuperChatDto>();
         CreateMap<SuperChatRequestDto, SuperChat>();
         CreateMap<SuperChat, SuperChatDisplayDto>();
+        
+        // Collaboration mappings
+        CreateMap<CreatorCollaboration, CollaborationDto>()
+            .ForMember(dest => dest.InitiatorName, opt => opt.MapFrom(src => $"{src.Initiator.FirstName} {src.Initiator.LastName}"))
+            .ForMember(dest => dest.CollaboratorName, opt => opt.MapFrom(src => $"{src.Collaborator.FirstName} {src.Collaborator.LastName}"))
+            .ForMember(dest => dest.InitiatorAvatar, opt => opt.MapFrom(src => src.Initiator.ProfilePictureUrl))
+            .ForMember(dest => dest.CollaboratorAvatar, opt => opt.MapFrom(src => src.Collaborator.ProfilePictureUrl));
+        
+        CreateMap<CollaborationMessage, CollaborationMessageDto>()
+            .ForMember(dest => dest.SenderName, opt => opt.MapFrom(src => $"{src.Sender.FirstName} {src.Sender.LastName}"))
+            .ForMember(dest => dest.SenderAvatar, opt => opt.MapFrom(src => src.Sender.ProfilePictureUrl));
+        
+        CreateMap<CollaborationAsset, CollaborationAssetDto>()
+            .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => $"{src.UploadedBy.FirstName} {src.UploadedBy.LastName}"));
+        
+        // Challenge mappings
+        CreateMap<CommunityChallenge, ChallengeDto>()
+            .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => $"{src.Creator.FirstName} {src.Creator.LastName}"))
+            .ForMember(dest => dest.CreatorAvatar, opt => opt.MapFrom(src => src.Creator.ProfilePictureUrl));
+        
+        CreateMap<ChallengeSubmission, ChallengeSubmissionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        
+        CreateMap<ChallengeParticipant, ChallengeParticipantDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        
+        CreateMap<ChallengeComment, ChallengeCommentDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        
+        // Enhanced Comment mappings
+        CreateMap<EnhancedComment, EnhancedCommentDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        
+        CreateMap<CommentReaction, CommentReactionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+        
+        // Mentorship mappings
+        CreateMap<MentorshipProgram, MentorshipProgramDto>()
+            .ForMember(dest => dest.MentorName, opt => opt.MapFrom(src => $"{src.Mentor.FirstName} {src.Mentor.LastName}"))
+            .ForMember(dest => dest.MentorAvatar, opt => opt.MapFrom(src => src.Mentor.ProfilePictureUrl));
+        
+        CreateMap<MentorshipApplication, MentorshipApplicationDto>()
+            .ForMember(dest => dest.MenteeName, opt => opt.MapFrom(src => $"{src.Mentee.FirstName} {src.Mentee.LastName}"))
+            .ForMember(dest => dest.MenteeAvatar, opt => opt.MapFrom(src => src.Mentee.ProfilePictureUrl));
+        
+        CreateMap<MentorshipSession, MentorshipSessionDto>()
+            .ForMember(dest => dest.MenteeName, opt => opt.MapFrom(src => $"{src.Mentee.FirstName} {src.Mentee.LastName}"));
+        
+        CreateMap<MentorshipReview, MentorshipReviewDto>()
+            .ForMember(dest => dest.MenteeName, opt => opt.MapFrom(src => $"{src.Mentee.FirstName} {src.Mentee.LastName}"));
+        
+        // Social Sharing mappings
+        CreateMap<SocialShare, SocialShareDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+        
+        CreateMap<ViralContent, ViralContentDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+        
+        CreateMap<ContentPromotion, ContentPromotionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+        
+        CreateMap<SocialConnection, SocialConnectionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
     }
 
     private static VideoStatus MapVideoProcessingStatusToVideoStatus(VideoProcessingStatus status)

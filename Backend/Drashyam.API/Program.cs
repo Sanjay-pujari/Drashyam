@@ -232,7 +232,13 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILiveStreamService, LiveStreamService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IFileStorageService>(provider =>
+{
+    var blobServiceClient = provider.GetService<BlobServiceClient>();
+    var storageSettings = provider.GetRequiredService<IOptions<AzureStorageSettings>>();
+    var logger = provider.GetRequiredService<ILogger<FileStorageService>>();
+    return new FileStorageService(blobServiceClient, storageSettings, logger);
+});
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
@@ -241,6 +247,8 @@ builder.Services.AddScoped<IReferralService, ReferralService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
+builder.Services.AddScoped<ICollaborationService, CollaborationService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IWatchLaterService, WatchLaterService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();

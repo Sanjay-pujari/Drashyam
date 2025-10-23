@@ -86,7 +86,21 @@ public enum NotificationType
     Email,
     Push,
     Video,
-    Comment
+    Comment,
+    CollaborationRequest,
+    CollaborationResponse,
+    CollaborationCancelled,
+    CollaborationCompleted,
+    CollaborationMessage,
+    ChallengeCreated,
+    ChallengeJoined,
+    ChallengeSubmission,
+    ChallengeVote,
+    MentorshipApplication,
+    MentorshipAccepted,
+    MentorshipSession,
+    SocialShare,
+    ViralContent
 }
 
 public enum AdType
@@ -221,5 +235,278 @@ public enum LiveStreamStatus
     Scheduled,
     Live,
     Ended,
+    Cancelled
+}
+
+// Collaboration System Enums
+public enum CollaborationType
+{
+    VideoCreation,
+    LiveStream,
+    ChannelPartnership,
+    ContentSeries,
+    EventCollaboration,
+    CrossPromotion
+}
+
+public enum CollaborationStatus
+{
+    Pending,
+    Accepted,
+    Declined,
+    InProgress,
+    Completed,
+    Cancelled,
+    Expired
+}
+
+public enum CollaborationRole
+{
+    Creator,
+    Editor,
+    Producer,
+    CoHost,
+    Guest,
+    Sponsor,
+    Partner
+}
+
+public enum MessageType
+{
+    Text,
+    Image,
+    Video,
+    Audio,
+    Document,
+    Link
+}
+
+public enum AssetType
+{
+    Video,
+    Audio,
+    Image,
+    Document,
+    Script,
+    Storyboard,
+    Reference,
+    Other
+}
+
+// Community Challenges Enums
+public enum ChallengeType
+{
+    HashtagChallenge,
+    VideoContest,
+    LiveStreamEvent,
+    CommunityEvent,
+    SeasonalCampaign,
+    BrandPartnership,
+    EducationalSeries,
+    CreativeChallenge
+}
+
+public enum ChallengeStatus
+{
+    Draft,
+    Published,
+    Active,
+    Voting,
+    Completed,
+    Cancelled,
+    Expired
+}
+
+public enum ChallengeVisibility
+{
+    Public,
+    Private,
+    InviteOnly,
+    CommunityOnly
+}
+
+public enum ParticipationStatus
+{
+    Joined,
+    Active,
+    Completed,
+    Withdrawn,
+    Disqualified
+}
+
+public enum SubmissionStatus
+{
+    Pending,
+    Approved,
+    Rejected,
+    UnderReview,
+    Published
+}
+
+public enum VoteType
+{
+    Upvote,
+    Downvote,
+    Favorite,
+    Report
+}
+
+// Enhanced Comment System Enums
+public enum ReactionType
+{
+    Like,
+    Love,
+    Laugh,
+    Angry,
+    Sad,
+    Wow,
+    Dislike
+}
+
+public enum CommentVisibility
+{
+    Public,
+    Private,
+    Hidden,
+    Deleted
+}
+
+public enum CommentStatus
+{
+    Pending,
+    Approved,
+    Rejected,
+    Flagged,
+    UnderReview
+}
+
+public enum ModerationAction
+{
+    Approve,
+    Reject,
+    Hide,
+    Delete,
+    Flag,
+    Unflag,
+    Pin,
+    Unpin,
+    Highlight,
+    Unhighlight
+}
+
+// Mentorship Program Enums
+public enum MentorshipType
+{
+    VideoCreation,
+    LiveStreaming,
+    ChannelGrowth,
+    ContentStrategy,
+    TechnicalSkills,
+    BusinessDevelopment,
+    BrandBuilding,
+    Monetization,
+    General
+}
+
+public enum MentorshipStatus
+{
+    Draft,
+    Published,
+    Active,
+    Paused,
+    Completed,
+    Cancelled
+}
+
+public enum MentorshipVisibility
+{
+    Public,
+    Private,
+    InviteOnly
+}
+
+public enum ApplicationStatus
+{
+    Pending,
+    UnderReview,
+    Accepted,
+    Rejected,
+    Withdrawn
+}
+
+public enum SessionType
+{
+    VideoCall,
+    LiveStream,
+    Workshop,
+    QandA,
+    Review,
+    Planning,
+    Feedback
+}
+
+public enum SessionStatus
+{
+    Scheduled,
+    InProgress,
+    Completed,
+    Cancelled,
+    Rescheduled
+}
+
+// Social Sharing Enums
+public enum SharePlatform
+{
+    Facebook,
+    Twitter,
+    Instagram,
+    LinkedIn,
+    TikTok,
+    YouTube,
+    Reddit,
+    Pinterest,
+    WhatsApp,
+    Telegram,
+    Email,
+    SMS,
+    Other
+}
+
+public enum ViralStatus
+{
+    Detected,
+    Growing,
+    Peaking,
+    Declining,
+    Ended
+}
+
+public enum ViralTrigger
+{
+    Organic,
+    Influencer,
+    Trending,
+    Algorithm,
+    CrossPromotion,
+    Paid
+}
+
+public enum PromotionType
+{
+    Boost,
+    Sponsored,
+    Influencer,
+    CrossPromotion,
+    PaidAds,
+    Organic
+}
+
+public enum PromotionStatus
+{
+    Draft,
+    Scheduled,
+    Active,
+    Paused,
+    Completed,
     Cancelled
 }
