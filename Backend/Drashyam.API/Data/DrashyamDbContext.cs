@@ -49,6 +49,23 @@ public class DrashyamDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<VideoProcessingProgress> VideoProcessingProgress { get; set; }
     public DbSet<SuperChat> SuperChats { get; set; }
     
+    // Enhanced LiveStreaming Features
+    public DbSet<LiveStreamChat> LiveStreamChats { get; set; }
+    public DbSet<LiveStreamReaction> LiveStreamReactions { get; set; }
+    public DbSet<LiveStreamPoll> LiveStreamPolls { get; set; }
+    public DbSet<LiveStreamPollOption> LiveStreamPollOptions { get; set; }
+    public DbSet<LiveStreamPollVote> LiveStreamPollVotes { get; set; }
+    public DbSet<LiveStreamAnalytics> LiveStreamAnalytics { get; set; }
+    public DbSet<LiveStreamQuality> LiveStreamQualities { get; set; }
+    public DbSet<LiveStreamDonation> LiveStreamDonations { get; set; }
+    public DbSet<LiveStreamSuperChat> LiveStreamSuperChats { get; set; }
+    public DbSet<LiveStreamSubscription> LiveStreamSubscriptions { get; set; }
+    public DbSet<LiveStreamRevenue> LiveStreamRevenues { get; set; }
+    public DbSet<LiveStreamEvent> LiveStreamEvents { get; set; }
+    public DbSet<EventAttendee> EventAttendees { get; set; }
+    public DbSet<LiveStreamCollaboration> LiveStreamCollaborations { get; set; }
+    public DbSet<LiveStreamChallenge> LiveStreamChallenges { get; set; }
+    
     // Collaboration System
     public DbSet<CreatorCollaboration> CreatorCollaborations { get; set; }
     public DbSet<CollaborationMessage> CollaborationMessages { get; set; }

@@ -230,6 +230,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILiveStreamService, LiveStreamService>();
+builder.Services.AddScoped<ILiveStreamChatService, LiveStreamChatService>();
+builder.Services.AddScoped<ILiveStreamMonetizationService, LiveStreamMonetizationService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IFileStorageService>(provider =>

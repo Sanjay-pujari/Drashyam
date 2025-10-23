@@ -35,6 +35,41 @@ public class MappingProfile : Profile
         CreateMap<LiveStream, LiveStreamDto>();
         CreateMap<LiveStreamCreateDto, LiveStream>();
         CreateMap<LiveStreamUpdateDto, LiveStream>();
+        
+        // Enhanced LiveStreaming mappings
+        CreateMap<LiveStreamChat, LiveStreamChatDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        CreateMap<LiveStreamReaction, LiveStreamReactionDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"));
+        CreateMap<LiveStreamPoll, LiveStreamPollDto>();
+        CreateMap<LiveStreamPollOption, LiveStreamPollOptionDto>();
+        CreateMap<LiveStreamAnalytics, LiveStreamAnalyticsDto>();
+        CreateMap<LiveStreamQuality, LiveStreamQualityDto>();
+        CreateMap<LiveStreamDonation, LiveStreamDonationDto>()
+            .ForMember(dest => dest.DonorName, opt => opt.MapFrom(src => $"{src.Donor.FirstName} {src.Donor.LastName}"))
+            .ForMember(dest => dest.DonorAvatar, opt => opt.MapFrom(src => src.Donor.ProfilePictureUrl));
+        CreateMap<LiveStreamSuperChat, LiveStreamSuperChatDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        CreateMap<LiveStreamSubscription, LiveStreamSubscriptionDto>()
+            .ForMember(dest => dest.SubscriberName, opt => opt.MapFrom(src => $"{src.Subscriber.FirstName} {src.Subscriber.LastName}"))
+            .ForMember(dest => dest.SubscriberAvatar, opt => opt.MapFrom(src => src.Subscriber.ProfilePictureUrl));
+        CreateMap<LiveStreamRevenue, LiveStreamRevenueDto>();
+        CreateMap<LiveStreamEvent, LiveStreamEventDto>()
+            .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => $"{src.Creator.FirstName} {src.Creator.LastName}"))
+            .ForMember(dest => dest.CreatorAvatar, opt => opt.MapFrom(src => src.Creator.ProfilePictureUrl))
+            .ForMember(dest => dest.ChannelName, opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : null));
+        CreateMap<EventAttendee, EventAttendeeDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
+        CreateMap<LiveStreamCollaboration, LiveStreamCollaborationDto>()
+            .ForMember(dest => dest.CollaboratorName, opt => opt.MapFrom(src => $"{src.Collaborator.FirstName} {src.Collaborator.LastName}"))
+            .ForMember(dest => dest.CollaboratorAvatar, opt => opt.MapFrom(src => src.Collaborator.ProfilePictureUrl));
+        CreateMap<LiveStreamChallenge, LiveStreamChallengeDto>();
+        CreateMap<ChallengeParticipant, ChallengeParticipantDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ProfilePictureUrl));
 
         // Subscription mappings
         CreateMap<Subscription, SubscriptionDto>();

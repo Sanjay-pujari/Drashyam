@@ -238,6 +238,71 @@ public enum LiveStreamStatus
     Cancelled
 }
 
+// Enhanced LiveStreaming Enums
+public enum ChatMessageType
+{
+    Text,
+    Emoji,
+    Donation,
+    SuperChat,
+    System,
+    Moderator
+}
+
+
+public enum SuperChatTier
+{
+    Bronze,
+    Silver,
+    Gold,
+    Diamond,
+    Platinum
+}
+
+public enum SubscriptionTier
+{
+    Basic,
+    Premium,
+    VIP,
+    Elite
+}
+
+public enum EventType
+{
+    LiveStream,
+    Webinar,
+    Workshop,
+    QnA,
+    Gaming,
+    Music,
+    Art,
+    Education,
+    Entertainment,
+    Sports,
+    News,
+    Other
+}
+
+public enum EventStatus
+{
+    Scheduled,
+    Live,
+    Ended,
+    Cancelled,
+    Postponed
+}
+
+public enum AttendanceStatus
+{
+    Registered,
+    CheckedIn,
+    CheckedOut,
+    NoShow,
+    Cancelled
+}
+
+
+
 // Collaboration System Enums
 public enum CollaborationType
 {
