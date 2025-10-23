@@ -14,7 +14,6 @@ import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { Channel } from '../../models/channel.model';
 import { Video } from '../../models/video.model';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-channel-detail',
@@ -225,7 +224,7 @@ export class ChannelDetailComponent implements OnInit {
     
     // For now, we'll create a simple HTTP call to the new API endpoint
     // In a real implementation, you'd want to create a proper service
-    fetch(`${environment.apiUrl}/api/monetization/channels/${this.channelId}/merchandise`)
+    fetch(`/api/monetization/channels/${this.channelId}/merchandise`)
       .then(response => response.json())
       .then(data => {
         this.merchandise = data;
