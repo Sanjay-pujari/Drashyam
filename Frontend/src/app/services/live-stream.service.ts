@@ -2,32 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { LiveStream } from '../models/live-stream.model';
 
-export interface LiveStream {
-  id: number;
-  title: string;
-  description: string;
-  streamUrl: string;
-  hlsUrl: string;
-  rtmpUrl: string;
-  streamKey: string;
-  status: string;
-  viewerCount: number;
-  peakViewerCount: number;
-  startTime: Date;
-  endTime?: Date;
-  isRecording: boolean;
-  recordingUrl?: string;
-  userId: string;
-  channelId: number;
-  category: string;
-  tags: string[];
-  isPublic: boolean;
-  isMonetized: boolean;
-  thumbnailUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface StreamQuality {
   name: string;
@@ -194,6 +170,14 @@ export class LiveStreamService {
 
   getLiveStreams(): Observable<LiveStream[]> {
     return this.http.get<LiveStream[]>(`${this.apiUrl}/livestream/live`);
+  }
+
+  getLiveStreamById(streamId: number): Observable<LiveStream> {
+    return this.http.get<LiveStream>(`${this.apiUrl}/livestream/${streamId}`);
+  }
+
+  getActiveLiveStreams(params: { page: number; pageSize: number }): Observable<any> {
+    return this.http.get(`${this.apiUrl}/livestream/active?page=${params.page}&pageSize=${params.pageSize}`);
   }
 
   getFeaturedStreams(): Observable<LiveStream[]> {

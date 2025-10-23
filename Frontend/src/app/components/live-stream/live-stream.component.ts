@@ -1,4 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { LiveStreamService, LiveStream, StreamAnalytics, StreamHealth } from '../../services/live-stream.service';
@@ -8,7 +10,9 @@ import { LiveChatService } from '../../services/live-chat.service';
 @Component({
   selector: 'app-live-stream',
   templateUrl: './live-stream.component.html',
-  styleUrls: ['./live-stream.component.scss']
+  styleUrls: ['./live-stream.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class LiveStreamComponent implements OnInit, OnDestroy {
   @Input() streamId?: number;
@@ -391,5 +395,9 @@ export class LiveStreamComponent implements OnInit, OnDestroy {
     const seconds = duration % 60;
     
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  removeNotification(notification: NotificationMessage): void {
+    this.notifications = this.notifications.filter(n => n !== notification);
   }
 }

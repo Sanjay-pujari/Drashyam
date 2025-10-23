@@ -271,15 +271,15 @@ export class LiveStreamViewerComponent implements OnInit, OnDestroy {
   }
 
   loadLiveStream() {
-    const sub = this.liveStreamService.getLiveStreamById(this.liveStreamId).subscribe({
-      next: (liveStream) => {
+    const sub = this.liveStreamService.getLiveStreamById(this.liveStreamId).subscribe(
+      (liveStream: LiveStream) => {
         this.liveStream = liveStream;
       },
-      error: (error) => {
+      (error: any) => {
         console.error('Error loading live stream:', error);
         this.snackBar.open('Failed to load live stream', 'Close', { duration: 3000 });
       }
-    });
+    );
     this.subscriptions.push(sub);
   }
 

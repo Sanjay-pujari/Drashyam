@@ -17,6 +17,14 @@ export interface ChatMessage {
   timestamp: Date;
   isModerator: boolean;
   isSubscriber: boolean;
+  reactions: ChatReaction[];
+}
+
+export interface ChatReaction {
+  id: number;
+  reactionType: string;
+  userId: string;
+  timestamp: Date;
 }
 
 export interface NotificationMessage {
@@ -113,7 +121,8 @@ export class SignalRService {
         message: message.content,
         timestamp: new Date(message.timestamp),
         isModerator: message.isModerator || false,
-        isSubscriber: message.isSubscriber || false
+        isSubscriber: message.isSubscriber || false,
+        reactions: message.reactions || []
       });
     });
 

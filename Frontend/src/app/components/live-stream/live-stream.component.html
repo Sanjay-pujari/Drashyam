@@ -109,7 +109,7 @@
             class="quality-selector"
             [value]="currentQuality"
             [disabled]="isQualityChanging"
-            (change)="changeQuality($event.target.value)">
+            (change)="changeQuality($any($event.target).value)">
             <option *ngFor="let quality of availableQualities" [value]="quality.name">
               {{ quality.name }} ({{ quality.width }}x{{ quality.height }})
             </option>
@@ -127,7 +127,7 @@
         </button>
       </div>
       
-      <div class="chat-messages" #chatMessages>
+      <div class="chat-messages" #chatContainer>
         <div 
           class="chat-message" 
           *ngFor="let message of chatMessages"
@@ -257,7 +257,7 @@
       <h4>{{ notification.title }}</h4>
       <p>{{ notification.message }}</p>
     </div>
-    <button class="btn btn-sm btn-secondary" (click)="notifications = notifications.filter(n => n !== notification)">
+    <button class="btn btn-sm btn-secondary" (click)="removeNotification(notification)">
       <i class="fas fa-times"></i>
     </button>
   </div>

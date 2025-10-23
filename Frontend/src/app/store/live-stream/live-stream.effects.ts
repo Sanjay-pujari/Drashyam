@@ -17,7 +17,7 @@ export class LiveStreamEffects {
       ofType(LiveStreamActions.loadLiveStreams),
       switchMap(({ page = 1, pageSize = 20 }) =>
         this.liveStreamService.getActiveLiveStreams({ page, pageSize }).pipe(
-          map(response => LiveStreamActions.loadLiveStreamsSuccess({
+          map((response: any) => LiveStreamActions.loadLiveStreamsSuccess({
             liveStreams: response.items,
             totalCount: response.totalCount,
             page: response.page,

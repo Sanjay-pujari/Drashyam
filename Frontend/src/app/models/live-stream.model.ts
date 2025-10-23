@@ -9,17 +9,25 @@ export interface LiveStream {
   channelId?: number;
   streamKey: string;
   streamUrl: string;
+  hlsUrl?: string;
+  rtmpUrl?: string;
   status: LiveStreamStatus;
   scheduledStartTime: string;
   actualStartTime?: string;
+  startTime?: Date;
   endTime?: string;
   viewerCount: number;
   maxViewers: number;
+  peakViewerCount?: number;
   thumbnailUrl?: string;
   isMonetized: boolean;
+  isRecording?: boolean;
+  recordingUrl?: string;
   category?: string;
   tags?: string;
+  isPublic?: boolean;
   createdAt: string;
+  updatedAt?: string;
   user?: User;
   channel?: Channel;
 }
