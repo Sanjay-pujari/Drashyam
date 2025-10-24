@@ -225,7 +225,7 @@
                 <h4>Make this video premium</h4>
                 <p>Set a price for viewers to purchase access to this video</p>
               </div>
-              <mat-slide-toggle formControlName="isPremium">
+              <mat-slide-toggle formControlName="isPremium" (change)="onPremiumToggleChange()">
                 {{ uploadForm.get('isPremium')?.value ? 'Premium' : 'Free' }}
               </mat-slide-toggle>
             </div>
@@ -271,7 +271,7 @@
             mat-raised-button 
             color="primary" 
             type="submit"
-            [disabled]="!uploadForm.valid || !selectedFile || isUploading">
+            [disabled]="!isFormValid || !selectedFile || isUploading">
             <mat-icon>upload</mat-icon>
             {{ isUploading ? 'Uploading...' : 'Upload Video' }}
           </button>

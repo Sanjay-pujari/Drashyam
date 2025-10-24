@@ -18,7 +18,7 @@ public interface IMonetizationService
     Task DeleteSponsorAsync(int sponsorId, string userId);
     Task<List<DonationDto>> GetDonationsAsync(string userId, DateTime? startDate = null, DateTime? endDate = null);
     Task<DonationDto> ProcessDonationAsync(DonationRequestDto request);
-    Task<List<MerchandiseDto>> GetMerchandiseAsync(string userId);
+    Task<List<MerchandiseDto>> GetMerchandiseAsync(MerchandiseFilterDto filter);
     Task<MerchandiseDto> CreateMerchandiseAsync(MerchandiseRequestDto request, string userId);
     Task<MerchandiseDto> UpdateMerchandiseAsync(int merchandiseId, MerchandiseRequestDto request, string userId);
     Task DeleteMerchandiseAsync(int merchandiseId, string userId);

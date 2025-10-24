@@ -47,6 +47,8 @@ export class VideoUploadComponent implements OnInit {
   quotaWarning = false;
   uploadedVideoId: number | null = null;
   processingProgress: VideoProcessingProgress | null = null;
+  private isInitialized = false;
+  private _isFormValid = false;
 
   constructor(
     private fb: FormBuilder,
@@ -74,6 +76,15 @@ export class VideoUploadComponent implements OnInit {
   ngOnInit() {
     this.loadUserChannels();
     this.loadQuotaStatus();
+    this.isInitialized = true;
+    
+    // Set up form value change listeners
+    this.uploadForm.valueChanges.subscribe(() => {
+      this.updateFormValidity();
+    });
+    
+    // Initial form validity check
+    this.updateFormValidity();
   }
 
   loadUserChannels() {
@@ -132,7 +143,7 @@ export class VideoUploadComponent implements OnInit {
     }
     this.uploadForm.get('premiumPrice')?.updateValueAndValidity();
     
-    if (this.uploadForm.valid && this.selectedFile) {
+    if (this.isFormValid && this.selectedFile) {
       // Check quota before uploading
       this.checkQuotaBeforeUpload();
     }
@@ -208,26 +219,34 @@ export class VideoUploadComponent implements OnInit {
   }
 
   onChannelChange() {
-    // Re-check quota when channel changes
-    if (this.selectedFile) {
+    // Re-check quota when channel changes (only after initialization)
+    if (this.isInitialized && this.selectedFile) {
       this.checkQuotaForUpload();
     }
+  }
+
+  onPremiumToggleChange() {
+    // Update form validation when premium toggle changes
+    this.updateFormValidity();
   }
 
   private checkQuotaForUpload() {
     if (!this.selectedFile) return;
 
-    this.quotaService.canUploadVideo(this.selectedFile.size).subscribe({
-      next: (canUpload) => {
-        this.quotaWarning = !canUpload;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error checking quota:', error);
-        this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
-        this.cdr.detectChanges();
-      }
-    });
+    // Use setTimeout to ensure this runs after the current change detection cycle
+    setTimeout(() => {
+      this.quotaService.canUploadVideo(this.selectedFile!.size).subscribe({
+        next: (canUpload) => {
+          this.quotaWarning = !canUpload;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error checking quota:', error);
+          this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
+          this.cdr.detectChanges();
+        }
+      });
+    }, 0);
   }
 
   onProcessingCompleted(status: 'Completed' | 'Failed') {
@@ -344,5 +363,17 @@ export class VideoUploadComponent implements OnInit {
 
   getUsageColor(percentage: number): string {
     return this.quotaService.getUsageColor(percentage);
+  }
+
+  get isFormValid(): boolean {
+    return this._isFormValid;
+  }
+
+  private updateFormValidity(): void {
+    // Use setTimeout to avoid change detection issues
+    setTimeout(() => {
+      this._isFormValid = this.uploadForm.valid;
+      this.cdr.detectChanges();
+    }, 0);
   }
 }

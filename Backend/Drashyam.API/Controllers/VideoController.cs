@@ -77,6 +77,15 @@ public class VideoController : ControllerBase
         return Ok(videos);
     }
 
+    [HttpGet("subscriptions")]
+    [Authorize]
+    public async Task<ActionResult<PagedResult<VideoDto>>> GetSubscriptions([FromQuery] VideoFilterDto filter)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var videos = await _videoService.GetSubscribedChannelsVideosAsync(userId, filter);
+        return Ok(videos);
+    }
+
     [HttpPut("{id:int}")]
     [Authorize]
     public async Task<ActionResult<VideoDto>> Update([FromRoute] int id, [FromForm] VideoUpdateDto updateDto)
