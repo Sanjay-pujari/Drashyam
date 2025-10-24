@@ -176,8 +176,24 @@ builder.Services.AddCors(options =>
     }
 });
 
-// SignalR
-builder.Services.AddSignalR();
+// Azure SignalR Service Configuration
+builder.Services.Configure<AzureSignalRSettings>(builder.Configuration.GetSection("AzureSignalR"));
+
+// SignalR with Azure SignalR Service
+var signalRSettings = builder.Configuration.GetSection("AzureSignalR").Get<AzureSignalRSettings>();
+if (signalRSettings?.UseAzureSignalR == true && !string.IsNullOrEmpty(signalRSettings.ConnectionString))
+{
+    builder.Services.AddSignalR()
+        .AddAzureSignalR(options =>
+        {
+            options.ConnectionString = signalRSettings.ConnectionString;
+        });
+}
+else
+{
+    // Fallback to in-memory SignalR for development
+    builder.Services.AddSignalR();
+}
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
