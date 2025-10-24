@@ -160,6 +160,10 @@ import { RecommendationService, UserPreference } from '../../services/recommenda
                 <mat-icon>delete_forever</mat-icon>
                 Clear All Data
               </button>
+              <button mat-button type="button" (click)="testApiConnection()" color="accent">
+                <mat-icon>wifi</mat-icon>
+                Test API
+              </button>
             </div>
           </form>
         </mat-card-content>
@@ -410,6 +414,10 @@ export class RecommendationPreferencesComponent implements OnInit, OnDestroy {
   }
 
   savePreferences(): void {
+    console.log('Form valid:', this.preferencesForm.valid);
+    console.log('Form value:', this.preferencesForm.value);
+    console.log('Selected tags:', this.selectedTags);
+    
     if (this.preferencesForm.valid) {
       this.isSaving = true;
       
@@ -417,41 +425,60 @@ export class RecommendationPreferencesComponent implements OnInit, OnDestroy {
       const preferences: UserPreference[] = [];
 
       // Add category preferences
-      formValue.categories.forEach((category: string) => {
-        preferences.push({
-          id: 0,
-          category: category,
-          weight: 1.0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+      if (formValue.categories && formValue.categories.length > 0) {
+        formValue.categories.forEach((category: string) => {
+          preferences.push({
+            id: 0,
+            category: category,
+            weight: 1.0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
         });
-      });
+      }
 
       // Add tag preferences
-      this.selectedTags.forEach(tag => {
-        preferences.push({
-          id: 0,
-          tag: tag,
-          weight: 1.0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+      if (this.selectedTags && this.selectedTags.length > 0) {
+        this.selectedTags.forEach(tag => {
+          preferences.push({
+            id: 0,
+            tag: tag,
+            weight: 1.0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
         });
-      });
+      }
+
+      console.log('Saving preferences:', preferences);
 
       this.subscriptions.push(
         this.recommendationService.updatePreferences(preferences).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Preferences saved successfully:', response);
             this.snackBar.open('Preferences saved successfully!', 'Close', { duration: 3000 });
             this.isSaving = false;
             this.loadCurrentPreferences();
+            
+            // Emit event to notify other components that preferences have been updated
+            this.onPreferencesUpdated();
           },
           error: (error) => {
             console.error('Error saving preferences:', error);
-            this.snackBar.open('Failed to save preferences', 'Close', { duration: 3000 });
+            console.error('Error details:', {
+              status: error.status,
+              statusText: error.statusText,
+              message: error.message,
+              url: error.url
+            });
+            this.snackBar.open('Failed to save preferences: ' + (error.message || 'Unknown error'), 'Close', { duration: 5000 });
             this.isSaving = false;
           }
         })
       );
+    } else {
+      console.error('Form is invalid:', this.preferencesForm.errors);
+      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
     }
   }
 
@@ -520,5 +547,32 @@ export class RecommendationPreferencesComponent implements OnInit, OnDestroy {
       'History': 'history_edu'
     };
     return iconMap[category] || 'category';
+  }
+
+  private onPreferencesUpdated(): void {
+    // Dispatch a custom event to notify other components
+    const event = new CustomEvent('preferencesUpdated', {
+      detail: { timestamp: new Date().toISOString() }
+    });
+    window.dispatchEvent(event);
+    
+    console.log('Preferences updated event dispatched');
+  }
+
+  // Test method to verify API connectivity
+  testApiConnection(): void {
+    console.log('Testing API connection...');
+    this.subscriptions.push(
+      this.recommendationService.getPreferences().subscribe({
+        next: (preferences) => {
+          console.log('API connection successful, current preferences:', preferences);
+          this.snackBar.open('API connection successful!', 'Close', { duration: 2000 });
+        },
+        error: (error) => {
+          console.error('API connection failed:', error);
+          this.snackBar.open('API connection failed: ' + error.message, 'Close', { duration: 5000 });
+        }
+      })
+    );
   }
 }

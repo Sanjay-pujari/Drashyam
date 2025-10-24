@@ -451,28 +451,79 @@ export class RecommendationsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadPersonalizedRecommendations();
     this.loadTrendingVideos();
+    
+    // Listen for preferences updates
+    window.addEventListener('preferencesUpdated', () => {
+      console.log('Preferences updated event received, refreshing recommendations');
+      this.refreshRecommendations();
+    });
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    
+    // Remove event listener
+    window.removeEventListener('preferencesUpdated', this.refreshRecommendations);
+  }
+
+  // Method to refresh recommendations when preferences are updated
+  refreshRecommendations(): void {
+    console.log('Refreshing recommendations due to preference changes');
+    this.loadPersonalizedRecommendations();
   }
 
   loadPersonalizedRecommendations(): void {
     this.isLoadingPersonalized = true;
+    
+    // First, get user preferences to apply them to recommendations
     this.subscriptions.push(
-      this.recommendationService.getPersonalizedRecommendations({
-        limit: 20,
-        includeTrending: true,
-        includePersonalized: true
-      }).subscribe({
-        next: (recommendations) => {
-          this.personalizedRecommendations = recommendations;
-          this.isLoadingPersonalized = false;
+      this.recommendationService.getPreferences().subscribe({
+        next: (preferences) => {
+          console.log('User preferences loaded:', preferences);
+          
+          // Load personalized recommendations with user preferences
+          this.subscriptions.push(
+            this.recommendationService.getPersonalizedRecommendations({
+              limit: 20,
+              includeTrending: true,
+              includePersonalized: true,
+              // Apply user preferences
+              category: preferences.find(p => p.category)?.category,
+              type: 'personalized'
+            }).subscribe({
+              next: (recommendations) => {
+                console.log('Personalized recommendations loaded:', recommendations);
+                this.personalizedRecommendations = recommendations;
+                this.isLoadingPersonalized = false;
+              },
+              error: (error) => {
+                console.error('Error loading personalized recommendations:', error);
+                this.snackBar.open('Failed to load recommendations', 'Close', { duration: 3000 });
+                this.isLoadingPersonalized = false;
+              }
+            })
+          );
         },
         error: (error) => {
-          console.error('Error loading personalized recommendations:', error);
-          this.snackBar.open('Failed to load recommendations', 'Close', { duration: 3000 });
-          this.isLoadingPersonalized = false;
+          console.error('Error loading user preferences:', error);
+          // Still try to load recommendations without preferences
+          this.subscriptions.push(
+            this.recommendationService.getPersonalizedRecommendations({
+              limit: 20,
+              includeTrending: true,
+              includePersonalized: true
+            }).subscribe({
+              next: (recommendations) => {
+                this.personalizedRecommendations = recommendations;
+                this.isLoadingPersonalized = false;
+              },
+              error: (error) => {
+                console.error('Error loading personalized recommendations:', error);
+                this.snackBar.open('Failed to load recommendations', 'Close', { duration: 3000 });
+                this.isLoadingPersonalized = false;
+              }
+            })
+          );
         }
       })
     );
