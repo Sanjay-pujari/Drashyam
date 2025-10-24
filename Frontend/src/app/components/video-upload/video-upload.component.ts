@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -55,7 +55,8 @@ export class VideoUploadComponent implements OnInit {
     private quotaService: QuotaService,
     private videoProcessingService: VideoProcessingService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.uploadForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(100)]],
@@ -81,11 +82,13 @@ export class VideoUploadComponent implements OnInit {
       next: (result) => {
         this.userChannels = result.items || [];
         this.isLoadingChannels = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.userChannels = [];
         this.isLoadingChannels = false;
         this.snackBar.open('Error loading channels', 'Close', { duration: 3000 });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -145,11 +148,13 @@ export class VideoUploadComponent implements OnInit {
         } else {
           this.snackBar.open('Upload quota exceeded. Please upgrade your plan or delete some videos.', 'Close', { duration: 5000 });
           this.quotaWarning = true;
+          this.cdr.detectChanges();
         }
       },
       error: (error) => {
         console.error('Quota check failed:', error);
         this.snackBar.open('Unable to check quota. Please try again.', 'Close', { duration: 3000 });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -215,10 +220,12 @@ export class VideoUploadComponent implements OnInit {
     this.quotaService.canUploadVideo(this.selectedFile.size).subscribe({
       next: (canUpload) => {
         this.quotaWarning = !canUpload;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error checking quota:', error);
         this.snackBar.open('Failed to check upload quota', 'Close', { duration: 3000 });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -322,9 +329,11 @@ export class VideoUploadComponent implements OnInit {
     this.quotaService.getQuotaStatus().subscribe({
       next: (status) => {
         this.quotaStatus = status;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading quota status:', error);
+        this.cdr.detectChanges();
       }
     });
   }

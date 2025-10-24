@@ -162,15 +162,10 @@ builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowAll", policy =>
         {
-            policy.WithOrigins(
-                    "http://localhost:4200",
-                    "https://localhost:4200",
-                    "http://127.0.0.1:4200",
-                    "https://127.0.0.1:4200"
-                )
+            policy.AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();
+                .SetPreflightMaxAge(TimeSpan.FromSeconds(86400)); // Cache preflight for 24 hours
         });
     }
 });
@@ -297,7 +292,7 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 // Embed security middleware
 app.UseMiddleware<EmbedSecurityMiddleware>();
 
-// CORS
+// CORS - must be before authentication
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("AllowAll");

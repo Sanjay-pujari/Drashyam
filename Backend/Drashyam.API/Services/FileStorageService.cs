@@ -26,7 +26,8 @@ public class FileStorageService : IFileStorageService
     {
         if (_blobServiceClient == null)
         {
-            throw new InvalidOperationException("Azure Storage is not configured. Please set the AzureStorage:ConnectionString in appsettings.json");
+            _logger.LogWarning("Azure Storage is not configured. Using local file storage for development.");
+            // Don't throw exception in development - use local storage instead
         }
     }
 
@@ -35,6 +36,12 @@ public class FileStorageService : IFileStorageService
         EnsureAzureStorageConfigured();
         
         var fileName = $"videos/{Guid.NewGuid()}_{SanitizeFileName(videoFile.FileName)}";
+        
+        if (_blobServiceClient == null)
+        {
+            return await UploadToLocalStorageAsync(videoFile, fileName);
+        }
+        
         return await UploadFileAsync(videoFile, fileName, _storageSettings.VideoContainerName);
     }
 
@@ -43,6 +50,12 @@ public class FileStorageService : IFileStorageService
         EnsureAzureStorageConfigured();
         
         var fileName = $"thumbnails/{Guid.NewGuid()}_{SanitizeFileName(thumbnailFile.FileName)}";
+        
+        if (_blobServiceClient == null)
+        {
+            return await UploadToLocalStorageAsync(thumbnailFile, fileName);
+        }
+        
         return await UploadFileAsync(thumbnailFile, fileName, _storageSettings.ImageContainerName);
     }
 
@@ -51,6 +64,12 @@ public class FileStorageService : IFileStorageService
         EnsureAzureStorageConfigured();
         
         var fileName = $"videos/{Guid.NewGuid()}.mp4";
+        
+        if (_blobServiceClient == null)
+        {
+            return await UploadStreamToLocalStorageAsync(videoStream, fileName);
+        }
+        
         return await UploadStreamAsync(videoStream, fileName, _storageSettings.VideoContainerName, "video/mp4");
     }
 
@@ -59,6 +78,12 @@ public class FileStorageService : IFileStorageService
         EnsureAzureStorageConfigured();
         
         var fileName = $"thumbnails/{Guid.NewGuid()}.jpg";
+        
+        if (_blobServiceClient == null)
+        {
+            return await UploadStreamToLocalStorageAsync(thumbnailStream, fileName);
+        }
+        
         return await UploadStreamAsync(thumbnailStream, fileName, _storageSettings.ImageContainerName, "image/jpeg");
     }
 
@@ -269,5 +294,69 @@ public class FileStorageService : IFileStorageService
             ".mov" => "video/quicktime",
             _ => "application/octet-stream"
         };
+    }
+
+    private async Task<string> UploadToLocalStorageAsync(IFormFile file, string fileName)
+    {
+        try
+        {
+            // Create uploads directory if it doesn't exist
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsPath);
+
+            var filePath = Path.Combine(uploadsPath, fileName);
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Return a URL that can be accessed by the frontend
+            var baseUrl = "https://localhost:56379"; // Use the API base URL
+            var relativePath = Path.Combine("uploads", fileName).Replace("\\", "/");
+            return $"{baseUrl}/{relativePath}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading file to local storage: {FileName}", fileName);
+            throw new InvalidOperationException($"Failed to upload file: {ex.Message}", ex);
+        }
+    }
+
+    private async Task<string> UploadStreamToLocalStorageAsync(Stream stream, string fileName)
+    {
+        try
+        {
+            // Create uploads directory if it doesn't exist
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsPath);
+
+            var filePath = Path.Combine(uploadsPath, fileName);
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
+
+            // Return a URL that can be accessed by the frontend
+            var baseUrl = "https://localhost:56379"; // Use the API base URL
+            var relativePath = Path.Combine("uploads", fileName).Replace("\\", "/");
+            return $"{baseUrl}/{relativePath}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading stream to local storage: {FileName}", fileName);
+            throw new InvalidOperationException($"Failed to upload stream: {ex.Message}", ex);
+        }
     }
 }
