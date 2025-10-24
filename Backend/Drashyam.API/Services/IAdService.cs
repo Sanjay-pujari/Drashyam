@@ -14,6 +14,7 @@ public interface IAdService
     
     // Ad serving for free users
     Task<AdDto?> GetAdForUserAsync(string userId, int? videoId = null, DTOs.AdType? preferredType = null);
+    Task<List<AdDto>> GetDisplayAdsForUserAsync(string userId);
     Task<bool> RecordAdImpressionAsync(int campaignId, string userId, int? videoId = null);
     Task<bool> RecordAdClickAsync(int campaignId, string userId, int? videoId = null);
     

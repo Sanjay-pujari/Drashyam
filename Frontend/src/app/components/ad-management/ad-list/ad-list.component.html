@@ -1,0 +1,315 @@
+<div class="ad-management-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Ad Management</h1>
+        <p>Manage your advertising campaigns and individual ads</p>
+      </div>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="createCampaign()">
+          <mat-icon>add</mat-icon>
+          New Campaign
+        </button>
+        <button mat-raised-button color="accent" (click)="createAd()">
+          <mat-icon>add</mat-icon>
+          New Ad
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Controls -->
+  <mat-card class="filters-card">
+    <div class="filters-content">
+      <div class="search-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" 
+                 placeholder="Search campaigns or ads...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-controls">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option value="active">Active</mat-option>
+            <mat-option value="paused">Paused</mat-option>
+            <mat-option value="completed">Completed</mat-option>
+            <mat-option value="draft">Draft</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (viewMode === 'ads') {
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Ad Type</mat-label>
+            <mat-select [(ngModel)]="typeFilter" (ngModelChange)="applyFilters()">
+              <mat-option value="">All Types</mat-option>
+              <mat-option value="video">Video</mat-option>
+              <mat-option value="banner">Banner</mat-option>
+              <mat-option value="overlay">Overlay</mat-option>
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="dateRange.start" 
+                 (ngModelChange)="applyFilters()">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="dateRange.end" 
+                 (ngModelChange)="applyFilters()">
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="view-controls">
+        <button mat-button (click)="toggleViewMode()" 
+                [color]="viewMode === 'campaigns' ? 'primary' : 'basic'">
+          <mat-icon>campaign</mat-icon>
+          Campaigns
+        </button>
+        <button mat-button (click)="toggleViewMode()" 
+                [color]="viewMode === 'ads' ? 'primary' : 'basic'">
+          <mat-icon>ads_click</mat-icon>
+          Individual Ads
+        </button>
+        <button mat-button (click)="clearFilters()" color="warn">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading campaigns and ads...</p>
+    </div>
+  }
+
+  <!-- Campaigns View -->
+  @if (!isLoading && viewMode === 'campaigns') {
+    <mat-card class="data-card">
+      <div class="table-container">
+        <table mat-table [dataSource]="getCurrentPageData()" class="campaigns-table">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Campaign Name</th>
+            <td mat-cell *matCellDef="let campaign">
+              <div class="campaign-name">
+                <strong>{{ campaign.name }}</strong>
+                <span class="advertiser-id">{{ campaign.advertiserId }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let campaign">
+              <mat-chip [color]="getStatusColor(campaign.status)" selected>
+                {{ campaign.status }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Budget Column -->
+          <ng-container matColumnDef="budget">
+            <th mat-header-cell *matHeaderCellDef>Budget</th>
+            <td mat-cell *matCellDef="let campaign">
+              <div class="budget-info">
+                <div class="budget-amount">{{ formatCurrency(campaign.budget) }}</div>
+                <div class="spent-amount">Spent: {{ formatCurrency(campaign.spent) }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Start Date Column -->
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef>Start Date</th>
+            <td mat-cell *matCellDef="let campaign">
+              {{ formatDate(campaign.startDate) }}
+            </td>
+          </ng-container>
+
+          <!-- End Date Column -->
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef>End Date</th>
+            <td mat-cell *matCellDef="let campaign">
+              {{ formatDate(campaign.endDate) }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let campaign">
+              <button mat-icon-button [matMenuTriggerFor]="campaignMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #campaignMenu="matMenu">
+                <button mat-menu-item (click)="viewCampaign(campaign)">
+                  <mat-icon>visibility</mat-icon>
+                  View Details
+                </button>
+                <button mat-menu-item (click)="editCampaign(campaign)">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+                <button mat-menu-item (click)="createAd(campaign.id)">
+                  <mat-icon>add</mat-icon>
+                  Add Ad
+                </button>
+                <button mat-menu-item (click)="deleteCampaign(campaign)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="campaignColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: campaignColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+  }
+
+  <!-- Ads View -->
+  @if (!isLoading && viewMode === 'ads') {
+    <mat-card class="data-card">
+      <div class="table-container">
+        <table mat-table [dataSource]="getCurrentPageData()" class="ads-table">
+          <!-- Content Column -->
+          <ng-container matColumnDef="content">
+            <th mat-header-cell *matHeaderCellDef>Ad Content</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="ad-content">
+                <div class="ad-title">{{ ad.content }}</div>
+                @if (ad.thumbnailUrl) {
+                  <img [src]="ad.thumbnailUrl" [alt]="ad.content" class="ad-thumbnail">
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let ad">
+              <mat-chip [color]="getTypeColor(ad.type)" selected>
+                {{ ad.type }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Cost Per Click Column -->
+          <ng-container matColumnDef="costPerClick">
+            <th mat-header-cell *matHeaderCellDef>Cost Per Click</th>
+            <td mat-cell *matCellDef="let ad">
+              {{ formatCurrency(ad.costPerClick) }}
+            </td>
+          </ng-container>
+
+          <!-- Cost Per View Column -->
+          <ng-container matColumnDef="costPerView">
+            <th mat-header-cell *matHeaderCellDef>Cost Per View</th>
+            <td mat-cell *matCellDef="let ad">
+              {{ formatCurrency(ad.costPerView) }}
+            </td>
+          </ng-container>
+
+          <!-- Duration Column -->
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Duration</th>
+            <td mat-cell *matCellDef="let ad">
+              {{ ad.duration }}s
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef>Position</th>
+            <td mat-cell *matCellDef="let ad">
+              {{ ad.position }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let ad">
+              <button mat-icon-button [matMenuTriggerFor]="adMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #adMenu="matMenu">
+                <button mat-menu-item (click)="viewAd(ad)">
+                  <mat-icon>visibility</mat-icon>
+                  View Details
+                </button>
+                <button mat-menu-item (click)="editAd(ad)">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+                <button mat-menu-item (click)="deleteAd(ad)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="adColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: adColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && totalItems === 0) {
+    <mat-card class="empty-state">
+      <div class="empty-content">
+        <mat-icon class="empty-icon">ads_click</mat-icon>
+        <h3>No {{ viewMode }} found</h3>
+        <p>Create your first {{ viewMode === 'campaigns' ? 'campaign' : 'ad' }} to get started</p>
+        <button mat-raised-button color="primary" (click)="viewMode === 'campaigns' ? createCampaign() : createAd()">
+          <mat-icon>add</mat-icon>
+          Create {{ viewMode === 'campaigns' ? 'Campaign' : 'Ad' }}
+        </button>
+      </div>
+    </mat-card>
+  }
+</div>

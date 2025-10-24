@@ -684,81 +684,93 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
   }
 
   // Ad-related methods
-  private async loadPreRollAd() {
+  private loadPreRollAd() {
     if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
       return;
     }
 
-    try {
-      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+    this.currentUser$.pipe(take(1)).subscribe(currentUser => {
       const adRequest: AdRequest = {
-        videoId: this.video.id,
+        videoId: this.video!.id,
         userId: currentUser?.id,
-        category: this.video.category,
+        category: this.video!.category,
         deviceType: this.getDeviceType()
       };
 
-      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
-      if (adResponse?.hasAd && adResponse.ad) {
-        this.currentAd = adResponse.ad;
-        this.showAdOverlay = true;
-        this.isAdPlaying = true;
-        this.pauseVideo();
-      }
-    } catch (error) {
-      console.error('Error loading pre-roll ad:', error);
-    }
+      this.videoAdService.getVideoAd(adRequest).subscribe({
+        next: (adResponse) => {
+          if (adResponse?.hasAd && adResponse.ad) {
+            this.currentAd = adResponse.ad;
+            this.showAdOverlay = true;
+            this.isAdPlaying = true;
+            this.pauseVideo();
+            console.log('Pre-roll ad loaded:', adResponse.ad);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading pre-roll ad:', error);
+        }
+      });
+    });
   }
 
-  private async loadMidRollAd(position: number) {
+  private loadMidRollAd(position: number) {
     if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
       return;
     }
 
-    try {
-      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+    this.currentUser$.pipe(take(1)).subscribe(currentUser => {
       const adRequest: AdRequest = {
-        videoId: this.video.id,
+        videoId: this.video!.id,
         userId: currentUser?.id,
-        category: this.video.category,
+        category: this.video!.category,
         deviceType: this.getDeviceType()
       };
 
-      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
-      if (adResponse?.hasAd && adResponse.ad) {
-        this.currentAd = adResponse.ad;
-        this.showAdOverlay = true;
-        this.isAdPlaying = true;
-        this.pauseVideo();
-      }
-    } catch (error) {
-      console.error('Error loading mid-roll ad:', error);
-    }
+      this.videoAdService.getVideoAd(adRequest).subscribe({
+        next: (adResponse) => {
+          if (adResponse?.hasAd && adResponse.ad) {
+            this.currentAd = adResponse.ad;
+            this.showAdOverlay = true;
+            this.isAdPlaying = true;
+            this.pauseVideo();
+            console.log('Mid-roll ad loaded at position:', position, adResponse.ad);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading mid-roll ad:', error);
+        }
+      });
+    });
   }
 
-  private async loadPostRollAd() {
+  private loadPostRollAd() {
     if (!this.video || !this.videoAdService.shouldShowAds(this.userSubscription)) {
       return;
     }
 
-    try {
-      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
+    this.currentUser$.pipe(take(1)).subscribe(currentUser => {
       const adRequest: AdRequest = {
-        videoId: this.video.id,
+        videoId: this.video!.id,
         userId: currentUser?.id,
-        category: this.video.category,
+        category: this.video!.category,
         deviceType: this.getDeviceType()
       };
 
-      const adResponse = await this.videoAdService.getVideoAd(adRequest).toPromise();
-      if (adResponse?.hasAd && adResponse.ad) {
-        this.currentAd = adResponse.ad;
-        this.showAdOverlay = true;
-        this.isAdPlaying = true;
-      }
-    } catch (error) {
-      console.error('Error loading post-roll ad:', error);
-    }
+      this.videoAdService.getVideoAd(adRequest).subscribe({
+        next: (adResponse) => {
+          if (adResponse?.hasAd && adResponse.ad) {
+            this.currentAd = adResponse.ad;
+            this.showAdOverlay = true;
+            this.isAdPlaying = true;
+            console.log('Post-roll ad loaded:', adResponse.ad);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading post-roll ad:', error);
+        }
+      });
+    });
   }
 
   private setupAdPositions() {
@@ -811,14 +823,22 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy, O
     this.resumeVideo();
   }
 
-  async onAdClicked() {
+  onAdClicked() {
     if (this.currentAd) {
-      const currentUser = await this.currentUser$.pipe(take(1)).toPromise();
-      this.videoAdService.recordAdClick(
-        this.currentAd.campaignId,
-        this.video?.id || 0,
-        currentUser?.id
-      ).subscribe();
+      this.currentUser$.pipe(take(1)).subscribe(currentUser => {
+        this.videoAdService.recordAdClick(
+          this.currentAd!.campaignId,
+          this.video?.id || 0,
+          currentUser?.id
+        ).subscribe({
+          next: () => {
+            console.log('Ad click recorded');
+          },
+          error: (error) => {
+            console.error('Error recording ad click:', error);
+          }
+        });
+      });
     }
   }
 

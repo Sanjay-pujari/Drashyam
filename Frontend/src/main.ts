@@ -74,6 +74,7 @@ const routes: Routes = [
   { path: 'profile', loadComponent: () => import('./app/components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] },
   { path: 'settings', loadComponent: () => import('./app/components/settings/settings.component').then(m => m.SettingsComponent), canActivate: [authGuard] },
   { path: 'ad-campaigns', loadComponent: () => import('./app/components/manage-campaigns/manage-campaigns.component').then(m => m.ManageCampaignsComponent), canActivate: [authGuard] },
+  { path: 'ad-management', loadComponent: () => import('./app/components/ad-management/ad-list/ad-list.component').then(m => m.AdListComponent), canActivate: [authGuard] },
   { path: 'my-videos', loadComponent: () => import('./app/components/video-management/video-management.component').then(m => m.VideoManagementComponent), canActivate: [authGuard] },
   { path: 'premium-content', loadComponent: () => import('./app/components/premium-content-management/premium-content-management.component').then(m => m.PremiumContentManagementComponent), canActivate: [authGuard] },
   { path: 'merchandise', loadComponent: () => import('./app/components/merchandise-management/merchandise-management.component').then(m => m.MerchandiseManagementComponent), canActivate: [authGuard] },

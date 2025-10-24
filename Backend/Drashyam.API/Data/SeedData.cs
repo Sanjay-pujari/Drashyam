@@ -224,6 +224,122 @@ public static class SeedData
                 );
                 await context.SaveChangesAsync();
             }
+
+            // Add sample ad campaigns and ads
+            var adCampaigns = new[]
+            {
+                new AdCampaign
+                {
+                    Name = "Tech Gadgets Campaign",
+                    Description = "Promote the latest tech gadgets",
+                    AdvertiserId = admin.Id,
+                    Type = DTOs.AdType.Video,
+                    Budget = 1000.00m,
+                    CostPerClick = 0.50m,
+                    CostPerView = 0.10m,
+                    StartDate = DateTime.UtcNow.AddDays(-30),
+                    EndDate = DateTime.UtcNow.AddDays(30),
+                    Status = DTOs.AdStatus.Active,
+                    TargetAudience = "Technology enthusiasts",
+                    AdContent = "Check out the latest smartphones and gadgets!",
+                    AdUrl = "https://example.com/tech-gadgets",
+                    ThumbnailUrl = "https://via.placeholder.com/300x200/4CAF50/white?text=Tech+Gadgets",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new AdCampaign
+                {
+                    Name = "Fitness Equipment Campaign",
+                    Description = "Promote fitness and health equipment",
+                    AdvertiserId = admin.Id,
+                    Type = DTOs.AdType.Video,
+                    Budget = 800.00m,
+                    CostPerClick = 0.40m,
+                    CostPerView = 0.08m,
+                    StartDate = DateTime.UtcNow.AddDays(-15),
+                    EndDate = DateTime.UtcNow.AddDays(45),
+                    Status = DTOs.AdStatus.Active,
+                    TargetAudience = "Fitness enthusiasts",
+                    AdContent = "Transform your fitness routine with our premium equipment!",
+                    AdUrl = "https://example.com/fitness-equipment",
+                    ThumbnailUrl = "https://via.placeholder.com/300x200/FF5722/white?text=Fitness+Equipment",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new AdCampaign
+                {
+                    Name = "Online Learning Campaign",
+                    Description = "Promote online courses and education",
+                    AdvertiserId = admin.Id,
+                    Type = DTOs.AdType.Video,
+                    Budget = 1200.00m,
+                    CostPerClick = 0.60m,
+                    CostPerView = 0.12m,
+                    StartDate = DateTime.UtcNow.AddDays(-7),
+                    EndDate = DateTime.UtcNow.AddDays(60),
+                    Status = DTOs.AdStatus.Active,
+                    TargetAudience = "Students and professionals",
+                    AdContent = "Learn new skills with our comprehensive online courses!",
+                    AdUrl = "https://example.com/online-learning",
+                    ThumbnailUrl = "https://via.placeholder.com/300x200/2196F3/white?text=Online+Learning",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }
+            };
+
+            context.AdCampaigns.AddRange(adCampaigns);
+            await context.SaveChangesAsync();
+
+            // Add sample ads for each campaign
+            var campaigns = await context.AdCampaigns.ToListAsync();
+            if (campaigns.Any())
+            {
+                var sampleAds = new[]
+                {
+                    new Ad
+                    {
+                        CampaignId = campaigns[0].Id,
+                        Type = DTOs.AdType.Video,
+                        Content = "Discover the latest iPhone 15 Pro with advanced camera features and 5G connectivity. Limited time offer - 20% off!",
+                        Url = "https://example.com/iphone-15-pro",
+                        ThumbnailUrl = "https://via.placeholder.com/300x200/4CAF50/white?text=iPhone+15+Pro",
+                        CostPerClick = 0.50m,
+                        CostPerView = 0.10m,
+                        Duration = 30,
+                        SkipAfter = 5,
+                        Position = null
+                    },
+                    new Ad
+                    {
+                        CampaignId = campaigns[1].Id,
+                        Type = DTOs.AdType.Video,
+                        Content = "Get fit with our premium home gym equipment. Free shipping on orders over $100!",
+                        Url = "https://example.com/home-gym",
+                        ThumbnailUrl = "https://via.placeholder.com/300x200/FF5722/white?text=Home+Gym",
+                        CostPerClick = 0.40m,
+                        CostPerView = 0.08m,
+                        Duration = 25,
+                        SkipAfter = 5,
+                        Position = null
+                    },
+                    new Ad
+                    {
+                        CampaignId = campaigns[2].Id,
+                        Type = DTOs.AdType.Video,
+                        Content = "Master Python programming in 30 days. Join 10,000+ students who have already transformed their careers!",
+                        Url = "https://example.com/python-course",
+                        ThumbnailUrl = "https://via.placeholder.com/300x200/2196F3/white?text=Python+Course",
+                        CostPerClick = 0.60m,
+                        CostPerView = 0.12m,
+                        Duration = 35,
+                        SkipAfter = 5,
+                        Position = null
+                    }
+                };
+
+                context.Ads.AddRange(sampleAds);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

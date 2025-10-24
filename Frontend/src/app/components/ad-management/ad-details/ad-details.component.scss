@@ -1,0 +1,521 @@
+.ad-details-container {
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+// Header
+.details-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .title-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      
+      h2 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        
+        mat-icon {
+          color: #1976d2;
+        }
+      }
+      
+      .status-badge {
+        mat-chip {
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .close-button {
+        color: #666;
+        
+        &:hover {
+          color: #333;
+        }
+      }
+    }
+  }
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+// Tabs
+.details-tabs {
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-header {
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+.tab-content {
+  padding: 24px;
+}
+
+// Info Cards
+.info-card {
+  margin-bottom: 24px;
+  
+  .mat-mdc-card-header {
+    padding-bottom: 16px;
+    
+    .mat-mdc-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    label {
+      font-weight: 600;
+      color: #666;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    span {
+      color: #333;
+      font-size: 1rem;
+    }
+    
+    .budget-amount {
+      font-weight: 700;
+      color: #1976d2;
+      font-size: 1.1rem;
+    }
+    
+    .url-link {
+      color: #1976d2;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Budget Card
+.budget-card {
+  margin-bottom: 24px;
+  
+  .budget-progress {
+    .budget-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      
+      .budget-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+        
+        &.budget-good {
+          background-color: #4caf50;
+        }
+        
+        &.budget-caution {
+          background-color: #ff9800;
+        }
+        
+        &.budget-warning {
+          background-color: #f44336;
+        }
+      }
+    }
+    
+    .budget-details {
+      display: flex;
+      justify-content: space-between;
+      
+      .budget-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        
+        .budget-label {
+          font-size: 0.875rem;
+          color: #666;
+          font-weight: 500;
+        }
+        
+        .budget-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #333;
+        }
+      }
+    }
+  }
+}
+
+// Cost Card
+.cost-card {
+  margin-bottom: 24px;
+  
+  .cost-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    
+    .cost-item {
+      text-align: center;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      
+      .cost-label {
+        font-size: 0.875rem;
+        color: #666;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+      
+      .cost-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1976d2;
+      }
+    }
+  }
+}
+
+// Metrics Card
+.metrics-card {
+  margin-bottom: 24px;
+  
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    
+    .metric-item {
+      text-align: center;
+      padding: 20px 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1976d2;
+        margin-bottom: 8px;
+      }
+      
+      .metric-label {
+        font-size: 0.875rem;
+        color: #666;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+// Performance Card
+.performance-card {
+  margin-bottom: 24px;
+  
+  .performance-grade {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    
+    .grade-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      
+      &.grade-A {
+        background-color: #4caf50;
+      }
+      
+      &.grade-B {
+        background-color: #8bc34a;
+      }
+      
+      &.grade-C {
+        background-color: #ff9800;
+      }
+      
+      &.grade-D {
+        background-color: #f44336;
+      }
+    }
+    
+    .grade-details {
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+      }
+      
+      p {
+        margin: 0;
+        color: #666;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Ads Card
+.ads-card {
+  .ads-table-container {
+    overflow-x: auto;
+  }
+  
+  .ads-table {
+    width: 100%;
+    
+    .ad-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .ad-title {
+        font-weight: 500;
+        color: #333;
+        flex: 1;
+      }
+      
+      .ad-thumbnail {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
+    }
+    
+    .cost-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.875rem;
+      
+      div {
+        color: #666;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .ad-details-container {
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  
+  .details-header {
+    padding: 12px 16px;
+    
+    .header-content {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      
+      .title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        
+        h2 {
+          font-size: 1.25rem;
+        }
+      }
+      
+      .header-actions {
+        justify-content: flex-end;
+      }
+    }
+  }
+  
+  .tab-content {
+    padding: 16px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+  }
+  
+  .performance-grade {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .cost-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .details-header {
+    .header-content {
+      .title-section {
+        h2 {
+          font-size: 1.1rem;
+          
+          mat-icon {
+            font-size: 1.2rem;
+            width: 1.2rem;
+            height: 1.2rem;
+          }
+        }
+      }
+    }
+  }
+  
+  .tab-content {
+    padding: 12px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .metric-item {
+    padding: 16px 12px;
+    
+    .metric-value {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// Material Design Overrides
+.mat-mdc-dialog-container {
+  .mat-mdc-dialog-content {
+    padding: 0;
+  }
+}
+
+// Table Styles
+.mat-mdc-table {
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #333;
+    background-color: #f5f5f5;
+  }
+  
+  .mat-mdc-cell {
+    padding: 12px 16px;
+  }
+  
+  .mat-mdc-row:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+// Chip Styles
+.mat-mdc-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  
+  &.mat-primary {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.mat-accent {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+  
+  &.mat-warn {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+}
+
+// Card Hover Effects
+.info-card,
+.budget-card,
+.cost-card,
+.metrics-card,
+.performance-card,
+.ads-card {
+  transition: box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Menu Styles
+.mat-mdc-menu-panel {
+  .mat-mdc-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    mat-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+}

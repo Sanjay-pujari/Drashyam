@@ -11,6 +11,16 @@ public class AdDto
     public string? ThumbnailUrl { get; set; }
     public decimal CostPerClick { get; set; }
     public decimal CostPerView { get; set; }
+    public int Duration { get; set; } = 30; // Default 30 seconds
+    public int SkipAfter { get; set; } = 5; // Default 5 seconds before skip
+    public int? Position { get; set; } // For mid-roll ads
+}
+
+public class AdServeResponseDto
+{
+    public bool HasAd { get; set; }
+    public AdDto? Ad { get; set; }
+    public string? AdType { get; set; }
 }
 
 public class AdCampaignDto

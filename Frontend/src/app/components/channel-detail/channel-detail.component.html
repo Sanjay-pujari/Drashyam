@@ -90,6 +90,48 @@
       </ng-template>
     </mat-tab>
     
+    <mat-tab label="Ads">
+      <div class="ads-section">
+        <div class="ads-header">
+          <h3>Advertisements</h3>
+          <p>Ads from other users that may appear on this channel</p>
+        </div>
+        <div class="ads-grid" *ngIf="ads.length > 0; else noAds">
+          <mat-card class="ad-card" *ngFor="let ad of ads" (click)="onAdClick(ad)">
+            <div class="ad-image">
+              <img [src]="getSafeImageUrl(ad.thumbnailUrl ?? null)" [alt]="'Advertisement'" (error)="onImageError($event)">
+              <div class="ad-badge">
+                <mat-icon>ads_click</mat-icon>
+                Advertisement
+              </div>
+            </div>
+            <mat-card-content>
+              <h3 class="ad-title">{{ ad.content }}</h3>
+              <p class="ad-duration">{{ ad.duration }}s</p>
+              <div class="ad-stats">
+                <span class="ad-cost">${{ ad.costPerClick | number:'1.2-2' }} per click</span>
+                <span class="ad-views">${{ ad.costPerView | number:'1.2-2' }} per view</span>
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-raised-button color="primary" (click)="onAdClick(ad); $event.stopPropagation()">
+                <mat-icon>open_in_new</mat-icon>
+                View Ad
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+        
+        <ng-template #noAds>
+          <div class="no-content">
+            <mat-icon>ads_click</mat-icon>
+            <h3>No ads available</h3>
+            <p>No advertisements from other users are currently available for this channel.</p>
+          </div>
+        </ng-template>
+      </div>
+    </mat-tab>
+    
     <mat-tab label="Merchandise">
       <div class="merchandise-section">
         <div class="merchandise-grid" *ngIf="merchandise.length > 0; else noMerchandise">

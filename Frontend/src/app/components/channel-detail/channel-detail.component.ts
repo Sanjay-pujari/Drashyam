@@ -20,8 +20,14 @@ import { Video } from '../../models/video.model';
   selector: 'app-channel-detail',
   standalone: true,
   imports: [
-    CommonModule, MatCardModule, MatButtonModule, MatIconModule, 
-    MatTabsModule, MatChipsModule, MatProgressSpinnerModule, MatSlideToggleModule
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTabsModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule
   ],
   templateUrl: './channel-detail.component.html',
   styleUrls: ['./channel-detail.component.scss']
@@ -30,6 +36,7 @@ export class ChannelDetailComponent implements OnInit {
   channel: Channel | null = null;
   videos: Video[] = [];
   merchandise: any[] = [];
+  ads: any[] = [];
   isLoading = true;
   isSubscribed = false;
   isOwner = false;
@@ -54,6 +61,7 @@ export class ChannelDetailComponent implements OnInit {
         this.loadChannel();
         this.loadChannelVideos();
         this.loadChannelMerchandise();
+        this.loadChannelAds();
         this.checkSubscription();
         this.checkOwnership();
       } else {
@@ -276,5 +284,29 @@ export class ChannelDetailComponent implements OnInit {
 
   isInCart(item: any): boolean {
     return this.cartService.isItemInCart(item.id);
+  }
+
+  loadChannelAds() {
+    if (!this.channelId) return;
+    
+    // Load ads from OTHER users (not the channel owner's own ads)
+    // This shows ads that are being displayed to users when they visit this channel
+    this.monetizationService.getDisplayAds().subscribe({
+      next: (ads) => {
+        // These are already filtered to exclude the current user's own ads
+        this.ads = ads;
+        console.log('Channel ads loaded (excluding owner ads):', this.ads.length);
+      },
+      error: (err) => {
+        console.error('Error loading channel ads:', err);
+        this.ads = [];
+      }
+    });
+  }
+
+  onAdClick(ad: any) {
+    if (ad.url) {
+      window.open(ad.url, '_blank');
+    }
   }
 }

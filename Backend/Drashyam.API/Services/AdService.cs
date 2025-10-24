@@ -154,36 +154,81 @@ public class AdService : IAdService
             // User has no subscription, show ads
         }
 
-        // Get active campaigns that match criteria
-        var query = _context.AdCampaigns
-            .Where(a => a.Status == AdStatus.Active && 
-                       a.StartDate <= DateTime.UtcNow && 
-                       a.EndDate >= DateTime.UtcNow);
+        // Get active ads from active campaigns, excluding ads from the same user
+        var query = _context.Ads
+            .Include(a => a.Campaign)
+            .Where(a => a.Campaign.Status == AdStatus.Active && 
+                       a.Campaign.StartDate <= DateTime.UtcNow && 
+                       a.Campaign.EndDate >= DateTime.UtcNow &&
+                       a.Campaign.AdvertiserId != userId); // Exclude ads from the same user
 
         if (preferredType.HasValue)
         {
             query = query.Where(a => a.Type == preferredType.Value);
         }
 
-        var campaigns = await query.ToListAsync();
+        var ads = await query.ToListAsync();
 
-        if (!campaigns.Any())
+        if (!ads.Any())
             return null;
 
         // Simple random selection (in production, use more sophisticated targeting)
         var random = new Random();
-        var selectedCampaign = campaigns[random.Next(campaigns.Count)];
+        var selectedAd = ads[random.Next(ads.Count)];
 
         return new AdDto
         {
-            Id = selectedCampaign.Id,
-            Type = (DTOs.AdType)selectedCampaign.Type,
-            Content = selectedCampaign.AdContent,
-            Url = selectedCampaign.AdUrl,
-            ThumbnailUrl = selectedCampaign.ThumbnailUrl,
-            CostPerClick = selectedCampaign.CostPerClick,
-            CostPerView = selectedCampaign.CostPerView
+            Id = selectedAd.Id,
+            Type = selectedAd.Type,
+            Content = selectedAd.Content,
+            Url = selectedAd.Url,
+            ThumbnailUrl = selectedAd.ThumbnailUrl,
+            CostPerClick = selectedAd.CostPerClick,
+            CostPerView = selectedAd.CostPerView,
+            Duration = selectedAd.Duration,
+            SkipAfter = selectedAd.SkipAfter,
+            Position = selectedAd.Position
         };
+    }
+
+    public async Task<List<AdDto>> GetDisplayAdsForUserAsync(string userId)
+    {
+        // Check if user has a paid subscription (no ads for paid users)
+        try
+        {
+            var subscription = await _subscriptionService.GetUserSubscriptionAsync(userId);
+            if (subscription.Plan != null && !subscription.Plan.HasAds)
+            {
+                return new List<AdDto>(); // No ads for paid users
+            }
+        }
+        catch
+        {
+            // User has no subscription, show ads
+        }
+
+        // Get active ads from active campaigns, excluding ads from the same user
+        var ads = await _context.Ads
+            .Include(a => a.Campaign)
+            .Where(a => a.Campaign.Status == AdStatus.Active && 
+                       a.Campaign.StartDate <= DateTime.UtcNow && 
+                       a.Campaign.EndDate >= DateTime.UtcNow &&
+                       a.Campaign.AdvertiserId != userId) // Exclude ads from the same user
+            .ToListAsync();
+
+        return ads.Select(ad => new AdDto
+        {
+            Id = ad.Id,
+            Type = ad.Type,
+            Content = ad.Content,
+            Url = ad.Url,
+            ThumbnailUrl = ad.ThumbnailUrl,
+            CostPerClick = ad.CostPerClick,
+            CostPerView = ad.CostPerView,
+            Duration = ad.Duration,
+            SkipAfter = ad.SkipAfter,
+            Position = ad.Position
+        }).ToList();
     }
 
     public async Task<bool> RecordAdImpressionAsync(int campaignId, string userId, int? videoId = null)

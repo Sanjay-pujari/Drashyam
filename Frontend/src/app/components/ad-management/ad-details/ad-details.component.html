@@ -1,0 +1,389 @@
+<div class="ad-details-container">
+  <!-- Header -->
+  <div class="details-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h2 mat-dialog-title>
+          <mat-icon>{{ data.type === 'campaign' ? 'campaign' : 'ads_click' }}</mat-icon>
+          {{ data.type === 'campaign' ? (campaign.name || 'Campaign') : 'Ad Details' }}
+        </h2>
+        <div class="status-badge">
+          @if (data.type === 'campaign' && campaign) {
+            <mat-chip [color]="getStatusColor(campaign.status)" selected>
+              {{ campaign.status }}
+            </mat-chip>
+          }
+          @if (data.type === 'ad' && ad) {
+            <mat-chip [color]="getTypeColor(ad.type)" selected>
+              {{ ad.type }}
+            </mat-chip>
+          }
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #actionsMenu="matMenu">
+          @if (data.type === 'campaign') {
+            <button mat-menu-item (click)="editCampaign()">
+              <mat-icon>edit</mat-icon>
+              Edit Campaign
+            </button>
+            <button mat-menu-item (click)="pauseCampaign()">
+              <mat-icon>pause</mat-icon>
+              Pause Campaign
+            </button>
+            <button mat-menu-item (click)="duplicateCampaign()">
+              <mat-icon>content_copy</mat-icon>
+              Duplicate
+            </button>
+          } @else {
+            <button mat-menu-item (click)="editAd()">
+              <mat-icon>edit</mat-icon>
+              Edit Ad
+            </button>
+            <button mat-menu-item (click)="pauseAd()">
+              <mat-icon>pause</mat-icon>
+              Pause Ad
+            </button>
+            <button mat-menu-item (click)="duplicateAd()">
+              <mat-icon>content_copy</mat-icon>
+              Duplicate
+            </button>
+          }
+          <button mat-menu-item (click)="exportData()">
+            <mat-icon>download</mat-icon>
+            Export Data
+          </button>
+        </mat-menu>
+        <button mat-icon-button (click)="close()" class="close-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading details...</p>
+    </div>
+  }
+
+  <!-- Campaign Details -->
+  @if (!isLoading && data.type === 'campaign' && campaign) {
+    <mat-tab-group class="details-tabs">
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <!-- Campaign Info -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Campaign Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Campaign Name</label>
+                  <span>{{ campaign.name }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Advertiser ID</label>
+                  <span>{{ campaign.advertiserId }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Status</label>
+                  <mat-chip [color]="getStatusColor(campaign.status)" selected>
+                    {{ campaign.status }}
+                  </mat-chip>
+                </div>
+                <div class="info-item">
+                  <label>Start Date</label>
+                  <span>{{ formatDate(campaign.startDate) }}</span>
+                </div>
+                <div class="info-item">
+                  <label>End Date</label>
+                  <span>{{ formatDate(campaign.endDate) }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Total Budget</label>
+                  <span class="budget-amount">{{ formatCurrency(campaign.budget) }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Budget Progress -->
+          <mat-card class="budget-card">
+            <mat-card-header>
+              <mat-card-title>Budget Progress</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="budget-progress">
+                <div class="budget-bar">
+                  <div class="budget-fill" [style.width.%]="getBudgetProgress()" 
+                       [class]="'budget-' + getBudgetStatus()"></div>
+                </div>
+                <div class="budget-details">
+                  <div class="budget-item">
+                    <span class="budget-label">Spent:</span>
+                    <span class="budget-value">{{ formatCurrency(campaign.spent) }}</span>
+                  </div>
+                  <div class="budget-item">
+                    <span class="budget-label">Remaining:</span>
+                    <span class="budget-value">{{ formatCurrency(campaign.budget - campaign.spent) }}</span>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Analytics Tab -->
+      <mat-tab label="Analytics">
+        <div class="tab-content">
+          <!-- Key Metrics -->
+          <mat-card class="metrics-card">
+            <mat-card-header>
+              <mat-card-title>Key Metrics</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(campaignAnalytics.impressions) }}</div>
+                  <div class="metric-label">Impressions</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(campaignAnalytics.clicks) }}</div>
+                  <div class="metric-label">Clicks</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(campaignAnalytics.conversions) }}</div>
+                  <div class="metric-label">Conversions</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatPercentage(campaignAnalytics.ctr) }}</div>
+                  <div class="metric-label">CTR</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatCurrency(campaignAnalytics.cpc) }}</div>
+                  <div class="metric-label">CPC</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatCurrency(campaignAnalytics.cpm) }}</div>
+                  <div class="metric-label">CPM</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Performance Grade -->
+          <mat-card class="performance-card">
+            <mat-card-header>
+              <mat-card-title>Performance Grade</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="performance-grade">
+                <div class="grade-circle" [class]="'grade-' + getPerformanceGrade()">
+                  {{ getPerformanceGrade() }}
+                </div>
+                <div class="grade-details">
+                  <h3>Performance Grade: {{ getPerformanceGrade() }}</h3>
+                  <p>Based on CTR and engagement metrics</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Ads Tab -->
+      <mat-tab label="Ads">
+        <div class="tab-content">
+          <mat-card class="ads-card">
+            <mat-card-header>
+              <mat-card-title>Campaign Ads</mat-card-title>
+              <mat-card-subtitle>{{ adTableData.length }} ads in this campaign</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="ads-table-container">
+                <table mat-table [dataSource]="adTableData" class="ads-table">
+                  <ng-container matColumnDef="content">
+                    <th mat-header-cell *matHeaderCellDef>Content</th>
+                    <td mat-cell *matCellDef="let ad">
+                      <div class="ad-content">
+                        <div class="ad-title">{{ ad.content }}</div>
+                        @if (ad.thumbnailUrl) {
+                          <img [src]="ad.thumbnailUrl" [alt]="ad.content" class="ad-thumbnail">
+                        }
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let ad">
+                      <mat-chip [color]="getTypeColor(ad.type)" selected>
+                        {{ ad.type }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="position">
+                    <th mat-header-cell *matHeaderCellDef>Position</th>
+                    <td mat-cell *matCellDef="let ad">{{ ad.position }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="cost">
+                    <th mat-header-cell *matHeaderCellDef>Cost</th>
+                    <td mat-cell *matCellDef="let ad">
+                      <div class="cost-info">
+                        <div>CPC: {{ formatCurrency(ad.costPerClick) }}</div>
+                        <div>CPV: {{ formatCurrency(ad.costPerView) }}</div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="duration">
+                    <th mat-header-cell *matHeaderCellDef>Duration</th>
+                    <td mat-cell *matCellDef="let ad">{{ ad.duration }}s</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="['content', 'type', 'position', 'cost', 'duration']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['content', 'type', 'position', 'cost', 'duration'];"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+
+  <!-- Ad Details -->
+  @if (!isLoading && data.type === 'ad' && ad) {
+    <mat-tab-group class="details-tabs">
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <!-- Ad Info -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>Ad Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Ad Content</label>
+                  <span>{{ ad.content }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Type</label>
+                  <mat-chip [color]="getTypeColor(ad.type)" selected>
+                    {{ ad.type }}
+                  </mat-chip>
+                </div>
+                <div class="info-item">
+                  <label>Position</label>
+                  <span>{{ ad.position }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Target URL</label>
+                  <a [href]="ad.url" target="_blank" class="url-link">{{ ad.url }}</a>
+                </div>
+                <div class="info-item">
+                  <label>Duration</label>
+                  <span>{{ ad.duration }} seconds</span>
+                </div>
+                <div class="info-item">
+                  <label>Skip After</label>
+                  <span>{{ ad.skipAfter }} seconds</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Cost Information -->
+          <mat-card class="cost-card">
+            <mat-card-header>
+              <mat-card-title>Cost Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="cost-grid">
+                <div class="cost-item">
+                  <div class="cost-label">Cost Per Click</div>
+                  <div class="cost-value">{{ formatCurrency(ad.costPerClick) }}</div>
+                </div>
+                <div class="cost-item">
+                  <div class="cost-label">Cost Per View</div>
+                  <div class="cost-value">{{ formatCurrency(ad.costPerView) }}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Analytics Tab -->
+      <mat-tab label="Analytics">
+        <div class="tab-content">
+          <!-- Ad Metrics -->
+          <mat-card class="metrics-card">
+            <mat-card-header>
+              <mat-card-title>Ad Performance</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(adAnalytics.impressions) }}</div>
+                  <div class="metric-label">Impressions</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(adAnalytics.clicks) }}</div>
+                  <div class="metric-label">Clicks</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatNumber(adAnalytics.views) }}</div>
+                  <div class="metric-label">Views</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatPercentage(adAnalytics.ctr) }}</div>
+                  <div class="metric-label">CTR</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatCurrency(adAnalytics.cpc) }}</div>
+                  <div class="metric-label">CPC</div>
+                </div>
+                <div class="metric-item">
+                  <div class="metric-value">{{ formatCurrency(adAnalytics.cpm) }}</div>
+                  <div class="metric-label">CPM</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Performance Grade -->
+          <mat-card class="performance-card">
+            <mat-card-header>
+              <mat-card-title>Performance Grade</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="performance-grade">
+                <div class="grade-circle" [class]="'grade-' + getPerformanceGrade()">
+                  {{ getPerformanceGrade() }}
+                </div>
+                <div class="grade-details">
+                  <h3>Performance Grade: {{ getPerformanceGrade() }}</h3>
+                  <p>Based on CTR and engagement metrics</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

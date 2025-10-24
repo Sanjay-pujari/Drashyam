@@ -227,7 +227,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost("video-ad")]
-    public async Task<ActionResult<AdDto?>> GetVideoAd([FromBody] AdServeRequestDto request)
+    public async Task<ActionResult<AdServeResponseDto>> GetVideoAd([FromBody] AdServeRequestDto request)
     {
         try
         {
@@ -235,12 +235,40 @@ public class AdController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? request.UserId;
             
             var ad = await _adService.GetAdForUserAsync(userId, request.VideoId, DTOs.AdType.Video);
-            return Ok(ad);
+            
+            var response = new AdServeResponseDto
+            {
+                HasAd = ad != null,
+                Ad = ad,
+                AdType = ad?.Type.ToString() ?? null
+            };
+            
+            return Ok(response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error serving video ad");
             return BadRequest("Failed to serve video ad");
+        }
+    }
+
+    [HttpGet("display-ads")]
+    public async Task<ActionResult<List<AdDto>>> GetDisplayAds([FromQuery] string? userId = null)
+    {
+        try
+        {
+            // Get user ID from token if available, otherwise use the one from query
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? userId;
+            
+            // Get ads that should be displayed to this user (excluding their own ads)
+            var ads = await _adService.GetDisplayAdsForUserAsync(currentUserId);
+            
+            return Ok(ads);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting display ads");
+            return BadRequest("Failed to get display ads");
         }
     }
 

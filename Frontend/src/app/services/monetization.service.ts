@@ -55,6 +55,31 @@ export interface MerchandiseAnalytics {
   recentOrders: MerchandiseOrder[];
 }
 
+export interface AdDto {
+  id: number;
+  type: string;
+  content: string;
+  url: string;
+  thumbnailUrl?: string;
+  costPerClick: number;
+  costPerView: number;
+  duration: number;
+  skipAfter: number;
+  position: string;
+}
+
+export interface AdCampaignDto {
+  id: number;
+  name: string;
+  advertiserId: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  budget: number;
+  spent: number;
+  ads: AdDto[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -93,5 +118,15 @@ export class MonetizationService {
 
   updateMerchandiseOrder(orderId: number, update: Partial<MerchandiseOrder>): Observable<MerchandiseOrder> {
     return this.http.put<MerchandiseOrder>(`${this.apiUrl}/orders/${orderId}`, update);
+  }
+
+  // Ad Campaign Management
+  getAdCampaigns(): Observable<AdCampaignDto[]> {
+    return this.http.get<AdCampaignDto[]>(`${this.apiUrl}/ad-campaigns`);
+  }
+
+  // Get display ads (ads that should be shown to users, excluding their own ads)
+  getDisplayAds(): Observable<AdDto[]> {
+    return this.http.get<AdDto[]>(`${this.apiUrl}/display-ads`);
   }
 }

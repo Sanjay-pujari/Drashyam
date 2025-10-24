@@ -1,0 +1,337 @@
+.ad-management-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Header Section
+.header-section {
+  margin-bottom: 24px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.title-section {
+  h1 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// Filters Card
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 300px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-field {
+  min-width: 150px;
+}
+
+.view-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+// Data Cards
+.data-card {
+  margin-bottom: 24px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+// Campaigns Table
+.campaigns-table {
+  width: 100%;
+  
+  .campaign-name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .advertiser-id {
+      font-size: 0.875rem;
+      color: #666;
+    }
+  }
+  
+  .budget-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .budget-amount {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .spent-amount {
+      font-size: 0.875rem;
+      color: #666;
+    }
+  }
+}
+
+// Ads Table
+.ads-table {
+  width: 100%;
+  
+  .ad-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .ad-title {
+      font-weight: 500;
+      color: #333;
+      flex: 1;
+    }
+    
+    .ad-thumbnail {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+  }
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  
+  .empty-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: #ccc;
+  }
+  
+  h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+// Action Menus
+.delete-action {
+  color: #f44336 !important;
+  
+  mat-icon {
+    color: #f44336;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .ad-management-container {
+    padding: 16px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+  }
+  
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .view-controls {
+    margin-left: 0;
+    justify-content: center;
+  }
+  
+  .search-field {
+    min-width: auto;
+  }
+  
+  .filter-field {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+    
+    button {
+      width: 100%;
+    }
+  }
+  
+  .view-controls {
+    flex-direction: column;
+    width: 100%;
+    
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// Material Table Overrides
+.mat-mdc-table {
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #333;
+    background-color: #f5f5f5;
+  }
+  
+  .mat-mdc-cell {
+    padding: 12px 16px;
+  }
+  
+  .mat-mdc-row:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+// Chip Styles
+.mat-mdc-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  
+  &.mat-primary {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.mat-accent {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+  
+  &.mat-warn {
+    background-color: #ffebee;
+    color: #d32f2f;
+  }
+}
+
+// Form Field Styles
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    background-color: #fff;
+  }
+}
+
+// Button Styles
+.mat-mdc-raised-button {
+  &.mat-primary {
+    background-color: #1976d2;
+    color: white;
+  }
+  
+  &.mat-accent {
+    background-color: #7b1fa2;
+    color: white;
+  }
+}
+
+// Paginator Styles
+.mat-mdc-paginator {
+  background-color: #fafafa;
+  border-top: 1px solid #e0e0e0;
+}
+
+// Menu Styles
+.mat-mdc-menu-panel {
+  .mat-mdc-menu-item {
+    &.delete-action {
+      color: #f44336;
+      
+      .mat-icon {
+        color: #f44336;
+      }
+    }
+  }
+}
