@@ -1,0 +1,295 @@
+<div class="live-stream-manager" [class]="getLayoutClass()">
+  <!-- Stream Header -->
+  <div class="stream-header">
+    <div class="stream-info">
+      <div class="stream-status" [style.color]="getStreamStatusColor()">
+        <span class="status-dot" [class.live]="isStreaming"></span>
+        <span>{{ streamStatus | titlecase }}</span>
+      </div>
+      <div class="stream-details">
+        <span class="viewer-count" *ngIf="viewerCount > 0">
+          <i class="fas fa-eye"></i>
+          {{ viewerCount | number }}
+        </span>
+        <span class="recording-indicator" *ngIf="isRecording">
+          <i class="fas fa-circle"></i>
+          Recording: {{ formatDuration(getRecordingDuration()) }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="stream-controls">
+      <button 
+        class="control-btn primary" 
+        (click)="isStreaming ? stopStream() : startStream()"
+        [class.recording]="isRecording">
+        <i class="fas" [class.fa-play]="!isStreaming" [class.fa-stop]="isStreaming"></i>
+        {{ isStreaming ? 'Stop Stream' : 'Start Stream' }}
+      </button>
+      
+      <button class="control-btn" (click)="toggleRecording()" [disabled]="!isStreaming">
+        <i class="fas" [class.fa-record-vinyl]="!isRecording" [class.fa-stop]="isRecording"></i>
+        {{ isRecording ? 'Stop Recording' : 'Start Recording' }}
+      </button>
+      
+      <button class="control-btn" (click)="toggleLayout('chat-focus')" [class.active]="layout === 'chat-focus'">
+        <i class="fas fa-comments"></i>
+        Chat Focus
+      </button>
+      
+      <button class="control-btn" (click)="toggleLayout('analytics-focus')" [class.active]="layout === 'analytics-focus'">
+        <i class="fas fa-chart-line"></i>
+        Analytics Focus
+      </button>
+      
+      <button class="control-btn" (click)="toggleLayout('fullscreen')" [class.active]="layout === 'fullscreen'">
+        <i class="fas fa-expand"></i>
+        Fullscreen
+      </button>
+      
+      <button class="control-btn" (click)="toggleSettings()" [class.active]="showSettings">
+        <i class="fas fa-cog"></i>
+        Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Video Player Section -->
+    <div class="player-section" *ngIf="config.showPlayer">
+      <app-live-stream-player
+        #player
+        [streamKey]="streamKey"
+        [autoPlay]="isStreaming"
+        [showControls]="true"
+        [showChat]="config.showChat"
+        [showAnalytics]="config.showAnalytics"
+        (streamStarted)="onStreamStarted()"
+        (streamStopped)="onStreamStopped()"
+        (viewerCountChanged)="onViewerCountChanged($event)"
+        (qualityChanged)="onQualityChanged($event)">
+      </app-live-stream-player>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="chat-section" *ngIf="config.showChat">
+      <app-live-stream-chat
+        #chat
+        [streamId]="config.streamId"
+        [userId]="config.userId"
+        [userName]="config.userName"
+        [isModerator]="config.isModerator"
+        [isSubscriber]="false"
+        [maxMessages]="100"
+        [autoScroll]="true"
+        [showTimestamps]="true"
+        [enableReactions]="true"
+        [enableMentions]="true"
+        (messageSent)="onMessageSent($event)"
+        (reactionSent)="onReactionSent($event)"
+        (userMentioned)="onUserMentioned($event)">
+      </app-live-stream-chat>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="analytics-section" *ngIf="config.showAnalytics">
+      <app-stream-analytics-dashboard
+        #analytics
+        [streamId]="config.streamId"
+        [isLive]="isStreaming"
+        [autoRefresh]="true"
+        [refreshInterval]="5000"
+        (analyticsUpdated)="onAnalyticsUpdated($event)">
+      </app-stream-analytics-dashboard>
+    </div>
+  </div>
+
+  <!-- Stream Information Panel -->
+  <div class="stream-info-panel" *ngIf="showStreamInfo">
+    <div class="panel-header">
+      <h3>Stream Information</h3>
+      <button class="close-btn" (click)="toggleStreamInfo()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="panel-content">
+      <div class="form-group">
+        <label>Stream Title:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="streamTitle"
+          placeholder="Enter stream title"
+          class="form-input">
+      </div>
+      
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea 
+          [(ngModel)]="streamDescription"
+          placeholder="Enter stream description"
+          class="form-textarea"
+          rows="3">
+        </textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Category:</label>
+        <select [(ngModel)]="streamCategory" class="form-select">
+          <option value="">Select Category</option>
+          <option value="gaming">Gaming</option>
+          <option value="music">Music</option>
+          <option value="talk">Talk Show</option>
+          <option value="education">Education</option>
+          <option value="sports">Sports</option>
+          <option value="art">Art</option>
+          <option value="cooking">Cooking</option>
+          <option value="tech">Technology</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Tags (comma-separated):</label>
+        <input 
+          type="text" 
+          [(ngModel)]="streamTags"
+          placeholder="gaming, live, fun"
+          class="form-input">
+      </div>
+      
+      <div class="form-actions">
+        <button class="btn primary" (click)="updateStreamInfo()">
+          <i class="fas fa-save"></i>
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" *ngIf="showSettings">
+    <div class="panel-header">
+      <h3>Stream Settings</h3>
+      <button class="close-btn" (click)="toggleSettings()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="panel-content">
+      <div class="settings-section">
+        <h4>Display Options</h4>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.showChat">
+            Show Chat
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.showAnalytics">
+            Show Analytics
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.showPlayer">
+            Show Video Player
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h4>Stream Options</h4>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.autoStart">
+            Auto-start Stream
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.enableRecording">
+            Enable Recording
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" [(ngModel)]="config.enableMonetization">
+            Enable Monetization
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h4>Stream Information</h4>
+        <div class="info-item">
+          <span>Stream Key:</span>
+          <span class="stream-key">{{ streamKey }}</span>
+        </div>
+        <div class="info-item">
+          <span>RTMP URL:</span>
+          <span class="rtmp-url">{{ rtmpUrl }}</span>
+        </div>
+        <div class="info-item">
+          <span>HLS URL:</span>
+          <span class="hls-url">{{ hlsUrl }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Moderation Tools Panel -->
+  <div class="moderation-panel" *ngIf="showModerationTools && config.isModerator">
+    <div class="panel-header">
+      <h3>Moderation Tools</h3>
+      <button class="close-btn" (click)="toggleModerationTools()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="panel-content">
+      <div class="moderation-actions">
+        <button class="mod-btn">
+          <i class="fas fa-ban"></i>
+          Ban User
+        </button>
+        <button class="mod-btn">
+          <i class="fas fa-clock"></i>
+          Timeout User
+        </button>
+        <button class="mod-btn">
+          <i class="fas fa-comment-slash"></i>
+          Delete Message
+        </button>
+        <button class="mod-btn">
+          <i class="fas fa-trash"></i>
+          Clear Chat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue Summary -->
+  <div class="revenue-summary" *ngIf="config.enableMonetization && totalRevenue > 0">
+    <div class="revenue-header">
+      <h4>Revenue Summary</h4>
+      <span class="total-revenue">{{ formatCurrency(totalRevenue) }}</span>
+    </div>
+    
+    <div class="revenue-breakdown">
+      <div class="revenue-item">
+        <span>Super Chats:</span>
+        <span>{{ formatCurrency(superChats) }}</span>
+      </div>
+      <div class="revenue-item">
+        <span>Donations:</span>
+        <span>{{ formatCurrency(donations) }}</span>
+      </div>
+      <div class="revenue-item">
+        <span>Subscriptions:</span>
+        <span>{{ formatCurrency(subscriptions) }}</span>
+      </div>
+    </div>
+  </div>
+</div>

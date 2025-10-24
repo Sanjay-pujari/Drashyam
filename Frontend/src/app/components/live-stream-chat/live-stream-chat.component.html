@@ -1,0 +1,198 @@
+<div class="live-stream-chat" [class.collapsed]="!showChat">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="chat-title">
+      <h3>Live Chat</h3>
+      <span class="message-count" *ngIf="messages.length > 0">{{ messages.length }}</span>
+    </div>
+    <div class="chat-controls">
+      <button class="control-btn" (click)="toggleUserList()" [class.active]="showUserList" title="User List">
+        <i class="fas fa-users"></i>
+      </button>
+      <button class="control-btn" (click)="toggleSettings()" [class.active]="showSettings" title="Settings">
+        <i class="fas fa-cog"></i>
+      </button>
+      <button class="control-btn" (click)="toggleChat()" title="Toggle Chat">
+        <i class="fas" [class.fa-chevron-down]="showChat" [class.fa-chevron-up]="!showChat"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-messages" #chatContainer *ngIf="showChat">
+    <div class="connection-status" *ngIf="!isConnected">
+      <div class="status-indicator connecting">
+        <span class="status-dot"></span>
+        <span>Connecting to chat...</span>
+      </div>
+    </div>
+
+    <div class="message" 
+         *ngFor="let message of messages; trackBy: trackByMessageId"
+         [class]="getMessageClass(message)"
+         (click)="selectMessage(message)"
+         [class.selected]="selectedMessage?.id === message.id">
+      
+      <!-- Message Header -->
+      <div class="message-header">
+        <span class="user-name" [style.color]="getUserColor(message.userId)">
+          {{ message.userName }}
+          <i class="fas fa-shield-alt" *ngIf="message.isModerator" title="Moderator"></i>
+          <i class="fas fa-star" *ngIf="message.isSubscriber" title="Subscriber"></i>
+        </span>
+        <span class="timestamp" *ngIf="showTimestamps">
+          {{ formatTimestamp(message.timestamp) }}
+        </span>
+      </div>
+
+      <!-- Message Content -->
+      <div class="message-content">
+        <span class="message-text">{{ message.message }}</span>
+        
+        <!-- Message Reactions -->
+        <div class="message-reactions" *ngIf="message.reactions && message.reactions.length > 0">
+          <div class="reaction" 
+               *ngFor="let reaction of getUniqueReactions(message.reactions)"
+               (click)="addReaction(message, reaction.reactionType)">
+            <span class="reaction-emoji">{{ reaction.reactionType }}</span>
+            <span class="reaction-count">{{ getReactionCount(message, reaction.reactionType) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Moderation Actions -->
+      <div class="moderation-actions" *ngIf="moderationMode && isModerator">
+        <button class="mod-btn delete" (click)="deleteMessage(message)" title="Delete Message">
+          <i class="fas fa-trash"></i>
+        </button>
+        <button class="mod-btn timeout" (click)="timeoutUser(message, 300)" title="Timeout 5min">
+          <i class="fas fa-clock"></i>
+        </button>
+        <button class="mod-btn ban" (click)="banUser(message)" title="Ban User">
+          <i class="fas fa-ban"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" *ngIf="typingUsers.length > 0">
+      <span class="typing-text">{{ getTypingText() }}</span>
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container" *ngIf="showChat && isConnected">
+    <div class="input-wrapper">
+      <input 
+        #messageInput
+        type="text" 
+        [(ngModel)]="newMessage"
+        (keypress)="onKeyPress($event)"
+        placeholder="Type a message..."
+        class="message-input"
+        [disabled]="!isConnected">
+      
+      <div class="input-controls">
+        <button class="control-btn emoji-btn" (click)="toggleEmojiPicker()" title="Add Emoji">
+          <i class="fas fa-smile"></i>
+        </button>
+        <button class="control-btn send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Emoji Picker -->
+    <div class="emoji-picker" *ngIf="showEmojiPicker">
+      <div class="emoji-grid">
+        <button 
+          class="emoji-btn" 
+          *ngFor="let emoji of availableReactions"
+          (click)="addEmoji(emoji)"
+          [title]="emoji">
+          {{ emoji }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User List -->
+  <div class="user-list" *ngIf="showUserList">
+    <div class="user-list-header">
+      <h4>Viewers ({{ viewerCount }})</h4>
+      <button class="close-btn" (click)="toggleUserList()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="user-list-content">
+      <!-- In a real implementation, you would populate this from SignalR -->
+      <div class="user-item">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-status">You</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" *ngIf="showSettings">
+    <div class="settings-header">
+      <h4>Chat Settings</h4>
+      <button class="close-btn" (click)="toggleSettings()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="settings-content">
+      <div class="setting-item">
+        <label>Font Size:</label>
+        <select [(ngModel)]="chatSettings.fontSize">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>Show Timestamps:</label>
+        <input type="checkbox" [(ngModel)]="chatSettings.showTimestamps">
+      </div>
+      <div class="setting-item">
+        <label>Show User Colors:</label>
+        <input type="checkbox" [(ngModel)]="chatSettings.showUserColors">
+      </div>
+      <div class="setting-item">
+        <label>Enable Sound:</label>
+        <input type="checkbox" [(ngModel)]="chatSettings.enableSound">
+      </div>
+      <div class="setting-item">
+        <label>Enable Notifications:</label>
+        <input type="checkbox" [(ngModel)]="chatSettings.enableNotifications">
+      </div>
+    </div>
+  </div>
+
+  <!-- Moderation Panel -->
+  <div class="moderation-panel" *ngIf="moderationMode && isModerator">
+    <div class="moderation-header">
+      <h4>Moderation Tools</h4>
+      <button class="close-btn" (click)="toggleModerationMode()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="moderation-content">
+      <div class="moderation-actions">
+        <button class="mod-action-btn" (click)="clearChat()">
+          <i class="fas fa-trash"></i>
+          Clear Chat
+        </button>
+        <button class="mod-action-btn" (click)="exportChat()">
+          <i class="fas fa-download"></i>
+          Export Chat
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

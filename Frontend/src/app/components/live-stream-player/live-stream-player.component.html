@@ -1,0 +1,181 @@
+<div class="live-stream-player" [class.fullscreen]="showFullscreen">
+  <!-- Video Player -->
+  <div class="video-container">
+    <video 
+      #videoPlayer
+      class="video-player"
+      [class.buffering]="isBuffering"
+      [class.error]="connectionError"
+      [muted]="isMuted"
+      [volume]="volume"
+      playsinline
+      webkit-playsinline>
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="isConnecting">
+      <div class="loading-spinner"></div>
+      <p>Connecting to stream...</p>
+    </div>
+
+    <!-- Error Overlay -->
+    <div class="error-overlay" *ngIf="connectionError">
+      <div class="error-icon">⚠️</div>
+      <p>{{ connectionError }}</p>
+      <button class="retry-btn" (click)="refreshStream()">Retry</button>
+    </div>
+
+    <!-- Buffering Overlay -->
+    <div class="buffering-overlay" *ngIf="isBuffering && !isConnecting">
+      <div class="buffering-spinner"></div>
+      <p>Buffering...</p>
+    </div>
+
+    <!-- Player Controls -->
+    <div class="player-controls" *ngIf="showControls">
+      <!-- Top Controls -->
+      <div class="top-controls">
+        <div class="stream-info">
+          <div class="status-indicator" [class]="getConnectionStatusClass()">
+            <span class="status-dot"></span>
+            <span class="status-text">{{ getConnectionStatus() }}</span>
+          </div>
+          <div class="viewer-count" *ngIf="viewerCount > 0">
+            <i class="fas fa-eye"></i>
+            <span>{{ formatViewerCount(viewerCount) }}</span>
+          </div>
+        </div>
+        
+        <div class="top-right-controls">
+          <button class="control-btn" (click)="toggleAnalytics()" [class.active]="analyticsVisible">
+            <i class="fas fa-chart-line"></i>
+          </button>
+          <button class="control-btn" (click)="toggleSettings()" [class.active]="showSettings">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button class="control-btn" (click)="toggleFullscreen()">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Controls -->
+      <div class="bottom-controls">
+        <div class="left-controls">
+          <button class="control-btn play-pause" (click)="togglePlayPause()">
+            <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
+          </button>
+          
+          <div class="volume-control">
+            <button class="control-btn" (click)="toggleMute()">
+              <i class="fas" [class.fa-volume-up]="!isMuted" [class.fa-volume-mute]="isMuted"></i>
+            </button>
+            <input 
+              type="range" 
+              class="volume-slider" 
+              [value]="volume * 100"
+              (input)="setVolume($any($event.target).value / 100)"
+              min="0" 
+              max="100">
+          </div>
+        </div>
+
+        <div class="center-controls">
+          <div class="quality-selector" *ngIf="availableQualities.length > 0">
+            <button 
+              class="quality-btn" 
+              (click)="toggleQualitySelector()"
+              [class.active]="showQualitySelector">
+              <span>{{ currentQuality?.name || 'Auto' }}</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            
+            <div class="quality-dropdown" *ngIf="showQualitySelector">
+              <div 
+                class="quality-option" 
+                *ngFor="let quality of availableQualities"
+                (click)="setQuality(quality)"
+                [class.selected]="currentQuality?.name === quality.name">
+                <span class="quality-name">{{ getQualityName(quality) }}</span>
+                <span class="quality-bitrate">{{ formatBitrate(quality.bitrate) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-controls">
+          <button class="control-btn" (click)="refreshStream()" [disabled]="isConnecting">
+            <i class="fas fa-sync-alt" [class.spinning]="isConnecting"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Panel -->
+  <div class="analytics-panel" *ngIf="analyticsVisible">
+    <div class="analytics-header">
+      <h3>Stream Analytics</h3>
+      <button class="close-btn" (click)="toggleAnalytics()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="analytics-content" *ngIf="streamMetrics">
+      <div class="metric-item">
+        <label>Bitrate:</label>
+        <span>{{ formatBitrate(streamMetrics.bitrate) }}</span>
+      </div>
+      <div class="metric-item">
+        <label>FPS:</label>
+        <span>{{ streamMetrics.fps }}</span>
+      </div>
+      <div class="metric-item">
+        <label>Resolution:</label>
+        <span>{{ streamMetrics.resolution | number }}</span>
+      </div>
+      <div class="metric-item">
+        <label>CPU Usage:</label>
+        <span>{{ streamMetrics.cpuUsage | number:'1.1-1' }}%</span>
+      </div>
+      <div class="metric-item">
+        <label>Memory:</label>
+        <span>{{ streamMetrics.memoryUsage | number:'1.0-0' }} MB</span>
+      </div>
+      <div class="metric-item">
+        <label>Latency:</label>
+        <span>{{ streamMetrics.networkLatency }} ms</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" *ngIf="showSettings">
+    <div class="settings-header">
+      <h3>Player Settings</h3>
+      <button class="close-btn" (click)="toggleSettings()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="settings-content">
+      <div class="setting-item">
+        <label>Auto-play:</label>
+        <input type="checkbox" [(ngModel)]="autoPlay">
+      </div>
+      <div class="setting-item">
+        <label>Show Controls:</label>
+        <input type="checkbox" [(ngModel)]="showControls">
+      </div>
+      <div class="setting-item">
+        <label>Show Chat:</label>
+        <input type="checkbox" [(ngModel)]="showChat">
+      </div>
+      <div class="setting-item">
+        <label>Show Analytics:</label>
+        <input type="checkbox" [(ngModel)]="analyticsVisible">
+      </div>
+    </div>
+  </div>
+</div>

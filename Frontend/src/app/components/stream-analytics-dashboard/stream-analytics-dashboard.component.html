@@ -1,0 +1,335 @@
+<div class="stream-analytics-dashboard" [class.expanded]="isExpanded">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h3>Stream Analytics</h3>
+      <div class="stream-status" [class.live]="isLive">
+        <span class="status-dot"></span>
+        <span>{{ isLive ? 'Live' : 'Offline' }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="time-range-selector">
+        <select [(ngModel)]="timeRange" (change)="changeTimeRange(timeRange)">
+          <option value="1h">Last Hour</option>
+          <option value="6h">Last 6 Hours</option>
+          <option value="24h">Last 24 Hours</option>
+          <option value="7d">Last 7 Days</option>
+        </select>
+      </div>
+      <button class="control-btn" (click)="toggleRealTime()" [class.active]="showRealTime" title="Real-time Updates">
+        <i class="fas fa-sync-alt" [class.spinning]="showRealTime"></i>
+      </button>
+      <button class="control-btn" (click)="refreshAnalytics()" title="Refresh">
+        <i class="fas fa-refresh"></i>
+      </button>
+      <button class="control-btn" (click)="exportAnalytics()" title="Export Data">
+        <i class="fas fa-download"></i>
+      </button>
+      <button class="control-btn" (click)="toggleExpanded()" title="Expand/Collapse">
+        <i class="fas" [class.fa-expand]="!isExpanded" [class.fa-compress]="isExpanded"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'overview'"
+      (click)="selectTab('overview')">
+      <i class="fas fa-chart-line"></i>
+      Overview
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'demographics'"
+      (click)="selectTab('demographics')">
+      <i class="fas fa-users"></i>
+      Demographics
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'metrics'"
+      (click)="selectTab('metrics')">
+      <i class="fas fa-cogs"></i>
+      Technical
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'revenue'"
+      (click)="selectTab('revenue')">
+      <i class="fas fa-dollar-sign"></i>
+      Revenue
+    </button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content">
+    <!-- Overview Tab -->
+    <div class="tab-content" *ngIf="selectedTab === 'overview'">
+      <!-- Key Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <h4>Current Viewers</h4>
+            <i class="fas fa-eye"></i>
+          </div>
+          <div class="metric-value">{{ formatNumber(analytics?.viewerCount || 0) }}</div>
+          <div class="metric-subtitle">Peak: {{ formatNumber(analytics?.peakViewerCount || 0) }}</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <h4>Total Views</h4>
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="metric-value">{{ formatNumber(analytics?.totalViews || 0) }}</div>
+          <div class="metric-subtitle">All time</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <h4>Engagement Rate</h4>
+            <i class="fas fa-heart"></i>
+          </div>
+          <div class="metric-value" [style.color]="getEngagementColor(analytics?.engagementRate || 0)">
+            {{ formatPercentage(analytics?.engagementRate || 0) }}
+          </div>
+          <div class="metric-subtitle">Chat, reactions, shares</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <h4>Watch Time</h4>
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="metric-value">{{ formatDuration(analytics?.averageWatchTime || 0) }}</div>
+          <div class="metric-subtitle">Average per viewer</div>
+        </div>
+      </div>
+
+      <!-- Engagement Breakdown -->
+      <div class="engagement-breakdown">
+        <h4>Engagement Breakdown</h4>
+        <div class="engagement-stats">
+          <div class="engagement-item">
+            <span class="engagement-label">Chat Messages</span>
+            <span class="engagement-value">{{ formatNumber(analytics?.chatMessages || 0) }}</span>
+          </div>
+          <div class="engagement-item">
+            <span class="engagement-label">Reactions</span>
+            <span class="engagement-value">{{ formatNumber(analytics?.reactions || 0) }}</span>
+          </div>
+          <div class="engagement-item">
+            <span class="engagement-label">Shares</span>
+            <span class="engagement-value">{{ formatNumber(analytics?.shares || 0) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Viewer Chart -->
+      <div class="chart-container">
+        <h4>Viewer Count Over Time</h4>
+        <div class="chart-placeholder">
+          <!-- In a real implementation, you would use a charting library like Chart.js or D3.js -->
+          <div class="chart-mock">
+            <div class="chart-line"></div>
+            <div class="chart-points">
+              <div class="chart-point" *ngFor="let point of viewerChartData; let i = index" 
+                   [style.left]="(i / (viewerChartData.length - 1)) * 100 + '%'"
+                   [style.bottom]="getViewerChartHeight(point)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demographics Tab -->
+    <div class="tab-content" *ngIf="selectedTab === 'demographics'">
+      <div class="demographics-grid">
+        <!-- Age Distribution -->
+        <div class="demographic-card">
+          <h4>Age Distribution</h4>
+          <div class="demographic-chart">
+            <div class="demographic-bar" *ngFor="let ageGroup of demographics?.ageGroups | keyvalue">
+              <div class="bar-label">{{ ageGroup.key }}</div>
+              <div class="bar-container">
+                <div class="bar-fill" [style.width]="getAgeGroupBarWidth(ageGroup)">
+                  <span class="bar-value">{{ ageGroup.value }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gender Distribution -->
+        <div class="demographic-card">
+          <h4>Gender Distribution</h4>
+          <div class="demographic-pie">
+            <div class="pie-segment" *ngFor="let gender of demographics?.genders | keyvalue">
+              <div class="segment-color" [style.background-color]="getSegmentColor(gender.key)"></div>
+              <span class="segment-label">{{ gender.key }}</span>
+              <span class="segment-value">{{ formatNumber(gender.value) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Locations -->
+        <div class="demographic-card">
+          <h4>Top Locations</h4>
+          <div class="location-list">
+            <div class="location-item" *ngFor="let location of demographics?.locations | keyvalue | slice:0:5">
+              <span class="location-name">{{ location.key }}</span>
+              <span class="location-count">{{ formatNumber(location.value) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Device Types -->
+        <div class="demographic-card">
+          <h4>Device Types</h4>
+          <div class="device-list">
+            <div class="device-item" *ngFor="let device of demographics?.devices | keyvalue">
+              <span class="device-name">{{ device.key }}</span>
+              <span class="device-count">{{ formatNumber(device.value) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="demographics-summary">
+        <div class="summary-item">
+          <span class="summary-label">Average Age:</span>
+          <span class="summary-value">{{ getAverageAge() }} years</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Top Location:</span>
+          <span class="summary-value">{{ getTopLocation() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Top Device:</span>
+          <span class="summary-value">{{ getTopDevice() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Metrics Tab -->
+    <div class="tab-content" *ngIf="selectedTab === 'metrics'">
+      <div class="metrics-grid">
+        <!-- Stream Health -->
+        <div class="metric-card health-card">
+          <div class="metric-header">
+            <h4>Stream Health</h4>
+            <div class="health-indicator" [style.background-color]="getHealthColor()">
+              {{ getHealthStatus() | titlecase }}
+            </div>
+          </div>
+          <div class="health-details">
+            <div class="health-item">
+              <span>CPU Usage:</span>
+              <span>{{ formatPercentage(metrics?.cpuUsage || 0) }}</span>
+            </div>
+            <div class="health-item">
+              <span>Memory Usage:</span>
+              <span>{{ formatPercentage(metrics?.memoryUsage || 0) }}</span>
+            </div>
+            <div class="health-item">
+              <span>Network Latency:</span>
+              <span>{{ metrics?.networkLatency || 0 }} ms</span>
+            </div>
+            <div class="health-item">
+              <span>Buffer Health:</span>
+              <span>{{ formatPercentage(metrics?.bufferHealth || 0) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stream Quality -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <h4>Stream Quality</h4>
+            <i class="fas fa-video"></i>
+          </div>
+          <div class="quality-details">
+            <div class="quality-item">
+              <span>Bitrate:</span>
+              <span>{{ formatNumber(metrics?.bitrate || 0) }} bps</span>
+            </div>
+            <div class="quality-item">
+              <span>FPS:</span>
+              <span>{{ metrics?.fps || 0 }}</span>
+            </div>
+            <div class="quality-item">
+              <span>Resolution:</span>
+              <span>{{ metrics?.resolution || 'Unknown' }}</span>
+            </div>
+            <div class="quality-item">
+              <span>Dropped Frames:</span>
+              <span>{{ formatNumber(metrics?.droppedFrames || 0) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Chart -->
+      <div class="chart-container">
+        <h4>Performance Over Time</h4>
+        <div class="chart-placeholder">
+          <div class="chart-mock">
+            <div class="performance-lines">
+              <div class="performance-line cpu" [style.height.%]="(metrics?.cpuUsage || 0)"></div>
+              <div class="performance-line memory" [style.height.%]="(metrics?.memoryUsage || 0)"></div>
+              <div class="performance-line latency" [style.height]="getLatencyHeight()"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue Tab -->
+    <div class="tab-content" *ngIf="selectedTab === 'revenue'">
+      <div class="revenue-overview">
+        <div class="revenue-card">
+          <h4>Total Revenue</h4>
+          <div class="revenue-amount">{{ formatCurrency(analytics?.revenue || 0) }}</div>
+          <div class="revenue-subtitle">This stream</div>
+        </div>
+
+        <div class="revenue-breakdown">
+          <h4>Revenue Sources</h4>
+          <div class="revenue-sources">
+            <div class="revenue-source">
+              <span class="source-label">Super Chats</span>
+              <span class="source-amount">{{ formatCurrency((analytics?.revenue || 0) * 0.6) }}</span>
+            </div>
+            <div class="revenue-source">
+              <span class="source-label">Donations</span>
+              <span class="source-amount">{{ formatCurrency((analytics?.revenue || 0) * 0.3) }}</span>
+            </div>
+            <div class="revenue-source">
+              <span class="source-label">Subscriptions</span>
+              <span class="source-amount">{{ formatCurrency((analytics?.revenue || 0) * 0.1) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="chart-container">
+        <h4>Revenue Over Time</h4>
+        <div class="chart-placeholder">
+          <div class="chart-mock">
+            <div class="revenue-bars">
+              <div class="revenue-bar" *ngFor="let data of revenueChartData; let i = index"
+                   [style.height]="getRevenueBarHeight(data)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
