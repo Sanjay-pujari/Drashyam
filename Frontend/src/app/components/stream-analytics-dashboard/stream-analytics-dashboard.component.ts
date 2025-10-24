@@ -436,7 +436,7 @@ export class StreamAnalyticsDashboardComponent implements OnInit, OnDestroy {
     try {
       if (!this.streamKey) return;
       
-      this.azureAnalytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
+      this.azureAnalytics = await this.liveStreamService.getAzureStreamAnalytics(this.streamKey).toPromise();
       
       // Update traditional analytics with Azure data
       if (this.azureAnalytics && this.analytics) {
@@ -453,7 +453,7 @@ export class StreamAnalyticsDashboardComponent implements OnInit, OnDestroy {
     try {
       if (!this.streamKey) return;
       
-      this.azureHealth = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
+      this.azureHealth = await this.liveStreamService.getAzureStreamHealth(this.streamKey).toPromise();
       
       // Update metrics with Azure health data
       if (this.azureHealth && this.metrics) {

@@ -417,33 +417,33 @@ export class LiveStreamManagerComponent implements OnInit, OnDestroy {
   }
 
   // Azure Communication Services Analytics
-  async getStreamAnalytics(): Promise<void> {
-    try {
-      const analytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
-      console.log('Stream Analytics:', analytics);
-      
-      // Update viewer count from analytics
-      this.viewerCount = analytics.currentViewers;
-    } catch (error) {
-      console.error('Error getting stream analytics:', error);
-    }
-  }
+         async getStreamAnalytics(): Promise<void> {
+           try {
+             const analytics = await this.liveStreamService.getAzureStreamAnalytics(this.streamKey).toPromise();
+             console.log('Stream Analytics:', analytics);
+             
+             // Update viewer count from analytics
+             this.viewerCount = analytics.currentViewers;
+           } catch (error) {
+             console.error('Error getting stream analytics:', error);
+           }
+         }
 
-  async getStreamHealth(): Promise<void> {
-    try {
-      const health = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
-      console.log('Stream Health:', health);
-      
-      // Update stream status based on health
-      if (health.isHealthy) {
-        this.streamStatus = 'live';
-      } else {
-        this.streamStatus = 'degraded';
-      }
-    } catch (error) {
-      console.error('Error getting stream health:', error);
-    }
-  }
+         async getStreamHealth(): Promise<void> {
+           try {
+             const health = await this.liveStreamService.getAzureStreamHealth(this.streamKey).toPromise();
+             console.log('Stream Health:', health);
+             
+             // Update stream status based on health
+             if (health.isHealthy) {
+               this.streamStatus = 'live';
+             } else {
+               this.streamStatus = 'degraded';
+             }
+           } catch (error) {
+             console.error('Error getting stream health:', error);
+           }
+         }
 
   async getStreamingEndpoint(): Promise<void> {
     try {

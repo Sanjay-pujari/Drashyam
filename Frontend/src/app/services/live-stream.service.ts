@@ -264,11 +264,11 @@ export class LiveStreamService {
     return this.azureCommunicationService.getStreamPlaybackUrl(streamKey, protocol);
   }
 
-  getStreamAnalytics(streamKey: string): Observable<StreamingAnalytics> {
+  getAzureStreamAnalytics(streamKey: string): Observable<StreamingAnalytics> {
     return this.azureCommunicationService.getStreamAnalytics(streamKey);
   }
 
-  getStreamHealth(streamKey: string): Observable<StreamingHealth> {
+  getAzureStreamHealth(streamKey: string): Observable<StreamingHealth> {
     return this.azureCommunicationService.getStreamHealth(streamKey);
   }
 
@@ -297,8 +297,8 @@ export class LiveStreamService {
     return this.getStream(streamId).pipe(
       switchMap(stream => 
         combineLatest([
-          this.azureCommunicationService.getStreamAnalytics(stream.streamKey),
-          this.azureCommunicationService.getStreamHealth(stream.streamKey)
+          this.getAzureStreamAnalytics(stream.streamKey),
+          this.getAzureStreamHealth(stream.streamKey)
         ]).pipe(
           map(([analytics, health]) => ({ stream, analytics, health }))
         )
@@ -316,8 +316,8 @@ export class LiveStreamService {
     return this.getStream(streamId).pipe(
       switchMap(stream => 
         combineLatest([
-          this.azureCommunicationService.getStreamAnalytics(stream.streamKey),
-          this.azureCommunicationService.getStreamHealth(stream.streamKey),
+          this.getAzureStreamAnalytics(stream.streamKey),
+          this.getAzureStreamHealth(stream.streamKey),
           this.getStreamAnalytics(streamId)
         ]).pipe(
           map(([analytics, health, traditionalAnalytics]) => ({ 

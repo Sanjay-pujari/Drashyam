@@ -319,36 +319,36 @@ export class LiveStreamPlayerComponent implements OnInit, OnDestroy {
   }
 
   // Azure Communication Services methods
-  private async loadStreamAnalytics(): Promise<void> {
-    try {
-      this.streamAnalytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
-      
-      // Update viewer count from analytics
-      if (this.streamAnalytics) {
-        this.viewerCount = this.streamAnalytics.currentViewers;
-        this.viewerCountChanged.emit(this.viewerCount);
-      }
-    } catch (error) {
-      console.error('Error loading stream analytics:', error);
-    }
-  }
+         private async loadStreamAnalytics(): Promise<void> {
+           try {
+             this.streamAnalytics = await this.liveStreamService.getAzureStreamAnalytics(this.streamKey).toPromise();
+             
+             // Update viewer count from analytics
+             if (this.streamAnalytics) {
+               this.viewerCount = this.streamAnalytics.currentViewers;
+               this.viewerCountChanged.emit(this.viewerCount);
+             }
+           } catch (error) {
+             console.error('Error loading stream analytics:', error);
+           }
+         }
 
-  private async loadStreamHealth(): Promise<void> {
-    try {
-      this.streamHealth = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
-      
-      // Update stream status based on health
-      if (this.streamHealth) {
-        if (this.streamHealth.isHealthy) {
-          this.connectionError = '';
-        } else {
-          this.connectionError = 'Stream health degraded';
-        }
-      }
-    } catch (error) {
-      console.error('Error loading stream health:', error);
-    }
-  }
+         private async loadStreamHealth(): Promise<void> {
+           try {
+             this.streamHealth = await this.liveStreamService.getAzureStreamHealth(this.streamKey).toPromise();
+             
+             // Update stream status based on health
+             if (this.streamHealth) {
+               if (this.streamHealth.isHealthy) {
+                 this.connectionError = '';
+               } else {
+                 this.connectionError = 'Stream health degraded';
+               }
+             }
+           } catch (error) {
+             console.error('Error loading stream health:', error);
+           }
+         }
 
   // Get different stream URLs
   getHlsUrl(): string {
