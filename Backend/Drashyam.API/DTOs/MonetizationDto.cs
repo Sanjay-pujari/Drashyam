@@ -152,6 +152,10 @@ public class MerchandiseOrderDto
     public DateTime? ShippedAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public string? TrackingNumber { get; set; }
+    public string? Notes { get; set; }
+    public decimal TotalAmount { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
 
 public class MerchandiseOrderRequestDto
@@ -170,6 +174,7 @@ public class MerchandiseOrderUpdateDto
 {
     public MerchandiseOrderStatus Status { get; set; }
     public string? TrackingNumber { get; set; }
+    public string? Notes { get; set; }
 }
 
 public class MerchandiseAnalyticsDto
@@ -243,34 +248,6 @@ public class MerchandiseFilterDto
     public int PageSize { get; set; } = 20;
 }
 
-public class MerchandiseOrderRequestDto
-{
-    public int MerchandiseItemId { get; set; }
-    public int Quantity { get; set; }
-    public string? Size { get; set; }
-    public string? Color { get; set; }
-    public string? CustomerName { get; set; }
-    public string? CustomerEmail { get; set; }
-    public string? CustomerAddress { get; set; }
-}
-
-public class MerchandiseOrderUpdateDto
-{
-    public MerchandiseOrderStatus Status { get; set; }
-    public string? TrackingNumber { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class MerchandiseAnalyticsDto
-{
-    public int TotalItems { get; set; }
-    public int ActiveItems { get; set; }
-    public int TotalOrders { get; set; }
-    public decimal TotalRevenue { get; set; }
-    public decimal AverageOrderValue { get; set; }
-    public List<MerchandiseCategoryAnalyticsDto> CategoryBreakdown { get; set; } = new();
-    public List<MonthlyMerchandiseRevenueDto> MonthlyRevenue { get; set; } = new();
-}
 
 public class MerchandiseCategoryAnalyticsDto
 {

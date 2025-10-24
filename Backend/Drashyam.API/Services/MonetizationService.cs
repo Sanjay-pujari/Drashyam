@@ -92,14 +92,31 @@ public class MonetizationService : IMonetizationService
         return new DonationDto();
     }
 
-    public async Task<List<MerchandiseDto>> GetMerchandiseAsync(string userId)
+    public async Task<List<MerchandiseDto>> GetMerchandiseAsync(MerchandiseFilterDto filter)
     {
         try
         {
-            var merchandiseItems = await _context.MerchandiseItems
+            var query = _context.MerchandiseItems
                 .Include(m => m.Channel)
-                .Where(m => m.Channel.UserId == userId)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Apply filters
+            if (filter.ChannelId.HasValue)
+            {
+                query = query.Where(m => m.ChannelId == filter.ChannelId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.Search))
+            {
+                query = query.Where(m => m.Name.Contains(filter.Search) || m.Description.Contains(filter.Search));
+            }
+
+            if (filter.IsActive.HasValue)
+            {
+                query = query.Where(m => m.IsActive == filter.IsActive.Value);
+            }
+
+            var merchandiseItems = await query.ToListAsync();
 
             var merchandise = merchandiseItems.Select(m => new MerchandiseDto
             {
@@ -124,7 +141,7 @@ public class MonetizationService : IMonetizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving merchandise for user {UserId}", userId);
+            _logger.LogError(ex, "Error retrieving merchandise");
             throw;
         }
     }
@@ -637,6 +654,92 @@ public class MonetizationService : IMonetizationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving merchandise details for {MerchandiseId}", merchandiseId);
+            throw;
+        }
+    }
+
+    public async Task<MerchandiseOrderDto?> GetMerchandiseOrderAsync(int orderId, string userId)
+    {
+        try
+        {
+            var order = await _context.MerchandiseOrders
+                .Include(o => o.MerchandiseItem)
+                .ThenInclude(m => m.Channel)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.MerchandiseItem.Channel.UserId == userId);
+
+            if (order == null) return null;
+
+            return new MerchandiseOrderDto
+            {
+                Id = order.Id,
+                MerchandiseItemId = order.MerchandiseItemId,
+                MerchandiseName = order.MerchandiseItem.Name,
+                Quantity = order.Quantity,
+                Size = order.Size,
+                Color = order.Color,
+                CustomerName = order.CustomerName,
+                CustomerEmail = order.CustomerEmail,
+                CustomerAddress = order.CustomerAddress,
+                Status = order.Status,
+                TrackingNumber = order.TrackingNumber,
+                Notes = order.Notes,
+                TotalAmount = order.TotalAmount,
+                Currency = order.Currency,
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving merchandise order {OrderId}", orderId);
+            throw;
+        }
+    }
+
+    public async Task<MerchandiseOrderDto> UpdateMerchandiseOrderAsync(int orderId, MerchandiseOrderUpdateDto update, string userId)
+    {
+        try
+        {
+            var order = await _context.MerchandiseOrders
+                .Include(o => o.MerchandiseItem)
+                .ThenInclude(m => m.Channel)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.MerchandiseItem.Channel.UserId == userId);
+
+            if (order == null)
+            {
+                throw new InvalidOperationException("Order not found or access denied");
+            }
+
+            order.Status = update.Status;
+            order.TrackingNumber = update.TrackingNumber;
+            order.Notes = update.Notes;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new MerchandiseOrderDto
+            {
+                Id = order.Id,
+                MerchandiseItemId = order.MerchandiseItemId,
+                MerchandiseName = order.MerchandiseItem.Name,
+                Quantity = order.Quantity,
+                Size = order.Size,
+                Color = order.Color,
+                CustomerName = order.CustomerName,
+                CustomerEmail = order.CustomerEmail,
+                CustomerAddress = order.CustomerAddress,
+                Status = order.Status,
+                TrackingNumber = order.TrackingNumber,
+                Notes = order.Notes,
+                TotalAmount = order.TotalAmount,
+                Currency = order.Currency,
+                CreatedAt = order.CreatedAt,
+                UpdatedAt = order.UpdatedAt
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating merchandise order {OrderId}", orderId);
             throw;
         }
     }

@@ -137,10 +137,9 @@ public class MonetizationController : ControllerBase
 
     [HttpGet("merchandise")]
     [Authorize]
-    public async Task<ActionResult<List<MerchandiseDto>>> GetMerchandise()
+    public async Task<ActionResult<List<MerchandiseDto>>> GetMerchandise([FromQuery] MerchandiseFilterDto filter)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        var list = await _monetizationService.GetMerchandiseAsync(userId);
+        var list = await _monetizationService.GetMerchandiseAsync(filter);
         return Ok(list);
     }
 

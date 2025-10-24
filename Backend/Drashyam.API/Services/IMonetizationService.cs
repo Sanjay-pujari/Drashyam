@@ -28,6 +28,10 @@ public interface IMonetizationService
     Task<MerchandiseDto?> GetMerchandiseDetailsAsync(int merchandiseId);
     Task<RevenueReportDto> GetRevenueReportAsync(string userId, DateTime? startDate = null, DateTime? endDate = null);
     Task ProcessAdRevenueAsync(int videoId, decimal amount, string adType);
+    
+    // Merchandise Order Management
+    Task<MerchandiseOrderDto?> GetMerchandiseOrderAsync(int orderId, string userId);
+    Task<MerchandiseOrderDto> UpdateMerchandiseOrderAsync(int orderId, MerchandiseOrderUpdateDto update, string userId);
     Task ProcessSponsorRevenueAsync(int sponsorId, decimal amount);
     Task ProcessDonationRevenueAsync(int donationId, decimal amount);
     Task ProcessMerchandiseRevenueAsync(int merchandiseId, decimal amount);

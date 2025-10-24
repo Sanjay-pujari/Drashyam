@@ -104,6 +104,16 @@ public class MerchandiseOrder
     [MaxLength(100)]
     public string? TrackingNumber { get; set; }
 
+    [MaxLength(500)]
+    public string? Notes { get; set; }
+
+    [Column(TypeName = "decimal(10,2)")]
+    public decimal TotalAmount { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime? UpdatedAt { get; set; }
+
     // Navigation properties
     [ForeignKey("MerchandiseItemId")]
     public virtual MerchandiseItem MerchandiseItem { get; set; } = null!;
