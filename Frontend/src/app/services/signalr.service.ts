@@ -68,8 +68,9 @@ export class SignalRService {
 
   // Live Stream Hub
   private async initializeLiveStreamHub(): Promise<void> {
+    const hubUrl = this.getHubUrl('liveStreamHub');
     this.liveStreamHub = new HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/liveStreamHub`, {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => this.getAccessToken()
       })
       .withAutomaticReconnect()
@@ -105,8 +106,9 @@ export class SignalRService {
 
   // Chat Hub
   private async initializeChatHub(): Promise<void> {
+    const hubUrl = this.getHubUrl('chatHub');
     this.chatHub = new HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/chatHub`, {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => this.getAccessToken()
       })
       .withAutomaticReconnect()
@@ -143,8 +145,9 @@ export class SignalRService {
 
   // Notification Hub
   private async initializeNotificationHub(): Promise<void> {
+    const hubUrl = this.getHubUrl('notificationHub');
     this.notificationHub = new HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/notificationHub`, {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => this.getAccessToken()
       })
       .withAutomaticReconnect()
@@ -280,6 +283,18 @@ export class SignalRService {
   }
 
   // Helper Methods
+  private getHubUrl(hubName: string): string {
+    // Check if Azure SignalR is enabled
+    if (environment.azureSignalR?.enabled) {
+      // Use Azure SignalR Service
+      const hubPrefix = environment.azureSignalR.hubPrefix || 'drashyam';
+      return `${environment.signalRUrl}/${hubPrefix}/${hubName}`;
+    } else {
+      // Use local SignalR
+      return `${environment.signalRUrl}/${hubName}`;
+    }
+  }
+
   private getAccessToken(): string {
     // Get JWT token from localStorage or auth service
     return localStorage.getItem('access_token') || '';
