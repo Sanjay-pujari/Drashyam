@@ -451,7 +451,7 @@ export class QuotaDashboardComponent implements OnInit, OnDestroy {
   }
 
   upgradePlan() {
-    this.router.navigate(['/subscriptions']);
+    this.router.navigate(['/subscription-plans']);
     this.snackBar.open('Redirecting to subscription plans...', 'Close', { duration: 2000 });
   }
 }
