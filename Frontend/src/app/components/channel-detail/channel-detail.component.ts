@@ -12,6 +12,7 @@ import { ChannelService } from '../../services/channel.service';
 import { VideoService } from '../../services/video.service';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { MonetizationService } from '../../services/monetization.service';
 import { Channel } from '../../models/channel.model';
 import { Video } from '../../models/video.model';
 
@@ -42,7 +43,8 @@ export class ChannelDetailComponent implements OnInit {
     private channelService: ChannelService,
     private videoService: VideoService,
     private authService: AuthService,
-    private cartService: CartService
+    private cartService: CartService,
+    private monetizationService: MonetizationService
   ) {}
 
   ngOnInit() {
@@ -222,17 +224,24 @@ export class ChannelDetailComponent implements OnInit {
   loadChannelMerchandise() {
     if (!this.channelId) return;
     
-    // For now, we'll create a simple HTTP call to the new API endpoint
-    // In a real implementation, you'd want to create a proper service
-    fetch(`/api/monetization/channels/${this.channelId}/merchandise`)
-      .then(response => response.json())
-      .then(data => {
-        this.merchandise = data;
-      })
-      .catch(error => {
+    console.log('Loading merchandise for channel:', this.channelId);
+    
+    this.monetizationService.getChannelMerchandise(this.channelId).subscribe({
+      next: (merchandise) => {
+        console.log('Merchandise loaded successfully:', merchandise);
+        this.merchandise = merchandise;
+      },
+      error: (error) => {
         console.error('Error loading merchandise:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url
+        });
         this.merchandise = [];
-      });
+      }
+    });
   }
 
   viewMerchandise(merchandiseId: number) {
