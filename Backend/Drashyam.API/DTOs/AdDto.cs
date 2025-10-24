@@ -44,6 +44,12 @@ public class AdCampaignDto
     public DateTime? UpdatedAt { get; set; }
     public UserDto? Advertiser { get; set; }
     public List<AdImpressionDto>? Impressions { get; set; }
+    
+    // Analytics properties
+    public decimal Spent { get; set; }
+    public int TotalImpressions { get; set; }
+    public int TotalClicks { get; set; }
+    public decimal TotalRevenue { get; set; }
 }
 
 public class AdCampaignCreateDto
@@ -132,4 +138,21 @@ public class AdAnalyticsDto
     public decimal ClickThroughRate { get; set; }
     public decimal CostPerClick { get; set; }
     public decimal CostPerImpression { get; set; }
+}
+
+public class AdCampaignAnalyticsDto
+{
+    public int CampaignId { get; set; }
+    public string CampaignName { get; set; } = string.Empty;
+    public decimal Spent { get; set; }
+    public int TotalImpressions { get; set; }
+    public int TotalClicks { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal ClickThroughRate { get; set; }
+    public decimal CostPerClick { get; set; }
+    public decimal CostPerImpression { get; set; }
+    public decimal ReturnOnInvestment { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public DTOs.AdStatus Status { get; set; }
 }

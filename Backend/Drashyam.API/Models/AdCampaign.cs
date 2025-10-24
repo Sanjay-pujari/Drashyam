@@ -44,6 +44,15 @@ public class AdCampaign
 
     public DateTime? UpdatedAt { get; set; }
 
+    // Analytics properties
+    public decimal Spent { get; set; } = 0;
+
+    public int TotalImpressions { get; set; } = 0;
+
+    public int TotalClicks { get; set; } = 0;
+
+    public decimal TotalRevenue { get; set; } = 0;
+
     // Navigation properties
     [ForeignKey("AdvertiserId")]
     public virtual ApplicationUser Advertiser { get; set; } = null!;

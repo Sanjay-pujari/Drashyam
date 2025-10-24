@@ -743,4 +743,395 @@ public class MonetizationService : IMonetizationService
             throw;
         }
     }
+
+    // Ad Campaign Management Methods
+    public async Task<List<AdCampaignDto>> GetAdCampaignsAsync(string userId)
+    {
+        try
+        {
+            var campaigns = await _context.AdCampaigns
+                .Include(c => c.Advertiser)
+                .Include(c => c.Impressions)
+                .Where(c => c.AdvertiserId == userId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            return campaigns.Select(c => new AdCampaignDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description,
+                AdvertiserId = c.AdvertiserId,
+                Type = c.Type,
+                Budget = c.Budget,
+                CostPerClick = c.CostPerClick,
+                CostPerView = c.CostPerView,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                Status = c.Status,
+                TargetAudience = c.TargetAudience,
+                AdContent = c.AdContent,
+                AdUrl = c.AdUrl,
+                ThumbnailUrl = c.ThumbnailUrl,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+                Advertiser = c.Advertiser != null ? new UserDto
+                {
+                    Id = c.Advertiser.Id,
+                    FirstName = c.Advertiser.FirstName,
+                    LastName = c.Advertiser.LastName,
+                    Email = c.Advertiser.Email
+                } : null,
+                Spent = c.Spent,
+                TotalImpressions = c.TotalImpressions,
+                TotalClicks = c.TotalClicks,
+                TotalRevenue = c.TotalRevenue
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving ad campaigns for user {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task<AdCampaignDto?> GetAdCampaignAsync(int id, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .Include(c => c.Advertiser)
+                .Include(c => c.Impressions)
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return null;
+
+            return new AdCampaignDto
+            {
+                Id = campaign.Id,
+                Name = campaign.Name,
+                Description = campaign.Description,
+                AdvertiserId = campaign.AdvertiserId,
+                Type = campaign.Type,
+                Budget = campaign.Budget,
+                CostPerClick = campaign.CostPerClick,
+                CostPerView = campaign.CostPerView,
+                StartDate = campaign.StartDate,
+                EndDate = campaign.EndDate,
+                Status = campaign.Status,
+                TargetAudience = campaign.TargetAudience,
+                AdContent = campaign.AdContent,
+                AdUrl = campaign.AdUrl,
+                ThumbnailUrl = campaign.ThumbnailUrl,
+                CreatedAt = campaign.CreatedAt,
+                UpdatedAt = campaign.UpdatedAt,
+                Advertiser = campaign.Advertiser != null ? new UserDto
+                {
+                    Id = campaign.Advertiser.Id,
+                    FirstName = campaign.Advertiser.FirstName,
+                    LastName = campaign.Advertiser.LastName,
+                    Email = campaign.Advertiser.Email
+                } : null,
+                Spent = campaign.Spent,
+                TotalImpressions = campaign.TotalImpressions,
+                TotalClicks = campaign.TotalClicks,
+                TotalRevenue = campaign.TotalRevenue
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving ad campaign {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<AdCampaignDto> CreateAdCampaignAsync(AdCampaignCreateDto createDto, string userId)
+    {
+        try
+        {
+            var campaign = new AdCampaign
+            {
+                Name = createDto.Name,
+                Description = createDto.Description,
+                AdvertiserId = userId,
+                Type = createDto.Type,
+                Budget = createDto.Budget,
+                CostPerClick = createDto.CostPerClick,
+                CostPerView = createDto.CostPerView,
+                StartDate = createDto.StartDate,
+                EndDate = createDto.EndDate,
+                Status = DTOs.AdStatus.Draft,
+                TargetAudience = createDto.TargetAudience,
+                AdContent = createDto.AdContent,
+                AdUrl = createDto.AdUrl,
+                ThumbnailUrl = createDto.ThumbnailUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.AdCampaigns.Add(campaign);
+            await _context.SaveChangesAsync();
+
+            return new AdCampaignDto
+            {
+                Id = campaign.Id,
+                Name = campaign.Name,
+                Description = campaign.Description,
+                AdvertiserId = campaign.AdvertiserId,
+                Type = campaign.Type,
+                Budget = campaign.Budget,
+                CostPerClick = campaign.CostPerClick,
+                CostPerView = campaign.CostPerView,
+                StartDate = campaign.StartDate,
+                EndDate = campaign.EndDate,
+                Status = campaign.Status,
+                TargetAudience = campaign.TargetAudience,
+                AdContent = campaign.AdContent,
+                AdUrl = campaign.AdUrl,
+                ThumbnailUrl = campaign.ThumbnailUrl,
+                CreatedAt = campaign.CreatedAt,
+                UpdatedAt = campaign.UpdatedAt,
+                Spent = campaign.Spent,
+                TotalImpressions = campaign.TotalImpressions,
+                TotalClicks = campaign.TotalClicks,
+                TotalRevenue = campaign.TotalRevenue
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating ad campaign for user {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task<AdCampaignDto?> UpdateAdCampaignAsync(int id, AdCampaignUpdateDto updateDto, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return null;
+
+            if (!string.IsNullOrEmpty(updateDto.Name))
+                campaign.Name = updateDto.Name;
+
+            if (updateDto.Description != null)
+                campaign.Description = updateDto.Description;
+
+            if (updateDto.Type.HasValue)
+                campaign.Type = updateDto.Type.Value;
+
+            if (updateDto.Budget.HasValue)
+                campaign.Budget = updateDto.Budget.Value;
+
+            if (updateDto.CostPerClick.HasValue)
+                campaign.CostPerClick = updateDto.CostPerClick.Value;
+
+            if (updateDto.CostPerView.HasValue)
+                campaign.CostPerView = updateDto.CostPerView.Value;
+
+            if (updateDto.StartDate.HasValue)
+                campaign.StartDate = updateDto.StartDate.Value;
+
+            if (updateDto.EndDate.HasValue)
+                campaign.EndDate = updateDto.EndDate.Value;
+
+            if (updateDto.Status.HasValue)
+                campaign.Status = updateDto.Status.Value;
+
+            if (updateDto.TargetAudience != null)
+                campaign.TargetAudience = updateDto.TargetAudience;
+
+            if (updateDto.AdContent != null)
+                campaign.AdContent = updateDto.AdContent;
+
+            if (updateDto.AdUrl != null)
+                campaign.AdUrl = updateDto.AdUrl;
+
+            if (updateDto.ThumbnailUrl != null)
+                campaign.ThumbnailUrl = updateDto.ThumbnailUrl;
+
+            campaign.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new AdCampaignDto
+            {
+                Id = campaign.Id,
+                Name = campaign.Name,
+                Description = campaign.Description,
+                AdvertiserId = campaign.AdvertiserId,
+                Type = campaign.Type,
+                Budget = campaign.Budget,
+                CostPerClick = campaign.CostPerClick,
+                CostPerView = campaign.CostPerView,
+                StartDate = campaign.StartDate,
+                EndDate = campaign.EndDate,
+                Status = campaign.Status,
+                TargetAudience = campaign.TargetAudience,
+                AdContent = campaign.AdContent,
+                AdUrl = campaign.AdUrl,
+                ThumbnailUrl = campaign.ThumbnailUrl,
+                CreatedAt = campaign.CreatedAt,
+                UpdatedAt = campaign.UpdatedAt,
+                Spent = campaign.Spent,
+                TotalImpressions = campaign.TotalImpressions,
+                TotalClicks = campaign.TotalClicks,
+                TotalRevenue = campaign.TotalRevenue
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating ad campaign {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<bool> DeleteAdCampaignAsync(int id, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return false;
+
+            _context.AdCampaigns.Remove(campaign);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting ad campaign {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<bool> PauseAdCampaignAsync(int id, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return false;
+
+            campaign.Status = DTOs.AdStatus.Paused;
+            campaign.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error pausing ad campaign {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<bool> ResumeAdCampaignAsync(int id, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return false;
+
+            campaign.Status = DTOs.AdStatus.Active;
+            campaign.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resuming ad campaign {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<AdCampaignAnalyticsDto?> GetAdCampaignAnalyticsAsync(int id, string userId)
+    {
+        try
+        {
+            var campaign = await _context.AdCampaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.AdvertiserId == userId);
+
+            if (campaign == null) return null;
+
+            var clickThroughRate = campaign.TotalImpressions > 0 ? (decimal)campaign.TotalClicks / campaign.TotalImpressions * 100 : 0;
+            var costPerClick = campaign.TotalClicks > 0 ? campaign.Spent / campaign.TotalClicks : 0;
+            var costPerImpression = campaign.TotalImpressions > 0 ? campaign.Spent / campaign.TotalImpressions : 0;
+            var returnOnInvestment = campaign.Spent > 0 ? (campaign.TotalRevenue - campaign.Spent) / campaign.Spent * 100 : 0;
+
+            return new AdCampaignAnalyticsDto
+            {
+                CampaignId = campaign.Id,
+                CampaignName = campaign.Name,
+                Spent = campaign.Spent,
+                TotalImpressions = campaign.TotalImpressions,
+                TotalClicks = campaign.TotalClicks,
+                TotalRevenue = campaign.TotalRevenue,
+                ClickThroughRate = clickThroughRate,
+                CostPerClick = costPerClick,
+                CostPerImpression = costPerImpression,
+                ReturnOnInvestment = returnOnInvestment,
+                StartDate = campaign.StartDate,
+                EndDate = campaign.EndDate,
+                Status = campaign.Status
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving ad campaign analytics {CampaignId} for user {UserId}", id, userId);
+            throw;
+        }
+    }
+
+    public async Task<List<AdDto>> GetDisplayAdsAsync(int? channelId, string userId)
+    {
+        try
+        {
+            // Get active ad campaigns that are currently running
+            var activeCampaigns = await _context.AdCampaigns
+                .Include(c => c.Impressions)
+                .Where(c => c.Status == DTOs.AdStatus.Active && 
+                           c.StartDate <= DateTime.UtcNow && 
+                           c.EndDate >= DateTime.UtcNow)
+                .ToListAsync();
+
+            var displayAds = new List<AdDto>();
+
+            foreach (var campaign in activeCampaigns)
+            {
+                // Create display ads from campaign data
+                var ad = new AdDto
+                {
+                    Id = campaign.Id,
+                    Type = campaign.Type,
+                    Content = campaign.AdContent,
+                    Url = campaign.AdUrl,
+                    ThumbnailUrl = campaign.ThumbnailUrl,
+                    CostPerClick = campaign.CostPerClick,
+                    CostPerView = campaign.CostPerView,
+                    Duration = 30, // Default 30 seconds for display ads
+                    SkipAfter = 5, // Default 5 seconds before skip
+                    Position = null // Display ads don't have specific positions
+                };
+
+                displayAds.Add(ad);
+            }
+
+            return displayAds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving display ads for channel {ChannelId} and user {UserId}", channelId, userId);
+            throw;
+        }
+    }
 }

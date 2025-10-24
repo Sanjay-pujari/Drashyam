@@ -42,4 +42,17 @@ public interface IMonetizationService
     Task<MerchandiseOrderDto> UpdateMerchandiseOrderStatusAsync(int orderId, MerchandiseOrderStatus status, string userId, string? trackingNumber = null);
     Task<List<MerchandiseOrderDto>> GetCustomerOrdersAsync(string customerId, int page = 1, int pageSize = 20);
     Task<MerchandiseAnalyticsDto> GetMerchandiseAnalyticsAsync(string userId, DateTime? startDate = null, DateTime? endDate = null);
+    
+    // Ad Campaign Management
+    Task<List<AdCampaignDto>> GetAdCampaignsAsync(string userId);
+    Task<AdCampaignDto?> GetAdCampaignAsync(int id, string userId);
+    Task<AdCampaignDto> CreateAdCampaignAsync(AdCampaignCreateDto createDto, string userId);
+    Task<AdCampaignDto?> UpdateAdCampaignAsync(int id, AdCampaignUpdateDto updateDto, string userId);
+    Task<bool> DeleteAdCampaignAsync(int id, string userId);
+    Task<bool> PauseAdCampaignAsync(int id, string userId);
+    Task<bool> ResumeAdCampaignAsync(int id, string userId);
+    Task<AdCampaignAnalyticsDto?> GetAdCampaignAnalyticsAsync(int id, string userId);
+    
+    // Display Ads
+    Task<List<AdDto>> GetDisplayAdsAsync(int? channelId, string userId);
 }
