@@ -37,6 +37,31 @@ export interface StreamMetrics {
   bufferHealth: number;
 }
 
+// Azure Communication Services interfaces
+export interface AzureStreamAnalytics {
+  streamKey: string;
+  currentViewers: number;
+  totalViewers: number;
+  averageViewerDuration: string;
+  peakViewers: number;
+  bitrateKbps: number;
+  qualityScore: number;
+  ingestLatencyMs: number;
+  egressLatencyMs: number;
+  packetLossRate: number;
+}
+
+export interface AzureStreamHealth {
+  streamKey: string;
+  status: string;
+  cpuUsagePercent: number;
+  memoryUsagePercent: number;
+  networkLatencyMs: number;
+  packetLossRate: number;
+  isHealthy: boolean;
+  lastCheckedAt: string;
+}
+
 @Component({
   selector: 'app-stream-analytics-dashboard',
   standalone: true,
@@ -56,6 +81,11 @@ export class StreamAnalyticsDashboardComponent implements OnInit, OnDestroy {
   demographics: ViewerDemographics | null = null;
   metrics: StreamMetrics | null = null;
   historicalData: StreamAnalytics[] = [];
+  
+  // Azure Communication Services data
+  azureAnalytics: AzureStreamAnalytics | null = null;
+  azureHealth: AzureStreamHealth | null = null;
+  streamKey: string = '';
   
   // UI state
   selectedTab: 'overview' | 'demographics' | 'metrics' | 'revenue' = 'overview';
@@ -399,5 +429,83 @@ export class StreamAnalyticsDashboardComponent implements OnInit, OnDestroy {
   getLatencyHeight(): string {
     const latency = this.metrics?.networkLatency || 0;
     return `${Math.min(latency / 10, 100)}%`;
+  }
+
+  // Azure Communication Services methods
+  async loadAzureAnalytics(): Promise<void> {
+    try {
+      if (!this.streamKey) return;
+      
+      this.azureAnalytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
+      
+      // Update traditional analytics with Azure data
+      if (this.azureAnalytics && this.analytics) {
+        this.analytics.viewerCount = this.azureAnalytics.currentViewers;
+        this.analytics.peakViewerCount = this.azureAnalytics.peakViewers;
+        this.analytics.timestamp = new Date();
+      }
+    } catch (error) {
+      console.error('Error loading Azure analytics:', error);
+    }
+  }
+
+  async loadAzureHealth(): Promise<void> {
+    try {
+      if (!this.streamKey) return;
+      
+      this.azureHealth = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
+      
+      // Update metrics with Azure health data
+      if (this.azureHealth && this.metrics) {
+        this.metrics.cpuUsage = this.azureHealth.cpuUsagePercent;
+        this.metrics.memoryUsage = this.azureHealth.memoryUsagePercent;
+        this.metrics.networkLatency = this.azureHealth.networkLatencyMs;
+      }
+    } catch (error) {
+      console.error('Error loading Azure health:', error);
+    }
+  }
+
+  // Set stream key for Azure Communication Services
+  setStreamKey(streamKey: string): void {
+    this.streamKey = streamKey;
+    if (this.autoRefresh) {
+      this.loadAzureAnalytics();
+      this.loadAzureHealth();
+    }
+  }
+
+  // Get combined analytics data
+  getCombinedAnalytics(): any {
+    return {
+      traditional: this.analytics,
+      azure: this.azureAnalytics,
+      health: this.azureHealth,
+      metrics: this.metrics
+    };
+  }
+
+  // Get Azure-specific metrics
+  getAzureMetrics(): any {
+    if (!this.azureAnalytics || !this.azureHealth) return null;
+    
+    return {
+      currentViewers: this.azureAnalytics.currentViewers,
+      totalViewers: this.azureAnalytics.totalViewers,
+      peakViewers: this.azureAnalytics.peakViewers,
+      qualityScore: this.azureAnalytics.qualityScore,
+      bitrate: this.azureAnalytics.bitrateKbps,
+      latency: this.azureHealth.networkLatencyMs,
+      packetLoss: this.azureAnalytics.packetLossRate,
+      cpuUsage: this.azureHealth.cpuUsagePercent,
+      memoryUsage: this.azureHealth.memoryUsagePercent,
+      isHealthy: this.azureHealth.isHealthy
+    };
+  }
+
+  // Refresh Azure data
+  async refreshAzureData(): Promise<void> {
+    await this.loadAzureAnalytics();
+    await this.loadAzureHealth();
   }
 }

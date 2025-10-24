@@ -38,6 +38,13 @@ export class LiveStreamPlayerComponent implements OnInit, OnDestroy {
   streamMetrics: StreamMetrics | null = null;
   viewerCount = 0;
   hlsUrl = '';
+  rtmpUrl = '';
+  webRtcUrl = '';
+  
+  // Azure Communication Services data
+  streamingEndpoint: any = null;
+  streamAnalytics: any = null;
+  streamHealth: any = null;
   
   // UI state
   showQualitySelector = false;
@@ -94,18 +101,25 @@ export class LiveStreamPlayerComponent implements OnInit, OnDestroy {
 
   private async loadStream(): Promise<void> {
     try {
-      // Get stream details from API
-      const streamDetails = await this.liveStreamService.getLiveStreamById(parseInt(this.streamKey)).toPromise();
+      // Get streaming endpoint from Azure Communication Services
+      const endpoint = await this.liveStreamService.getStreamingEndpoint(this.streamKey).toPromise();
       
-      if (streamDetails && streamDetails.hlsUrl) {
-        this.hlsUrl = streamDetails.hlsUrl;
+      if (endpoint) {
+        this.streamingEndpoint = endpoint;
+        this.hlsUrl = endpoint.hlsUrl;
+        this.rtmpUrl = endpoint.rtmpUrl;
+        this.webRtcUrl = endpoint.webRtcUrl;
         
-        // Load stream in player
+        // Load stream in player using HLS URL
         await this.hlsPlayerService.loadStream(this.streamKey, this.hlsUrl);
         
         // Get available qualities
         this.availableQualities = this.hlsPlayerService.getAvailableQualities();
         this.currentQuality = this.hlsPlayerService.getCurrentQuality();
+        
+        // Load analytics and health data
+        await this.loadStreamAnalytics();
+        await this.loadStreamHealth();
         
         // Auto-play if enabled
         if (this.autoPlay) {
@@ -114,7 +128,7 @@ export class LiveStreamPlayerComponent implements OnInit, OnDestroy {
         
         this.streamStarted.emit();
       } else {
-        throw new Error('Stream not found or not available');
+        throw new Error('Stream endpoint not found or not available');
       }
     } catch (error) {
       console.error('Error loading stream:', error);
@@ -302,5 +316,85 @@ export class LiveStreamPlayerComponent implements OnInit, OnDestroy {
     if (this.isBuffering) return 'buffering';
     if (this.isPlaying) return 'live';
     return 'stopped';
+  }
+
+  // Azure Communication Services methods
+  private async loadStreamAnalytics(): Promise<void> {
+    try {
+      this.streamAnalytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
+      
+      // Update viewer count from analytics
+      if (this.streamAnalytics) {
+        this.viewerCount = this.streamAnalytics.currentViewers;
+        this.viewerCountChanged.emit(this.viewerCount);
+      }
+    } catch (error) {
+      console.error('Error loading stream analytics:', error);
+    }
+  }
+
+  private async loadStreamHealth(): Promise<void> {
+    try {
+      this.streamHealth = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
+      
+      // Update stream status based on health
+      if (this.streamHealth) {
+        if (this.streamHealth.isHealthy) {
+          this.connectionError = '';
+        } else {
+          this.connectionError = 'Stream health degraded';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading stream health:', error);
+    }
+  }
+
+  // Get different stream URLs
+  getHlsUrl(): string {
+    return this.hlsUrl;
+  }
+
+  getRtmpUrl(): string {
+    return this.rtmpUrl;
+  }
+
+  getWebRtcUrl(): string {
+    return this.webRtcUrl;
+  }
+
+  // Switch to different streaming protocol
+  switchToHls(): void {
+    if (this.hlsUrl) {
+      this.hlsPlayerService.loadStream(this.streamKey, this.hlsUrl);
+    }
+  }
+
+  switchToWebRtc(): void {
+    if (this.webRtcUrl) {
+      // WebRTC implementation would go here
+      console.log('Switching to WebRTC:', this.webRtcUrl);
+    }
+  }
+
+  // Get streaming endpoint information
+  getStreamingEndpointInfo(): any {
+    return this.streamingEndpoint;
+  }
+
+  // Get stream analytics data
+  getStreamAnalyticsData(): any {
+    return this.streamAnalytics;
+  }
+
+  // Get stream health data
+  getStreamHealthData(): any {
+    return this.streamHealth;
+  }
+
+  // Refresh analytics and health data
+  async refreshStreamData(): Promise<void> {
+    await this.loadStreamAnalytics();
+    await this.loadStreamHealth();
   }
 }

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { LiveStream } from '../models/live-stream.model';
+import { AzureCommunicationService, StreamingEndpoint, StreamingAnalytics, StreamingHealth } from './azure-communication.service';
 
 
 export interface StreamQuality {
@@ -59,7 +61,10 @@ export interface RecordingInfo {
 export class LiveStreamService {
   private apiUrl = `${environment.apiUrl}/api`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private azureCommunicationService: AzureCommunicationService
+  ) {}
 
   // Stream Management
   getStreams(page: number = 1, pageSize: number = 10): Observable<any> {
@@ -232,5 +237,110 @@ export class LiveStreamService {
 
   getGlobalDashboard(): Observable<any> {
     return this.http.get(`${this.apiUrl}/streamanalytics/global/dashboard`);
+  }
+
+  // Azure Communication Services Integration
+  createStreamingEndpoint(streamKey: string): Observable<StreamingEndpoint> {
+    return this.azureCommunicationService.createStreamingEndpoint(streamKey);
+  }
+
+  startStreamingEndpoint(streamKey: string): Observable<any> {
+    return this.azureCommunicationService.startStreamingEndpoint(streamKey);
+  }
+
+  stopStreamingEndpoint(streamKey: string): Observable<any> {
+    return this.azureCommunicationService.stopStreamingEndpoint(streamKey);
+  }
+
+  getStreamingEndpoint(streamKey: string): Observable<StreamingEndpoint> {
+    return this.azureCommunicationService.getStreamingEndpoint(streamKey);
+  }
+
+  deleteStreamingEndpoint(streamKey: string): Observable<any> {
+    return this.azureCommunicationService.deleteStreamingEndpoint(streamKey);
+  }
+
+  getStreamPlaybackUrl(streamKey: string, protocol: 'hls' | 'rtmp' | 'webrtc'): Observable<{ streamKey: string; protocol: string; url: string }> {
+    return this.azureCommunicationService.getStreamPlaybackUrl(streamKey, protocol);
+  }
+
+  getStreamAnalytics(streamKey: string): Observable<StreamingAnalytics> {
+    return this.azureCommunicationService.getStreamAnalytics(streamKey);
+  }
+
+  getStreamHealth(streamKey: string): Observable<StreamingHealth> {
+    return this.azureCommunicationService.getStreamHealth(streamKey);
+  }
+
+  // Enhanced stream management with Azure Communication Services
+  createStreamWithEndpoint(stream: Partial<LiveStream>): Observable<{ stream: LiveStream; endpoint: StreamingEndpoint }> {
+    return this.createStream(stream).pipe(
+      switchMap(createdStream => 
+        this.azureCommunicationService.createStreamingEndpoint(createdStream.streamKey).pipe(
+          map(endpoint => ({ stream: createdStream, endpoint }))
+        )
+      )
+    );
+  }
+
+  getStreamWithEndpoint(streamId: number): Observable<{ stream: LiveStream; endpoint?: StreamingEndpoint }> {
+    return this.getStream(streamId).pipe(
+      switchMap(stream => 
+        this.azureCommunicationService.getStreamingEndpoint(stream.streamKey).pipe(
+          map(endpoint => ({ stream, endpoint }))
+        )
+      )
+    );
+  }
+
+  getStreamWithAnalytics(streamId: number): Observable<{ stream: LiveStream; analytics?: StreamingAnalytics; health?: StreamingHealth }> {
+    return this.getStream(streamId).pipe(
+      switchMap(stream => 
+        combineLatest([
+          this.azureCommunicationService.getStreamAnalytics(stream.streamKey),
+          this.azureCommunicationService.getStreamHealth(stream.streamKey)
+        ]).pipe(
+          map(([analytics, health]) => ({ stream, analytics, health }))
+        )
+      )
+    );
+  }
+
+  // Enhanced analytics with Azure Communication Services
+  getEnhancedStreamAnalytics(streamId: number): Observable<{ 
+    stream: LiveStream; 
+    analytics: StreamingAnalytics; 
+    health: StreamingHealth;
+    traditionalAnalytics: StreamAnalytics;
+  }> {
+    return this.getStream(streamId).pipe(
+      switchMap(stream => 
+        combineLatest([
+          this.azureCommunicationService.getStreamAnalytics(stream.streamKey),
+          this.azureCommunicationService.getStreamHealth(stream.streamKey),
+          this.getStreamAnalytics(streamId)
+        ]).pipe(
+          map(([analytics, health, traditionalAnalytics]) => ({ 
+            stream, 
+            analytics, 
+            health, 
+            traditionalAnalytics 
+          }))
+        )
+      )
+    );
+  }
+
+  // Stream URLs for different protocols
+  getHlsUrl(streamKey: string): Observable<string> {
+    return this.azureCommunicationService.getHlsUrl(streamKey);
+  }
+
+  getRtmpUrl(streamKey: string): Observable<string> {
+    return this.azureCommunicationService.getRtmpUrl(streamKey);
+  }
+
+  getWebRtcUrl(streamKey: string): Observable<string> {
+    return this.azureCommunicationService.getWebRtcUrl(streamKey);
   }
 }

@@ -211,14 +211,15 @@ export class LiveStreamManagerComponent implements OnInit, OnDestroy {
     try {
       if (this.isStreaming) return;
 
-      // Start the stream
-      await this.liveStreamService.startStream({
-        streamKey: this.streamKey,
-        title: this.streamTitle,
-        description: this.streamDescription,
-        category: this.streamCategory,
-        tags: this.streamTags
-      }).toPromise();
+      // Create streaming endpoint using Azure Communication Services
+      const endpoint = await this.liveStreamService.createStreamingEndpoint(this.streamKey).toPromise();
+      
+      // Start the streaming endpoint
+      await this.liveStreamService.startStreamingEndpoint(this.streamKey).toPromise();
+
+      // Update URLs with Azure Communication Services endpoints
+      this.hlsUrl = endpoint.hlsUrl;
+      this.rtmpUrl = endpoint.rtmpUrl;
 
       this.isStreaming = true;
       this.streamStatus = 'live';
@@ -231,7 +232,9 @@ export class LiveStreamManagerComponent implements OnInit, OnDestroy {
       // Notify via SignalR
       this.signalRService.sendStreamUpdate(this.config.streamId, 'streamStarted', {
         streamKey: this.streamKey,
-        title: this.streamTitle
+        title: this.streamTitle,
+        hlsUrl: this.hlsUrl,
+        rtmpUrl: this.rtmpUrl
       });
     } catch (error) {
       console.error('Error starting stream:', error);
@@ -247,8 +250,8 @@ export class LiveStreamManagerComponent implements OnInit, OnDestroy {
         await this.stopRecording();
       }
 
-      // Stop the stream
-      await this.liveStreamService.stopStream(this.config.streamId).toPromise();
+      // Stop the streaming endpoint using Azure Communication Services
+      await this.liveStreamService.stopStreamingEndpoint(this.streamKey).toPromise();
 
       this.isStreaming = false;
       this.streamStatus = 'offline';
@@ -410,6 +413,70 @@ export class LiveStreamManagerComponent implements OnInit, OnDestroy {
       this.stopRecording();
     } else {
       this.startRecording();
+    }
+  }
+
+  // Azure Communication Services Analytics
+  async getStreamAnalytics(): Promise<void> {
+    try {
+      const analytics = await this.liveStreamService.getStreamAnalytics(this.streamKey).toPromise();
+      console.log('Stream Analytics:', analytics);
+      
+      // Update viewer count from analytics
+      this.viewerCount = analytics.currentViewers;
+    } catch (error) {
+      console.error('Error getting stream analytics:', error);
+    }
+  }
+
+  async getStreamHealth(): Promise<void> {
+    try {
+      const health = await this.liveStreamService.getStreamHealth(this.streamKey).toPromise();
+      console.log('Stream Health:', health);
+      
+      // Update stream status based on health
+      if (health.isHealthy) {
+        this.streamStatus = 'live';
+      } else {
+        this.streamStatus = 'degraded';
+      }
+    } catch (error) {
+      console.error('Error getting stream health:', error);
+    }
+  }
+
+  async getStreamingEndpoint(): Promise<void> {
+    try {
+      const endpoint = await this.liveStreamService.getStreamingEndpoint(this.streamKey).toPromise();
+      console.log('Streaming Endpoint:', endpoint);
+      
+      // Update URLs
+      this.hlsUrl = endpoint.hlsUrl;
+      this.rtmpUrl = endpoint.rtmpUrl;
+    } catch (error) {
+      console.error('Error getting streaming endpoint:', error);
+    }
+  }
+
+  // Enhanced stream management with Azure Communication Services
+  async createStreamWithEndpoint(): Promise<void> {
+    try {
+      const streamData = {
+        title: this.streamTitle,
+        description: this.streamDescription,
+        category: this.streamCategory,
+        tags: this.streamTags,
+        streamKey: this.streamKey
+      };
+
+      const result = await this.liveStreamService.createStreamWithEndpoint(streamData).toPromise();
+      console.log('Stream created with endpoint:', result);
+      
+      // Update URLs
+      this.hlsUrl = result.endpoint.hlsUrl;
+      this.rtmpUrl = result.endpoint.rtmpUrl;
+    } catch (error) {
+      console.error('Error creating stream with endpoint:', error);
     }
   }
 }
