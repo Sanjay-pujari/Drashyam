@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Drashyam.API.DTOs;
 using Drashyam.API.Services;
+using System.Security.Claims;
 
 namespace Drashyam.API.Controllers;
 
@@ -11,258 +11,193 @@ namespace Drashyam.API.Controllers;
 [Authorize]
 public class StreamingController : ControllerBase
 {
-    private readonly IStreamingService _streamingService;
+    private readonly IAzureCommunicationService _azureCommunicationService;
     private readonly ILogger<StreamingController> _logger;
 
-    public StreamingController(IStreamingService streamingService, ILogger<StreamingController> logger)
+    public StreamingController(
+        IAzureCommunicationService azureCommunicationService,
+        ILogger<StreamingController> logger)
     {
-        _streamingService = streamingService;
+        _azureCommunicationService = azureCommunicationService;
         _logger = logger;
     }
 
-    [HttpPost("{streamId:int}/start")]
-    public async Task<ActionResult<StreamInfoDto>> StartStream([FromRoute] int streamId)
+    [HttpPost("endpoints")]
+    public async Task<ActionResult<StreamingEndpointDto>> CreateStreamingEndpoint([FromBody] CreateStreamingEndpointDto request)
     {
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var streamInfo = await _streamingService.StartStreamAsync(streamId, userId);
-            return Ok(streamInfo);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error starting stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
 
-    [HttpPost("{streamId:int}/stop")]
-    public async Task<ActionResult<StreamInfoDto>> StopStream([FromRoute] int streamId)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var streamInfo = await _streamingService.StopStreamAsync(streamId, userId);
-            return Ok(streamInfo);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error stopping stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
+            var endpoint = await _azureCommunicationService.CreateStreamingEndpointAsync(
+                userId, 
+                request.Title, 
+                request.Description);
 
-    [HttpPost("{streamId:int}/pause")]
-    public async Task<ActionResult<StreamInfoDto>> PauseStream([FromRoute] int streamId)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var streamInfo = await _streamingService.PauseStreamAsync(streamId, userId);
-            return Ok(streamInfo);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error pausing stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPost("{streamId:int}/resume")]
-    public async Task<ActionResult<StreamInfoDto>> ResumeStream([FromRoute] int streamId)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var streamInfo = await _streamingService.ResumeStreamAsync(streamId, userId);
-            return Ok(streamInfo);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error resuming stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("{streamId:int}/quality")]
-    public async Task<ActionResult<StreamQualityDto>> GetStreamQuality([FromRoute] int streamId)
-    {
-        try
-        {
-            var quality = await _streamingService.GetStreamQualityAsync(streamId);
-            return Ok(quality);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error getting stream quality for {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPut("{streamId:int}/quality")]
-    public async Task<ActionResult<StreamQualityDto>> UpdateStreamQuality([FromRoute] int streamId, [FromBody] StreamQualitySettingsDto settings)
-    {
-        try
-        {
-            var quality = await _streamingService.UpdateStreamQualityAsync(streamId, settings);
-            return Ok(quality);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error updating stream quality for {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("qualities")]
-    public async Task<ActionResult<List<StreamQualityDto>>> GetAvailableQualities()
-    {
-        try
-        {
-            var qualities = await _streamingService.GetAvailableQualitiesAsync();
-            return Ok(qualities);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting available qualities");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPost("{streamId:int}/recording/start")]
-    public async Task<ActionResult<RecordingInfoDto>> StartRecording([FromRoute] int streamId)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var recording = await _streamingService.StartRecordingAsync(streamId, userId);
-            return Ok(recording);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error starting recording for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPost("{streamId:int}/recording/stop")]
-    public async Task<ActionResult<RecordingInfoDto>> StopRecording([FromRoute] int streamId)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var recording = await _streamingService.StopRecordingAsync(streamId, userId);
-            return Ok(recording);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error stopping recording for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("{streamId:int}/recording")]
-    public async Task<ActionResult<RecordingInfoDto>> GetRecordingStatus([FromRoute] int streamId)
-    {
-        try
-        {
-            var recording = await _streamingService.GetRecordingStatusAsync(streamId);
-            return Ok(recording);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error getting recording status for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("{streamId:int}/analytics")]
-    public async Task<ActionResult<StreamAnalyticsDto>> GetStreamAnalytics([FromRoute] int streamId)
-    {
-        try
-        {
-            var analytics = await _streamingService.GetStreamAnalyticsAsync(streamId);
-            return Ok(analytics);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error getting analytics for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("{streamId:int}/health")]
-    public async Task<ActionResult<StreamHealthDto>> GetStreamHealth([FromRoute] int streamId)
-    {
-        try
-        {
-            var health = await _streamingService.GetStreamHealthAsync(streamId);
-            return Ok(health);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error getting health for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPost("{streamId:int}/metrics")]
-    public async Task<ActionResult> UpdateStreamMetrics([FromRoute] int streamId, [FromBody] StreamMetricsDto metrics)
-    {
-        try
-        {
-            await _streamingService.UpdateStreamMetricsAsync(streamId, metrics);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error updating metrics for stream {streamId}");
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpGet("{streamId:int}/endpoint")]
-    public async Task<ActionResult<StreamEndpointDto>> GetStreamEndpoint([FromRoute] int streamId)
-    {
-        try
-        {
-            var endpoint = await _streamingService.GetStreamEndpointAsync(streamId);
             return Ok(endpoint);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting endpoint for stream {streamId}");
-            return BadRequest(ex.Message);
+            _logger.LogError(ex, "Error creating streaming endpoint");
+            return StatusCode(500, "Internal server error");
         }
     }
 
-    [HttpGet("validate-key/{streamKey}")]
-    public async Task<ActionResult<bool>> ValidateStreamKey([FromRoute] string streamKey)
+    [HttpGet("endpoints/{endpointId}")]
+    public async Task<ActionResult<StreamingEndpointDto>> GetStreamingEndpoint(string endpointId)
     {
         try
         {
-            var isValid = await _streamingService.ValidateStreamKeyAsync(streamKey);
-            return Ok(isValid);
+            var endpoint = await _azureCommunicationService.GetStreamingEndpointAsync(endpointId);
+            return Ok(endpoint);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error validating stream key {streamKey}");
-            return BadRequest(ex.Message);
+            _logger.LogError(ex, "Error getting streaming endpoint");
+            return StatusCode(500, "Internal server error");
         }
     }
 
-    [HttpGet("{streamId:int}/config")]
-    public async Task<ActionResult<StreamConfigDto>> GetStreamConfiguration([FromRoute] int streamId)
+    [HttpGet("endpoints")]
+    public async Task<ActionResult<List<StreamingEndpointDto>>> GetUserStreamingEndpoints()
     {
         try
         {
-            var config = await _streamingService.GetStreamConfigurationAsync(streamId);
-            return Ok(config);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
+
+            var endpoints = await _azureCommunicationService.GetUserStreamingEndpointsAsync(userId);
+            return Ok(endpoints);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting configuration for stream {streamId}");
-            return BadRequest(ex.Message);
+            _logger.LogError(ex, "Error getting user streaming endpoints");
+            return StatusCode(500, "Internal server error");
         }
     }
+
+    [HttpPost("endpoints/{endpointId}/start")]
+    public async Task<ActionResult> StartStreaming(string endpointId)
+    {
+        try
+        {
+            var success = await _azureCommunicationService.StartStreamingAsync(endpointId);
+            if (success)
+            {
+                return Ok(new { message = "Streaming started successfully" });
+            }
+            return BadRequest("Failed to start streaming");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error starting streaming");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpPost("endpoints/{endpointId}/stop")]
+    public async Task<ActionResult> StopStreaming(string endpointId)
+    {
+        try
+        {
+            var success = await _azureCommunicationService.StopStreamingAsync(endpointId);
+            if (success)
+            {
+                return Ok(new { message = "Streaming stopped successfully" });
+            }
+            return BadRequest("Failed to stop streaming");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping streaming");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpDelete("endpoints/{endpointId}")]
+    public async Task<ActionResult> DeleteStreamingEndpoint(string endpointId)
+    {
+        try
+        {
+            var success = await _azureCommunicationService.DeleteStreamingEndpointAsync(endpointId);
+            if (success)
+            {
+                return Ok(new { message = "Streaming endpoint deleted successfully" });
+            }
+            return BadRequest("Failed to delete streaming endpoint");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting streaming endpoint");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("endpoints/{endpointId}/analytics")]
+    public async Task<ActionResult<StreamingAnalyticsDto>> GetStreamingAnalytics(string endpointId)
+    {
+        try
+        {
+            var analytics = await _azureCommunicationService.GetStreamingAnalyticsAsync(endpointId);
+            return Ok(analytics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting streaming analytics");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpPut("endpoints/{endpointId}/settings")]
+    public async Task<ActionResult> UpdateStreamingSettings(string endpointId, [FromBody] StreamingSettingsDto settings)
+    {
+        try
+        {
+            settings.EndpointId = endpointId;
+            var success = await _azureCommunicationService.UpdateStreamingSettingsAsync(endpointId, settings);
+            if (success)
+            {
+                return Ok(new { message = "Streaming settings updated successfully" });
+            }
+            return BadRequest("Failed to update streaming settings");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating streaming settings");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("endpoints/{endpointId}/health")]
+    public async Task<ActionResult<StreamingHealthDto>> GetStreamingHealth(string endpointId)
+    {
+        try
+        {
+            var health = await _azureCommunicationService.GetStreamingHealthAsync(endpointId);
+            return Ok(health);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting streaming health");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+}
+
+public class CreateStreamingEndpointDto
+{
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string? Category { get; set; }
+    public List<string>? Tags { get; set; }
+    public bool IsPublic { get; set; } = true;
+    public int MaxViewers { get; set; } = 1000;
+    public StreamingQualityDto? QualitySettings { get; set; }
 }

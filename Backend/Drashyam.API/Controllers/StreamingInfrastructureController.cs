@@ -10,16 +10,16 @@ namespace Drashyam.API.Controllers;
 public class StreamingInfrastructureController : ControllerBase
 {
     private readonly IStreamingInfrastructureService _streamingService;
-    private readonly IAzureMediaService _azureMediaService;
+    private readonly IAzureCommunicationService _azureCommunicationService;
     private readonly ILogger<StreamingInfrastructureController> _logger;
 
     public StreamingInfrastructureController(
         IStreamingInfrastructureService streamingService,
-        IAzureMediaService azureMediaService,
+        IAzureCommunicationService azureCommunicationService,
         ILogger<StreamingInfrastructureController> logger)
     {
         _streamingService = streamingService;
-        _azureMediaService = azureMediaService;
+        _azureCommunicationService = azureCommunicationService;
         _logger = logger;
     }
 

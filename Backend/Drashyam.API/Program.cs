@@ -220,8 +220,8 @@ builder.Services.AddSingleton(provider =>
     return new BlobServiceClient(settings.ConnectionString);
 });
 
-// HttpClient for Azure Media Services
-builder.Services.AddHttpClient<IAzureMediaService, AzureMediaService>();
+// HttpClient for Azure Communication Services (replacement for deprecated Azure Media Services)
+builder.Services.AddHttpClient<IAzureCommunicationService, AzureCommunicationService>();
 
 // Stripe Configuration
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
@@ -243,7 +243,7 @@ builder.Services.AddScoped<ILiveStreamMonetizationService, LiveStreamMonetizatio
 builder.Services.AddScoped<IStreamingService, StreamingService>();
 builder.Services.AddScoped<IStreamAnalyticsService, StreamAnalyticsService>();
 builder.Services.AddScoped<IStreamingInfrastructureService, StreamingInfrastructureService>();
-builder.Services.AddScoped<IAzureMediaService, AzureMediaService>();
+builder.Services.AddScoped<IAzureCommunicationService, AzureCommunicationService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IFileStorageService>(provider =>

@@ -576,3 +576,13 @@ public enum PromotionStatus
     Completed,
     Cancelled
 }
+
+public enum StreamingStatus
+{
+    Created,
+    Active,
+    Inactive,
+    Error,
+    Processing,
+    Stopped
+}
