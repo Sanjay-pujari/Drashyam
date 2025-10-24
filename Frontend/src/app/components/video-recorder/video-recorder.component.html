@@ -27,8 +27,21 @@
         </div>
       }
 
+      <!-- Quota Warning -->
+      @if (quotaWarning) {
+        <div class="quota-warning">
+          <mat-icon color="warn">warning</mat-icon>
+          <h3>Recording Quota Exceeded</h3>
+          <p>You have reached your video recording limit. Please upgrade your plan or delete some videos to continue recording.</p>
+          <button mat-raised-button color="primary" routerLink="/subscription-plans">
+            <mat-icon>upgrade</mat-icon>
+            Upgrade Plan
+          </button>
+        </div>
+      }
+
       <!-- Camera Preview -->
-      @if (hasPermission && !error) {
+      @if (hasPermission && !error && !quotaWarning) {
         <div class="camera-preview">
           <video
             #videoElement

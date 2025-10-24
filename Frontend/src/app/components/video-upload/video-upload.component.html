@@ -33,6 +33,17 @@
           }
         </div>
 
+        <!-- Quota Warning -->
+        <div class="quota-warning" *ngIf="quotaWarning">
+          <mat-icon color="warn">warning</mat-icon>
+          <h3>Upload Quota Exceeded</h3>
+          <p>You have reached your upload limit. Please upgrade your plan or delete some videos to continue uploading.</p>
+          <button mat-raised-button color="primary" routerLink="/subscription-plans">
+            <mat-icon>upgrade</mat-icon>
+            Upgrade Plan
+          </button>
+        </div>
+
         <!-- Quota Status Display -->
         <div class="quota-status-section" *ngIf="quotaStatus">
           <h3>Upload Quota Status</h3>

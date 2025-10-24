@@ -1,16 +1,18 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VideoService } from '../../services/video.service';
+import { QuotaService } from '../../services/quota.service';
 
 @Component({
   selector: 'app-video-recorder',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatCardModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatCardModule],
   templateUrl: './video-recorder.component.html',
   styleUrls: ['./video-recorder.component.scss']
 })
@@ -34,6 +36,8 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
   hasPermission = false;
   isInitializing = false;
   error: string | null = null;
+  quotaWarning = false;
+  quotaStatus: any = null;
   
   // Recording constraints
   private readonly constraints: MediaStreamConstraints = {
@@ -52,16 +56,30 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
 
   constructor(
     private snackBar: MatSnackBar,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private quotaService: QuotaService
   ) {}
 
   ngOnInit() {
     this.initializeCamera();
+    this.loadQuotaStatus();
   }
 
   ngOnDestroy() {
     this.stopRecording();
     this.stopCamera();
+  }
+
+  private loadQuotaStatus() {
+    this.quotaService.getQuotaStatus().subscribe({
+      next: (status) => {
+        this.quotaStatus = status;
+        this.quotaWarning = status.videoUsagePercentage >= 100 || status.storageUsagePercentage >= 100;
+      },
+      error: (error) => {
+        console.error('Error loading quota status:', error);
+      }
+    });
   }
 
   async initializeCamera() {
@@ -111,11 +129,30 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
     }
   }
 
-  async startRecording() {
-    if (!this.stream) {
-      this.snackBar.open('Camera not available', 'Close', { duration: 3000 });
-      return;
-    }
+  private checkQuotaBeforeRecording() {
+    // Estimate video size based on recording time and quality
+    // For HD video at 30fps, estimate ~1MB per second
+    const estimatedSizePerSecond = 1024 * 1024; // 1MB per second
+    const estimatedSize = this.maxRecordingTime * estimatedSizePerSecond;
+
+    this.quotaService.canUploadVideo(estimatedSize).subscribe({
+      next: (canUpload) => {
+        if (!canUpload) {
+          this.snackBar.open('Recording quota exceeded. Please upgrade your plan or delete some videos.', 'Close', { duration: 5000 });
+          return;
+        }
+        // If quota check passes, proceed with actual recording
+        this.proceedWithRecording();
+      },
+      error: (error) => {
+        console.error('Quota check failed:', error);
+        this.snackBar.open('Unable to check recording quota. Please try again.', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  private async proceedWithRecording() {
+    if (!this.stream) return;
 
     try {
       this.recordedChunks = [];
@@ -184,6 +221,16 @@ export class VideoRecorderComponent implements OnInit, OnDestroy {
       }
       this.snackBar.open('Failed to start recording', 'Close', { duration: 3000 });
     }
+  }
+
+  async startRecording() {
+    if (!this.stream) {
+      this.snackBar.open('Camera not available', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Check quota before starting recording
+    this.checkQuotaBeforeRecording();
   }
 
   pauseRecording() {

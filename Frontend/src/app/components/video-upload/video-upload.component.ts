@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -25,7 +26,7 @@ import { environment } from '../../../environments/environment';
   selector: 'app-video-upload',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
+    CommonModule, RouterModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatSelectModule, MatProgressBarModule, MatCardModule,
     MatIconModule, MatChipsModule, MatSlideToggleModule,
     VideoProcessingStatusComponent
@@ -143,6 +144,12 @@ export class VideoUploadComponent implements OnInit {
     }
     this.uploadForm.get('premiumPrice')?.updateValueAndValidity();
     
+    // Check if quota warning is active
+    if (this.quotaWarning) {
+      this.snackBar.open('Upload quota exceeded. Please upgrade your plan or delete some videos.', 'Close', { duration: 5000 });
+      return;
+    }
+    
     if (this.isFormValid && this.selectedFile) {
       // Check quota before uploading
       this.checkQuotaBeforeUpload();
@@ -238,6 +245,9 @@ export class VideoUploadComponent implements OnInit {
       this.quotaService.canUploadVideo(this.selectedFile!.size).subscribe({
         next: (canUpload) => {
           this.quotaWarning = !canUpload;
+          if (!canUpload) {
+            this.snackBar.open('Upload quota exceeded. Please upgrade your plan or delete some videos.', 'Close', { duration: 5000 });
+          }
           this.cdr.detectChanges();
         },
         error: (error) => {
