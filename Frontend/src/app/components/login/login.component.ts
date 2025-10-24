@@ -16,8 +16,12 @@ import { environment } from '../../../environments/environment';
 export class LoginComponent implements OnInit {
 	form = this.fb.group({
 		email: ['', [Validators.required, Validators.email]],
-		password: ['', [Validators.required]]
+		password: ['', [Validators.required]],
+		rememberMe: [false]
 	});
+
+	showPassword = false;
+	isLoading = false;
 
 	constructor(
 		private fb: FormBuilder, 
@@ -50,10 +54,17 @@ export class LoginComponent implements OnInit {
 			console.warn('Login form invalid', this.form.value);
 			return;
 		}
-		const { email, password } = this.form.value as { email: string; password: string };
-		this.auth.login({ email, password, rememberMe: false }).subscribe({
-			next: () => this.router.navigateByUrl('/'),
+
+		this.isLoading = true;
+		const { email, password, rememberMe } = this.form.value as { email: string; password: string; rememberMe: boolean };
+		
+		this.auth.login({ email, password, rememberMe }).subscribe({
+			next: () => {
+				this.isLoading = false;
+				this.router.navigateByUrl('/');
+			},
 			error: (err) => {
+				this.isLoading = false;
 				console.error('Login failed', err);
 				console.error('Error details:', {
 					status: err.status,
@@ -73,6 +84,10 @@ export class LoginComponent implements OnInit {
 				}
 			}
 		});
+	}
+
+	togglePasswordVisibility() {
+		this.showPassword = !this.showPassword;
 	}
 }
 
